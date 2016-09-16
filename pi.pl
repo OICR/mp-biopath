@@ -3,14 +3,12 @@ module Pi
 export readPiFile
 
 type Node
-   posParents::Set{AbstractString}
-   negParents::Set{AbstractString}
+   posParents::Any
+   negParents::Any
    andOr::AbstractString #true is and false is or
 end
 
 function readFile(fname)
-    println(fname)
-
     f1 = open(fname)
     data = readlines(f1)
     shift!(data)
@@ -27,13 +25,17 @@ function readFile(fname)
             parents = posnegbool?
                 nodes[childName].posParents:
                 nodes[childName].negParents
-
-            println(parents)
- 
             push!(parents, parentName)
         else
-            node = Node(posnegbool? Set(parentName): Set(),
-                        posnegbool? Set(): Set(parentName),
+            posParents = Set{AbstractString}()
+            negParents = Set{AbstractString}()
+            if posnegbool
+                push!(posParents, parentName)
+            else
+                push!(negParents, parentName)
+            end
+            node = Node(posParents,
+                        negParents,
                         andor == "1"? "AND": "OR")
             nodes[childName] = node
         end
