@@ -17,7 +17,7 @@ function readFile(fname)
     nodes = Dict{AbstractString,Any}()
    
     for line in data
-        (parentName, childName, andor, posneg) = split(chomp(line), '\t')
+        (parentName, childName, posneg, andor) = split(chomp(line), '\t')
 
         posnegbool = posneg == "1"? true: false
 

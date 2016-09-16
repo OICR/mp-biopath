@@ -1,70 +1,61 @@
 #!/usr/bin/env julia
 
+using JuMP
+
 include("pi.pl")
 
 println("Running analysis on file:")
 
 if length(ARGS) == 0
     println("Please provide the path to the pairwise interaction file in the first line")
-else 
-    println("Performing analysis on pairwise interaction file:")
-    println(ARGS[1])
+    exit()
+end
 
-    pairwiseInteractions = Pi.readFile(ARGS[1])
+println("Performing analysis on pairwise interaction file:")
+println(ARGS[1])
 
-    nodes = collection(keys(pairwiseInteractions))
-    
- #   nodeList = Array{AbstractString,1}(node in nodes)
+pairwiseInteractions = Pi.readFile(ARGS[1])
 
-    println("node ", node)
-println("type", typeof(node))
-    i = 0
-    for (nodeName, node) in pairwiseInteractions
-        i += 0
+nodes = keys(pairwiseInteractions)
+   
+#nodeList is created in order to find and index for a node by name. This is used in order to make 
+#variable names e.g. X1 (X[i])
+i = 0
+nodesList = Array{AbstractString, 1}()
+for node in nodes
+    push!(nodesList, node)
 
-        println("Node: ", getindex(nodeName, nodesList))
-        if endswith(nodeName, "_RLE")
-            println("\tIs a Reaction")
-            if node.andOr == "AND"
-                println("\t\t- AND relation")
-                if length(node.negParents) > 0
-                     println("\t\tHas a negative regulator ", length(node.negParents))
-                     #Create constraint that flips negative regulator
-                end
-                #constraint 2 - take minimum from parents
-            else 
-                println("\t\t- OR relation")
-
-                #contraint 3 
-            end 
-            #println(node.parents)
-            #point
-
-            #reaction
-
-            ##positive
-            ##negative
-
-            #complex
-            ##if all poisitive
-        else
-             println("is not a reaction")
-             if node.andOr == "AND"
-                println("\t\t- AND relation")
-             else
-                println("\t\t- OR relation")
-             end
-             #sets
-              
-             #positive
-             #negative
-             #contraint 6
-             #contraint 7
-             #contraint 8
-             #contraint 9
-             #contraint 11
-             #contraint 12
-        end
+    for parent in pairwiseInteractions[node].negParents
+        indexin([parent], nodesList) != 0 || push!(nodesList, parent)
     end
+
+    for parent in pairwiseInteractions[node].posParents
+        indexin([parent], nodesList) != 0 || push!(nodesList, parent)
+    end
+end
+   
+for (nodeName, node) in pairwiseInteractions
+    currentNodeIndex = indexin([nodeName], nodesList)
+
+    if node.andOr == "AND"
+        println("AND relation")
+        if length(node.negParents) > 0
+             #println("-- Has a negative regulator(s): ", length(node.negParents))
+             #Create constraint that flips negative regulator
+        else
+             #println("-- All positive regulator(s): ", length(node.posParents))
+             #constraint 2 - take minimum from parents
+        end
+    else 
+        println("OR relation")
+        if length(node.negParents) > 0
+             #println("-- Has a negative regulator(s): ", length(node.negParents))
+             #Create constraint that flips negative regulator
+        else
+             #println("-- All positive regulator(s): ", length(node.posParents))
+        end
+
+        #contraint 3 
+    end 
 end
 
