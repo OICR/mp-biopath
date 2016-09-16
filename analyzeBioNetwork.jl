@@ -1,6 +1,7 @@
 #!/usr/bin/env julia
 
 using JuMP
+using Gurobi
 
 include("pi.pl")
 

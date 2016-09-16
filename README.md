@@ -2,6 +2,12 @@
 
 #Installation
 
+##Gurobi
+
+Got to http://www.gurobi.com/ for instructions on installing Gurobi
+
+http://www.gurobi.com/documentation/6.5/quickstart_linux.pdf
+
 ##Julia (http://julialang.org/)
 
 on Linux type
@@ -18,4 +24,10 @@ use the Julia console to install Julia external modules
 https://jump.readthedocs.io/en/latest/index.html
 ```julia
 Pkg.add("JuMP")
+```
+
+###Gurobi
+
+```julia
+Pkg.add("Gurobi")
 ```
