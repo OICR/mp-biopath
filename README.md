@@ -2,7 +2,7 @@
 
 #Installation
 
-##Julia
+##Julia (http://julialang.org/)
 
 on Linux type
 
@@ -10,9 +10,12 @@ on Linux type
 apt-get install julia
 ```
 
-##ulia dependencies 
-Go into julia consol and type the following command:
+##Julia dependencies 
 
+use the Julia console to install Julia external modules
+
+###Jump
+https://jump.readthedocs.io/en/latest/index.html
 ```julia
 Pkg.add("JuMP")
 ```
