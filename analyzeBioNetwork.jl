@@ -15,92 +15,183 @@ if length(ARGS) == 0
     exit()
 end
 
-println("Performing analysis on pairwise interaction file:")
-println(ARGS[1])
+println("Performing analysis on pairwise interaction file: ", ARGS[1])
 
 pairwiseInteractions = Pi.readFile(ARGS[1])
+nodesList = collect(keys(pairwiseInteractions))
 
-nodes = keys(pairwiseInteractions)
-   
-#nodeList is created in order to find and index for a node by name. This is used in order to make 
-#variable names e.g. X1 (X[i])
-
-nodesList = Array{AbstractString, 1}()
-for node in nodes
-    push!(nodesList, node)
-
-    for parent in pairwiseInteractions[node].negParents
-        indexin([parent], nodesList) == 0 || push!(nodesList, parent)
-    end
-
-    for parent in pairwiseInteractions[node].posParents
-        indexin([parent], nodesList) == 0 || push!(nodesList, parent)
-    end
-end
-
-
-# Preparing an optimization model
 m = Model(solver=GurobiSolver())
 
-# Declaring variables
+# Variables
 
-##node variables
+## Node
 @variable(m, x[1:length(nodesList)] >=0, Int)
 
-#these are auxilary for deterining if x is above or below NORMAL
-@variable(m, xz[1:length(nodesList)], Bin)
-@variable(m, xy[1:length(nodesList)], Bin)
+## Auxilary 
+@variable(m, z[1:length(nodesList)], Bin)  #Above Normal
+@variable(m, y[1:length(nodesList)], Bin)  #Below Normal
+@variable(m, o[1:length(nodesList)], Int)  #Min or max value of the node without neg reg
 
-
-###Objective funtion
-@objective(m, Min, sum{ M*(xy[i]+xz[i]) #auxilary variables
-                       + xy[i]*(NORMAL-x[i]) #weighting for above NORMAL
-                       + xz[i]*(x[i]-NORMAL) #weighting for below NORMAL
+# Objective funtion
+@objective(m, Min, sum{ M*(y[i]+z[i]) #auxilary variables
+                       + y[i]*(NORMAL-x[i]) #weighting for above NORMAL
+                       + z[i]*(x[i]-NORMAL) #weighting for below NORMAL
                         , i=1:length(nodesList)})
 
-@constraint(m, xzconst[i=1:length(nodesList)], xz[i]*NORMAL >= x[i] - NORMAL)
-@constraint(m, xyconst[i=1:length(nodesList)], xy[i]*NORMAL >= NORMAL - x[i])
+@constraint(m, xzconst[i=1:length(nodesList)], z[i]*NORMAL >= x[i] - NORMAL)
+@constraint(m, xyconst[i=1:length(nodesList)], y[i]*NORMAL >= NORMAL - x[i])
 
+if ismatch(r"Signaling_by_ERBB2", ARGS[1])
+println( search(ARGS[1], "Signaling_by_ERBB2") )
+    idxs = indexin(["1963571", "p-10Y-ERBB3-1_[plasma_membrane]_54424"], nodesList)
+    @constraint(m, EGFR, x[idxs[1]] == 0)
+    @constraint(m, ERBB3, x[idxs[2]] == 0)
+elseif ismatch(r"DNA_Double-Strand_Break_Repair", ARGS[1])
+    idxs = indexin(["RAD52_[nucleoplasm]_62640",
+#                    "PALB2_[nucleoplasm]_241569",
+                   "BRCA2_[nucleoplasm]_50952"
+                   ], nodesList)
 
-#Signalling by ERBB2
-@constraint(m, fixed, x[71] == 0)  #downregulating EGFR and ERBB3
-#expecting 73 and 73 to be down
+    @constraint(m, RAD52, x[idxs[1]] == 0) 
+    @constraint(m, secondone, x[idxs[2]] == 0) 
+end
 
 for (nodeName, node) in pairwiseInteractions
     currentIndexes = indexin([nodeName], nodesList)
     currentIndex = currentIndexes[1]
 
-    if node.andOr == "AND"
-        #println("AND relation")
-        if length(node.negParents) > 0
-            #println("-- Has a negative regulator(s): ", length(node.negParents))
-            #Create constraint that flips negative regulator
-        else
-            println(node.posParents)
-            for posParent in node.posParents
-                parentIndexes = indexin([posParent], nodesList)
-                println(typeof(parentIndexes))
-                parentIndex = parentIndexes[1]
-                @constraint(m, andposregcurrentIndex[parentIndex], x[currentIndex] <= x[parentIndex])
+    orPosParents =  collect(node.orPosParents)
+    orPosParentIndexes = indexin(orPosParents, nodesList) 
 
-            end
-        end
-    else 
-        #println("OR relation")
-        if length(node.negParents) > 0
-             #println("-- Has a negative regulator(s): ", length(node.negParents))
-             #Create constraint that flips negative regulator
-        else
-             #println("-- All positive regulator(s): ", length(node.posParents))
-        end
+    if length(orPosParentIndexes) > 0
+        @constraint(m, 
+          orposreg[currentIndex], 
+          sum{x[parentIndex] , parentIndex=orPosParentIndexes}/length(orPosParentIndexes) >= x[currentIndex] )
+    end
 
-        #contraint 3 
-    end 
+    for parent in node.andPosParents
+        parentIndexes = indexin([parent], nodesList)
+        parentIndex = parentIndexes[1]
+        @constraint(m, andposreg[parentIndex], x[currentIndex] <= x[parentIndex])
+    end
 end
 
 solve(m)
-print(m)
+#print(m)
+
+function valueToState(value)
+    if 70 > value
+        return "Down Regulated"
+    elseif 130 < value
+        return "Up Regulated"
+    else
+        return "Normal"
+    end
+end
+
 println("Optimal Solutions:")
-for i in eachindex(nodesList)
-    println( i, ") ", nodesList[i], " = ", getvalue(x[i]))
+
+if ismatch(r"Signaling_by_ERBB2", ARGS[1])
+    println("EGFR path")
+    for i in eachindex(nodesList)
+        if indexin([nodesList[i]], ["1963571",
+                                    "1963589_RLE",
+                                    "1963573",
+                                    "1963582_RLE",
+                                    "1963585",
+                                    "1963588",
+                                    "1963578_RLE",
+                                    "1248746",
+                                    "1250195_RLE",
+                                    "1250194",
+                                    "1250486_RLE",
+                                    "1250479",
+                                    "1250463_RLE",
+                                    "109783" #lethal node
+                                   ]) != [0]
+            value = getvalue(x[i])
+            println( i, "\t", nodesList[i], "\t\t", value, "\t", valueToState(value))
+        end
+    end
+    
+    println()
+    println("ERBB3 path")
+    for i in eachindex(nodesList)
+        if indexin([nodesList[i]], ["p-10Y-ERBB3-1_[plasma_membrane]_54424",
+                                    "1248743",
+                                    "1248749",
+                                    "1963572",
+                                    "1250189_RLE",
+                                    "1250508",
+                                    "1250462",
+                                    "PI(3_4_5)P3_[plasma_membrane]_188411" #end result
+                                    ]) != [0]
+            value = getvalue(x[i])
+            println( i, "\t", nodesList[i], "\t\t", value, "\t", valueToState(value))
+        end
+    end
+
+elseif ismatch(r"DNA_Double-Strand_Break_Repair", ARGS[1]) 
+   println("rad52")
+   for i in eachindex(nodesList)
+        if indexin([nodesList[i]], ["rad52_[nucleoplasm]_62640",
+                                    "75998_RLE",
+                                    "83899",
+                                    "5686587_RLE",
+                                    "5693580_RLE",
+                                    "5693564_RLE",
+                                    "5693590",
+                                    "5686642_RLE",
+                                    "5686613",
+                                    "5686657_RLE",
+                                    "5686662",
+                                    "5686663_RLE",
+                                    "5686663" #lethal node
+                                    ]) != [0]
+            value = getvalue(x[i])
+            println( i, "\t", nodesList[i], "\t\t", value, "\t", valueToState(value))
+        end
+   end
+
+   println()
+
+   println("PALB2")
+   for i in eachindex(nodesList)
+        if indexin([nodesList[i]], ["PALB2_[nucleoplasm]_241569",
+                                    "5693620_RLE",
+                                    "5685838_RLE",
+                                    "5685826",
+                                    "5693593_RLE",
+                                    "5686104",
+                                    "5686440_RLE", #slit over these three reactions
+                                    "5693539_RLE", 
+                                    "5693589_RLE",
+                                    "5686432",
+                                    "5686469_RLE", #lethal node
+                                    "5686228",
+                                    "5693584_RLE",
+                                    "5686493",
+                                    "5686483_RLE", #lethal node
+                                    "5686410_RLE", #lethal node
+                                    "84009",
+                                    "5693558_RLE", #lethal node
+                                    ]) != [0]
+            value = getvalue(x[i])
+            println( i, "\t", nodesList[i], "\t\t", value, "\t", valueToState(value))
+        end
+   end
+
+   println()
+
+   println("BRCA2")
+   for i in eachindex(nodesList)
+        if indexin([nodesList[i]], ["BRCA2_[nucleoplasm]_50952",
+                                    "5685242_RLE",
+                                    "5693561_RLE",
+                                    "d"
+                                    ]) != [0]
+            value = getvalue(x[i])
+            println( i, "\t", nodesList[i], "\t\t", value, "\t", valueToState(value))
+        end
+    end
 end
