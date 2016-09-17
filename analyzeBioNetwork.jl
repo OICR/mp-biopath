@@ -30,11 +30,11 @@ for node in nodes
     push!(nodesList, node)
 
     for parent in pairwiseInteractions[node].negParents
-        indexin([parent], nodesList) != 0 || push!(nodesList, parent)
+        indexin([parent], nodesList) == 0 || push!(nodesList, parent)
     end
 
     for parent in pairwiseInteractions[node].posParents
-        indexin([parent], nodesList) != 0 || push!(nodesList, parent)
+        indexin([parent], nodesList) == 0 || push!(nodesList, parent)
     end
 end
 
@@ -47,33 +47,43 @@ m = Model(solver=GurobiSolver())
 ##node variables
 @variable(m, x[1:length(nodesList)] >=0, Int)
 
-#these are for deterining if x is above or below NORMAL
+#these are auxilary for deterining if x is above or below NORMAL
 @variable(m, xz[1:length(nodesList)], Bin)
 @variable(m, xy[1:length(nodesList)], Bin)
 
 
-###OBjective funtion
-@objective(m, Min, sum{x[i], i=1:length(nodesList)} +
-                   M*(sum{xy[i], i=1:length(nodesList)} +
-                      sum{xz[i], i=1:length(nodesList)}))
+###Objective funtion
+@objective(m, Min, sum{ M*(xy[i]+xz[i]) #auxilary variables
+                       + xy[i]*(NORMAL-x[i]) #weighting for above NORMAL
+                       + xz[i]*(x[i]-NORMAL) #weighting for below NORMAL
+                        , i=1:length(nodesList)})
 
-##Adding constraints to 
-#@constraint(m, constraint1, -x1 +  x2 + 3x3 <= -5)
-@constraint(m, xzconst[i=1:length(nodesList)], xz[i] >= x[i] - 100)
-@constraint(m, xyconst[i=1:length(nodesList)], xy[i] >= 100 - x[i])
+@constraint(m, xzconst[i=1:length(nodesList)], xz[i]*NORMAL >= x[i] - NORMAL)
+@constraint(m, xyconst[i=1:length(nodesList)], xy[i]*NORMAL >= NORMAL - x[i])
 
+
+#Signalling by ERBB2
+@constraint(m, fixed, x[71] == 0)  #downregulating EGFR and ERBB3
+#expecting 73 and 73 to be down
 
 for (nodeName, node) in pairwiseInteractions
-    currentNodeIndex = indexin([nodeName], nodesList)
+    currentIndexes = indexin([nodeName], nodesList)
+    currentIndex = currentIndexes[1]
 
     if node.andOr == "AND"
         #println("AND relation")
         if length(node.negParents) > 0
-             #println("-- Has a negative regulator(s): ", length(node.negParents))
-             #Create constraint that flips negative regulator
+            #println("-- Has a negative regulator(s): ", length(node.negParents))
+            #Create constraint that flips negative regulator
         else
-             #println("-- All positive regulator(s): ", length(node.posParents))
-             #constraint 2 - take minimum from parents
+            println(node.posParents)
+            for posParent in node.posParents
+                parentIndexes = indexin([posParent], nodesList)
+                println(typeof(parentIndexes))
+                parentIndex = parentIndexes[1]
+                @constraint(m, andposregcurrentIndex[parentIndex], x[currentIndex] <= x[parentIndex])
+
+            end
         end
     else 
         #println("OR relation")
@@ -92,5 +102,5 @@ solve(m)
 print(m)
 println("Optimal Solutions:")
 for i in eachindex(nodesList)
-    println( nodesList[i], " = ", getvalue(x[i]))
+    println( i, ") ", nodesList[i], " = ", getvalue(x[i]))
 end
