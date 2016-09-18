@@ -31,6 +31,7 @@ m = Model(solver=GurobiSolver())
 @variable(m, z[1:length(nodesList)], Bin)  #Above Normal
 @variable(m, y[1:length(nodesList)], Bin)  #Below Normal
 @variable(m, o[1:length(nodesList)], Int)  #Min or max value of the node without neg reg
+@variable(m, n[1:length(nodesList)], Int)  #for neg regulation
 
 # Objective funtion
 @objective(m, Min, sum{ M*(y[i]+z[i]) #auxilary variables
@@ -62,17 +63,29 @@ for (nodeName, node) in pairwiseInteractions
 
     orPosParents =  collect(node.orPosParents)
     orPosParentIndexes = indexin(orPosParents, nodesList) 
-
     if length(orPosParentIndexes) > 0
         @constraint(m, 
           orposreg[currentIndex], 
-          sum{x[parentIndex] , parentIndex=orPosParentIndexes}/length(orPosParentIndexes) >= x[currentIndex] )
+          sum{x[parentIndex],
+              parentIndex=orPosParentIndexes}/length(orPosParentIndexes)  >= x[currentIndex])
+        #need to add "- n[currentIndex]" when loops are fixed
+    end
+
+    andNegParents =  collect(node.andNegParents)
+    andNegParentIndexes = indexin(andNegParents, nodesList) 
+    if length(andNegParentIndexes) > 0
+        @constraint(m, 
+          andnegreg[currentIndex], 
+          sum{x[parentIndex],
+              parentIndex=andNegParentIndexes} - length(andNegParentIndexes)*NORMAL == n[currentIndex])
+    else
+        @constraint(m, n[currentIndex] == 0)
     end
 
     for parent in node.andPosParents
         parentIndexes = indexin([parent], nodesList)
         parentIndex = parentIndexes[1]
-        @constraint(m, andposreg[parentIndex], x[currentIndex] <= x[parentIndex])
+        @constraint(m, andposreg[parentIndex], x[currentIndex] <= x[parentIndex]) #" - n[currentIndex])"
     end
 end
 
