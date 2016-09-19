@@ -31,6 +31,7 @@ m = Model(solver=GurobiSolver())
 @variable(m, z[1:length(nodesList)], Bin)  #Above Normal
 @variable(m, y[1:length(nodesList)], Bin)  #Below Normal
 @variable(m, o[1:length(nodesList)], Int)  #Min or max value of the node without neg reg
+@variable(m, r[1:length(nodesList)], Int)  #for or pos nodes
 @variable(m, n[1:length(nodesList)], Int)  #for neg regulation
 
 # Objective funtion
@@ -43,7 +44,6 @@ m = Model(solver=GurobiSolver())
 @constraint(m, xyconst[i=1:length(nodesList)], y[i]*NORMAL >= NORMAL - x[i])
 
 if ismatch(r"Signaling_by_ERBB2", ARGS[1])
-println( search(ARGS[1], "Signaling_by_ERBB2") )
     idxs = indexin(["1963571", "p-10Y-ERBB3-1_[plasma_membrane]_54424"], nodesList)
     @constraint(m, EGFR, x[idxs[1]] == 0)
     @constraint(m, ERBB3, x[idxs[2]] == 0)
@@ -63,12 +63,26 @@ for (nodeName, node) in pairwiseInteractions
 
     orPosParents =  collect(node.orPosParents)
     orPosParentIndexes = indexin(orPosParents, nodesList) 
+    andPosParents =  collect(node.andPosParents)
+    andPosParentIndexes = indexin(andPosParents, nodesList) 
+
+hello = "    for (i, idx) in enumerate(andPosParentIndexes)
+        if i == 1
+           product = product * x[idx]/100
+        else
+           product = (product) * (x[idx]/100)
+        end
+    end "
+
     if length(orPosParentIndexes) > 0
         @constraint(m, 
           orposreg[currentIndex], 
           sum{x[parentIndex],
-              parentIndex=orPosParentIndexes}/length(orPosParentIndexes)  >= x[currentIndex])
-        #need to add "- n[currentIndex]" when loops are fixed
+              parentIndex=orPosParentIndexes}/length(orPosParentIndexes)  == r[currentIndex])
+    else
+         if length(andPosParentIndexes) >= 2
+         @NLconstraint(m, andposreg[currentIndex], x[andPosParentIndexes[1]] >= x[currentIndex])
+         end
     end
 
     andNegParents =  collect(node.andNegParents)
@@ -79,14 +93,9 @@ for (nodeName, node) in pairwiseInteractions
           sum{x[parentIndex],
               parentIndex=andNegParentIndexes} - length(andNegParentIndexes)*NORMAL == n[currentIndex])
     else
-        @constraint(m, n[currentIndex] == 0)
+        @constraint(m, n[currentIndex] == 100)
     end
 
-    for parent in node.andPosParents
-        parentIndexes = indexin([parent], nodesList)
-        parentIndex = parentIndexes[1]
-        @constraint(m, andposreg[parentIndex], x[currentIndex] <= x[parentIndex]) #" - n[currentIndex])"
-    end
 end
 
 solve(m)
