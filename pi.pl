@@ -92,17 +92,27 @@ function readFile(fname)
            end
         else
            pseudonodeIndex = 1
-           pseudonodeName = AbstractString(parents[1], "_", parents[2], "_PSEUDONODE")
-           nodes[pseudonodeName] = ModelParents("AND", Set{AbstractString}(parents[1],parents[2]))
+println("parents\t", parents)
+
+           parentcollection = collect(parents)
+println("parentcollection\t", parentcollection) 
+           parentone = parentcollection[1]
+           parenttwo = parentcollection[2]
+println("parents", parentone, "\t", parenttwo)
+           pseudonodeName = "$parentone\_$parenttwo\_PSEUDONODE"
+println("pseudonodename\t", pseudonodeName)
+           nodes[pseudonodeName] = ModelParents("AND", Set(AbstractString(parentone),AbstractString(parenttwo)))
            for i = 3:length(parents)
-               newPseudonodeName =  AbstractString(parents[1], "_", parents[2], "_PSEUDONODE")
-               nodes[newPseudoNodeName]= ModelParents("AND", Set{AbstractString}(parents[i], pseudoName))
+               newPseudonodeName = "$parentone\_$parenttwo\_PSEUDONODE"
+               parenti = parentcollection[i]
+               println("prarenti\t", parenti)
+               nodes[newPseudoNodeName]= ModelParents("AND", Set{AbstractString}(parenti, pseudoName))
                pseudonodeName = newPseudonodeName
            end 
            nodeIndex = length(parents)
            for i = 1:length(negParents)
-               newPseudonodeName =  AbstractString(parents[1], "_", parents[2], "_PSEUDONODE")
-               nodes[newPseudoNodeName]= ModelParents("ANDNEG", Set{AbstractString}(parents[i], pseudoName))
+               newPseudonodeName = "$parentone\_$parenttwo\_PSEUDONODE"
+               nodes[newPseudoNodeName]= ModelParents("ANDNEG", Set{AbstractString}(parentcollection[i], pseudoName))
                pseudonodeName = newPseudonodeName
            end
         end

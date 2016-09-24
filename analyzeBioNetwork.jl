@@ -22,19 +22,15 @@ nodes = Pi.readFile(ARGS[1])
 nodesList = collect(keys(nodes))
 
 ## Auxilary 
-@variable(m, z[1:length(nodesList)], Bin)  #Above Normal
-@variable(m, y[1:length(nodesList)], Bin)  #Below Normal
-@variable(m, x[1:length(nodesList)] > 0, Int) ###actual nodes !!!
+@variable(m, z[1:length(nodesList)], Bin)                           #Above Normal
+@variable(m, y[1:length(nodesList)], Bin)                           #Below Normal
+@variable(m, x[1:length(nodesList)] >= 1, Int)                      ###actual nodes !!!
+@variable(m, w[1:length(nodesList)] >= 0, Int)                      #Above and optomized value
+@variable(m, v[1:length(nodesList)] >= 0, Int)                      #Below and optomized value
+@variable(m, u[1:length(nodesList),1:UPPERBOUND], Bin)              #Above being true 
+@variable(m, t[1:length(nodesList),1:UPPERBOUND], Bin)              #Neg being true
+@variable(m, s[1:length(nodesList),1:UPPERBOUND,1:UPPERBOUND], Bin) #Binary of two parent values
 
-@variable(m, w[1:length(nodesList)] >= 0, Int)  #Above and optomized value
-@variable(m, v[1:length(nodesList)] >= 0, Int)  #Below and optomized value
-
-@variable(m, u[1:length(nodesList),1:UPPERBOUND], Bin)  #above being true 
-@variable(m, t[1:length(nodesList),1:UPPERBOUND], Bin)  # neg being true
-
-@variable(m, s[1:length(nodesList),1:UPPERBOUND,1:UPPERBOUND], Bin)
-
-# Objective funtion
 @objective(m, Min, sum{ M*(y[i] + z[i] + w[i] + v[i]) #auxilary variables
                        + y[i]*(NORMAL-x[i]) #weighting for above NORMAL
                        + z[i]*(x[i]-NORMAL) #weighting for below NORMAL
@@ -47,7 +43,7 @@ nodesList = collect(keys(nodes))
 @constraint(m, xzconst[i=1:length(nodesList)], z[i]*NORMAL >= x[i] - NORMAL)
 @constraint(m, xyconst[i=1:length(nodesList)], y[i]*NORMAL >= NORMAL - x[i])
 
-#=
+
 if ismatch(r"Signaling_by_ERBB2", ARGS[1])
     idxs = indexin(["1963571", "p-10Y-ERBB3-1_[plasma_membrane]_54424"], nodesList)
     @constraint(m, EGFR, x[idxs[1]] == 0)
@@ -61,8 +57,6 @@ elseif ismatch(r"DNA_Double-Strand_Break_Repair", ARGS[1])
     @constraint(m, RAD52, x[idxs[1]] == 0) 
     @constraint(m, secondone, x[idxs[2]] == 0) 
 end
-=#
-
 
 for nodeName in keys(nodes)
     currentIndexes = indexin([nodeName], nodesList)
@@ -70,13 +64,13 @@ for nodeName in keys(nodes)
 
     ###Linearizing multiplication of and nodes
     relation = nodes[nodeName].relation
-    parents = nodes[nodesName].parents
-    if count(parents) == 0
+    parents = collect(nodes[nodeName].parents)
+
+    if length(parents) == 0
         continue
     end
 
     parentIndexes = indexin([parents], nodesList)
-
     for idx = 1: UPPERBOUND
         @constraint(m,
                     ifabove[currentIndex,idx],
@@ -85,44 +79,56 @@ for nodeName in keys(nodes)
                     ifbelow[currentIndex,idx],
                     idx >= x[currentIndex] * t[currentIndex,idx])
     end
-
-    if count(parents) == 1
+    if length(parents) == 1
         @constraint(m,
                    andoneparentBelow[currentIndex],
                    x[parentIndexes[1]] + w[currentIndex] >= x[currentIndex])
         @constraint(m,
                    andoneparentAbove[currentIndex],
-                   x[andPosParentIndexes[1]] - v[currentIndex] <= x[currentIndex])
-    elseif length(orPosParents) > 0
-        @constraint(m,
-                    orposparent[currentIndex],
-                    sum{x[orPosParentIndexes[a]], a=1:length(orPosParents)}/length(orPosParents)
-                     + w[currentIndex] >= x[currentIndex])
-        @constraint(m,
-                    orposparent[currentIndex],
-                    sum{x[orPosParentIndexes[a]], a=1:length(orPosParents)}/length(orPosParents)
-                     - v[currentIndex] <= x[currentIndex])
-    elseif numberofparents == length(andPosParents)
+                   x[parentIndexes[1]] - v[currentIndex] <= x[currentIndex])
+    elseif relation == "AND" || relation == "ANDNEG"
         for a = 1:UPPERBOUND, b = 1:UPPERBOUND 
             @constraint(m,
                         findalltrue[currentIndex,a,b],
-                        u[andPosParentIndexes[1],a] + t[andPosParentIndexes[1],a]
-                         + u[andPosParentIndexes[2],b] + t[andPosParentIndexes[2],b]
+                        u[parentIndexes[1],a] + t[parentIndexes[1],a]
+                         + u[parentIndexes[2],b] + t[parentIndexes[2],b]
                          >= 4 * s[currentIndex,a,b])
         end
+
+        if relation == "AND"
+            @constraint(m,
+                        setBasedOnParents[currentIndex],
+                        sum{(a/NORMAL)*(b/NORMAL)*s[currentIndex,a,b], a=1:UPPERBOUND, b=1:UPPERBOUND}*NORMAL
+                         + w[currentIndex] >= x[currentIndex])
+            @constraint(m,
+                        setBasedOnParents[currentIndex],
+                        sum{(a/NORMAL)*(b/NORMAL)*s[currentIndex,a,b], a=1:UPPERBOUND, b=1:UPPERBOUND}*NORMAL
+                         - v[currentIndex] <= x[currentIndex])
+        else #ANDNEG
+            @constraint(m,
+                        setBasedOnParents[currentIndex],
+                        sum{(a/NORMAL)/(b/NORMAL)*s[currentIndex,a,b], a=1:UPPERBOUND, b=1:UPPERBOUND}*NORMAL
+                         + w[currentIndex] >= x[currentIndex])
+            @constraint(m,
+                        setBasedOnParents[currentIndex],
+                        sum{(a/NORMAL)/(b/NORMAL)*s[currentIndex,a,b], a=1:UPPERBOUND, b=1:UPPERBOUND}*NORMAL
+                         - v[currentIndex] <= x[currentIndex])
+
+
+        end
+    elseif relation == "OR"
         @constraint(m,
-                    setBasedOnParents[currentIndex],
-                    sum{a*b*s[currentIndex,a,b], a=1:UPPERBOUND, b=1:UPPERBOUND}
+                    orposparent[currentIndex],
+                    sum{x[parentIndexes[a]], a=1:length(parents)}/length(parents)
                      + w[currentIndex] >= x[currentIndex])
         @constraint(m,
-                    setBasedOnParents[currentIndex],
-                    sum{a*b*s[currentIndex,a,b], a=1:UPPERBOUND, b=1:UPPERBOUND}
+                    orposparent[currentIndex],
+                    sum{x[parentIndexes[a]], a=1:length(parents)}/length(parents)
                      - v[currentIndex] <= x[currentIndex])
     end
 end
 
 println("solving model")
-print(m)
 solve(m)
 
 for i in eachindex(nodesList)
