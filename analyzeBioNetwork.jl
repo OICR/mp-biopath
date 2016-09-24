@@ -1,15 +1,12 @@
 #!/usr/bin/env julia
 
 using JuMP
-#using Gurobi
-using NLopt
-m = Model(solver=NLoptSolver(algorithm=:LD_SLSQP))
-#m = Model(solver=GurobiSolver())
+using Gurobi
+
+m = Model(solver=GurobiSolver())
 include("pi.pl")
 
-println("Running analysis on file:")
-
-UPPERBOUND = 6
+UPPERBOUND = 200
 NORMAL = UPPERBOUND/2
 M = 1000
 
@@ -20,32 +17,32 @@ end
 
 println("Performing analysis on pairwise interaction file: ", ARGS[1])
 
-pairwiseInteractions = Pi.readFile(ARGS[1])
-nodesList = collect(keys(pairwiseInteractions))
+nodes = Pi.readFile(ARGS[1])
 
-
-
-## Node
-@variable(m, x[1:length(nodesList)] >=0, Int)
+nodesList = collect(keys(nodes))
 
 ## Auxilary 
 @variable(m, z[1:length(nodesList)], Bin)  #Above Normal
 @variable(m, y[1:length(nodesList)], Bin)  #Below Normal
-@variable(m, r[1:length(nodesList)] >= 0, Int)  #Or pos nodes
+@variable(m, x[1:length(nodesList)] > 0, Int) ###actual nodes !!!
 
-@variable(m, e[1:length(nodesList)] >= 0, Int)  #Above and value
-@variable(m, f[1:length(nodesList)] >= 0, Int)  #Below and value
+@variable(m, w[1:length(nodesList)] >= 0, Int)  #Above and optomized value
+@variable(m, v[1:length(nodesList)] >= 0, Int)  #Below and optomized value
 
-@variable(m, n[1:length(nodesList),1:UPPERBOUND], Bin)  #above being true 
-@variable(m, l[1:length(nodesList),1:UPPERBOUND], Bin)  # neg being true
+@variable(m, u[1:length(nodesList),1:UPPERBOUND], Bin)  #above being true 
+@variable(m, t[1:length(nodesList),1:UPPERBOUND], Bin)  # neg being true
+
+@variable(m, s[1:length(nodesList),1:UPPERBOUND,1:UPPERBOUND], Bin)
 
 # Objective funtion
-@objective(m, Min, sum{ M*(y[i] + z[i] + e[i] + f[i]) #auxilary variables
+@objective(m, Min, sum{ M*(y[i] + z[i] + w[i] + v[i]) #auxilary variables
                        + y[i]*(NORMAL-x[i]) #weighting for above NORMAL
                        + z[i]*(x[i]-NORMAL) #weighting for below NORMAL
                         , i=1:length(nodesList)}
-                       - sum{ n[i,j] + l[i,j], i=1:length(nodesList),
-                             i=1:length(nodesList),j=1:UPPERBOUND})
+                       - sum{ u[i,j] + t[i,j], i=1:length(nodesList), 
+                             i = 1:length(nodesList), j = 1:UPPERBOUND}
+                       - sum{s[i,k,l],i=1:length(nodesList),
+                             k = 1:UPPERBOUND, l = 1:UPPERBOUND})
 
 @constraint(m, xzconst[i=1:length(nodesList)], z[i]*NORMAL >= x[i] - NORMAL)
 @constraint(m, xyconst[i=1:length(nodesList)], y[i]*NORMAL >= NORMAL - x[i])
@@ -67,243 +64,62 @@ end
 =#
 
 
-for (nodeName, node) in pairwiseInteractions
+for nodeName in keys(nodes)
     currentIndexes = indexin([nodeName], nodesList)
     currentIndex = currentIndexes[1]
 
-    orPosParents =  collect(node.orPosParents)
-    orPosParentIndexes = indexin(orPosParents, nodesList) 
-
-    andPosParents =  collect(node.andPosParents)
-    andPosParentIndexes = indexin(andPosParents, nodesList) 
-
-    andNegParents =  collect(node.andNegParents)
-    andNegParentIndexes = indexin(andNegParents, nodesList) 
-
     ###Linearizing multiplication of and nodes
-
-    numberofparents = length(andPosParents) + length(andNegParents)
-
-    if length(orPosParents) >= 1
-        numberofparents = numberofparents + 1
-    end
-
-    if numberofparents == 0
+    relation = nodes[nodeName].relation
+    parents = nodes[nodesName].parents
+    if count(parents) == 0
         continue
     end
 
-    idx = 0
-    while idx < UPPERBOUND
-        idx += 1
+    parentIndexes = indexin([parents], nodesList)
+
+    for idx = 1: UPPERBOUND
         @constraint(m,
                     ifabove[currentIndex,idx],
-                    x[currentIndex] >= n[currentIndex,idx] * idx)
+                    x[currentIndex] >= u[currentIndex,idx] * idx)
         @constraint(m,
                     ifbelow[currentIndex,idx],
-                    idx >= x[currentIndex] * l[currentIndex,idx])
+                    idx >= x[currentIndex] * t[currentIndex,idx])
     end
 
-    if numberofparents == 1
-       @constraint(m,
-                    andoneparentBelow[currentIndex],
-                    x[andPosParentIndexes[1]] + e[currentIndex] >= x[currentIndex])
-       @constraint(m,
-                    andoneparentAbove[currentIndex],
-                    x[andPosParentIndexes[1]] - f[currentIndex] <= x[currentIndex])
-    elseif numberofparents == length(andPosParents)
-       if numberofparents == 2 
-            @NLconstraint(m,
-                setBasedOnParents[currentIndex],
-                sum{n[andPosParentIndexes[1],i]*l[andPosParentIndexes[1],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[2],i]*l[andPosParentIndexes[2],i]/NORMAL*i, i=1:UPPERBOUND}
-                + e[currentIndex] >= x[currentIndex])
-            @NLconstraint(m,
-                setBasedOnParents[currentIndex],
-                sum{n[andPosParentIndexes[1],i]*l[andPosParentIndexes[1],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[2],i]*l[andPosParentIndexes[2],i]/NORMAL*i, i=1:UPPERBOUND} 
-                - f[currentIndex] <= x[currentIndex])
- #=       elseif numberofParents == 3
-            @constraint(m,
-                setBasedOnParents[currentIndex],
-                sum{n[andPosParentIndexes[1],i]*l[andPosParentIndexes[1],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[2],i]*l[andPosParentIndexes[2],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[2],i]*l[andPosParentIndexes[2],i]/NORMAL*i, i=1:UPPERBOUND}
-                + e[currentIndex] >= x[currentIndex])
-            @constraint(m,
-                setBasedOnParents[currentIndex],
-                sum{n[andPosParentIndexes[1],i]*l[andPosParentsIndexes[1],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[2],i]*l[andPosParentIndexes[2],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[3],i]*l[andPosParentIndexes[3],i]/NORMAL*i, i=1:UPPERBOUND} 
-                - f[currentIndex] <= x[currentIndex])
-       elseif numberofParents == 4
-            @constraint(m,
-                setBasedOnParents[currentIndex],
-                sum{n[andPosParentIndexes[1],i]*l[andPosParentIndexes[1],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[2],i]*l[andPosParentIndexes[2],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[3],i]*l[andPosParentIndexes[3],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[4],i]*l[andPosParentIndexes[4],i]/NORMAL*i, i=1:UPPERBOUND}
-                + e[currentIndex] >= x[currentIndex])
-            @constraint(m,
-                setBasedOnParents[currentIndex],
-                sum{n[andPosParentIndexes[1],i]*l[andPosParentsIndexes[1],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[2],i]*l[andPosParentIndexes[2],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[3],i]*l[andPosParentIndexes[3],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[4],i]*l[andPosParentIndexes[4],i]/NORMAL*i, i=1:UPPERBOUND} 
-                - f[currentIndex] <= x[currentIndex])
-       elseif numberofParents == 5
-            @constraint(m,
-                setBasedOnParents[currentIndex],
-                sum{n[andPosParentIndexes[1],i]*l[andPosParentIndexes[1],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[2],i]*l[andPosParentIndexes[2],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[3],i]*l[andPosParentIndexes[3],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[4],i]*l[andPosParentIndexes[4],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[5],i]*l[andPosParentIndexes[5],i]/NORMAL*i, i=1:UPPERBOUND}
-                + e[currentIndex] >= x[currentIndex])
-            @constraint(m,
-                setBasedOnParents[currentIndex],
-                sum{n[andPosParentIndexes[1],i]*l[andPosParentsIndexes[1],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[2],i]*l[andPosParentIndexes[2],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[3],i]*l[andPosParentIndexes[3],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[4],i]*l[andPosParentIndexes[4],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[5],i]*l[andPosParentIndexes[5],i]/NORMAL*i, i=1:UPPERBOUND} 
-                - f[currentIndex] <= x[currentIndex])
-       elseif numberofParents == 6
-            @constraint(m,
-                setBasedOnParents[currentIndex],
-                sum{n[andPosParentIndexes[1],i]*l[andPosParentIndexes[1],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[2],i]*l[andPosParentIndexes[2],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[3],i]*l[andPosParentIndexes[3],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[4],i]*l[andPosParentIndexes[4],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[5],i]*l[andPosParentIndexes[5],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[6],i]*l[andPosParentIndexes[6],i]/NORMAL*i, i=1:UPPERBOUND}
-                + e[currentIndex] >= x[currentIndex])
-            @constraint(m,
-                setBasedOnParents[currentIndex],
-                sum{n[andPosParentIndexes[1],i]*l[andPosParentsIndexes[1],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[2],i]*l[andPosParentIndexes[2],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[3],i]*l[andPosParentIndexes[3],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[4],i]*l[andPosParentIndexes[4],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[5],i]*l[andPosParentIndexes[5],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[6],i]*l[andPosParentIndexes[6],i]/NORMAL*i, i=1:UPPERBOUND} 
-                - f[currentIndex] <= x[currentIndex])
-       elseif numberofParents == 7
-            @constraint(m,
-                setBasedOnParents[currentIndex],
-                sum{n[andPosParentIndexes[1],i]*l[andPosParentIndexes[1],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[2],i]*l[andPosParentIndexes[2],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[3],i]*l[andPosParentIndexes[3],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[4],i]*l[andPosParentIndexes[4],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[5],i]*l[andPosParentIndexes[5],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[6],i]*l[andPosParentIndexes[6],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[7],i]*l[andPosParentIndexes[7],i]/NORMAL*i, i=1:UPPERBOUND}
-                + e[currentIndex] >= x[currentIndex])
-            @constraint(m,
-                setBasedOnParents[currentIndex],
-                sum{n[andPosParentIndexes[1],i]*l[andPosParentsIndexes[1],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[2],i]*l[andPosParentIndexes[2],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[3],i]*l[andPosParentIndexes[3],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[4],i]*l[andPosParentIndexes[4],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[5],i]*l[andPosParentIndexes[5],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[6],i]*l[andPosParentIndexes[6],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[7],i]*l[andPosParentIndexes[7],i]/NORMAL*i, i=1:UPPERBOUND} 
-                - f[currentIndex] <= x[currentIndex])
-       elseif numberofParents == 8
-            @constraint(m,
-                setBasedOnParents[currentIndex],
-                sum{n[andPosParentIndexes[1],i]*l[andPosParentIndexes[1],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[2],i]*l[andPosParentIndexes[2],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[3],i]*l[andPosParentIndexes[3],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[4],i]*l[andPosParentIndexes[4],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[5],i]*l[andPosParentIndexes[5],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[6],i]*l[andPosParentIndexes[6],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[7],i]*l[andPosParentIndexes[7],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[8],i]*l[andPosParentIndexes[8],i]/NORMAL*i, i=1:UPPERBOUND}
-                + e[currentIndex] >= x[currentIndex])
-            @constraint(m,
-                setBasedOnParents[currentIndex],
-                sum{n[andPosParentIndexes[1],i]*l[andPosParentsIndexes[1],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[2],i]*l[andPosParentIndexes[2],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[3],i]*l[andPosParentIndexes[3],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[4],i]*l[andPosParentIndexes[4],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[5],i]*l[andPosParentIndexes[5],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[6],i]*l[andPosParentIndexes[6],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[7],i]*l[andPosParentIndexes[7],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[8],i]*l[andPosParentIndexes[8],i]/NORMAL*i, i=1:UPPERBOUND} 
-                - f[currentIndex] <= x[currentIndex])
-       elseif numberofParents == 9
-            @constraint(m,
-                setBasedOnParents[currentIndex],
-                sum{n[andPosParentIndexes[1],i]*l[andPosParentIndexes[1],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[2],i]*l[andPosParentIndexes[2],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[3],i]*l[andPosParentIndexes[3],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[4],i]*l[andPosParentIndexes[4],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[5],i]*l[andPosParentIndexes[5],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[6],i]*l[andPosParentIndexes[6],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[7],i]*l[andPosParentIndexes[7],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[8],i]*l[andPosParentIndexes[8],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[9],i]*l[andPosParentIndexes[9],i]/NORMAL*i, i=1:UPPERBOUND}
-                + e[currentIndex] >= x[currentIndex])
-            @constraint(m,
-                setBasedOnParents[currentIndex],
-                sum{n[andPosParentIndexes[1],i]*l[andPosParentsIndexes[1],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[2],i]*l[andPosParentIndexes[2],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[3],i]*l[andPosParentIndexes[3],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[4],i]*l[andPosParentIndexes[4],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[5],i]*l[andPosParentIndexes[5],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[6],i]*l[andPosParentIndexes[6],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[7],i]*l[andPosParentIndexes[7],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[8],i]*l[andPosParentIndexes[8],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[9],i]*l[andPosParentIndexes[9],i]/NORMAL*i, i=1:UPPERBOUND} 
-                - f[currentIndex] <= x[currentIndex])
-       elseif numberofParents == 10
-            @constraint(m,
-                setBasedOnParents[currentIndex],
-                sum{n[andPosParentIndexes[1],i]*l[andPosParentIndexes[1],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[2],i]*l[andPosParentIndexes[2],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[3],i]*l[andPosParentIndexes[3],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[4],i]*l[andPosParentIndexes[4],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[5],i]*l[andPosParentIndexes[5],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[6],i]*l[andPosParentIndexes[6],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[7],i]*l[andPosParentIndexes[7],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[8],i]*l[andPosParentIndexes[8],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[9],i]*l[andPosParentIndexes[9],i]/NORMAL*i, i=1:UPPERBOUND}
-                *sum{n[andPosParentIndexes[10],i]*l[andPosParentIndexes[10],i]/NORMAL*i, i=1:UPPERBOUND}
-                + e[currentIndex] >= x[currentIndex])
-            @constraint(m,
-                setBasedOnParents[currentIndex],
-                sum{n[andPosParentIndexes[1],i]*l[andPosParentsIndexes[1],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[2],i]*l[andPosParentIndexes[2],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[3],i]*l[andPosParentIndexes[3],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[4],i]*l[andPosParentIndexes[4],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[5],i]*l[andPosParentIndexes[5],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[6],i]*l[andPosParentIndexes[6],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[7],i]*l[andPosParentIndexes[7],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[8],i]*l[andPosParentIndexes[8],i]/NORMAL*i, i=1:UPPERBOUND} 
-                *sum{n[andPosParentIndexes[10],i]*l[andPosParentIndexes[10],i]/NORMAL*i, i=1:UPPERBOUND} 
-                - f[currentIndex] <= x[currentIndex])
-=#
-        end
+    if count(parents) == 1
+        @constraint(m,
+                   andoneparentBelow[currentIndex],
+                   x[parentIndexes[1]] + w[currentIndex] >= x[currentIndex])
+        @constraint(m,
+                   andoneparentAbove[currentIndex],
+                   x[andPosParentIndexes[1]] - v[currentIndex] <= x[currentIndex])
     elseif length(orPosParents) > 0
-  #=       @constraint(m, 
-                    orposreg[currentIndex], 
-                    sum{x[parentIndex],
-                    parentIndex=orPosParentIndexes}/length(orPosParentIndexes)  == r[currentIndex])
-        if length(orPosParents) == numberofparents
+        @constraint(m,
+                    orposparent[currentIndex],
+                    sum{x[orPosParentIndexes[a]], a=1:length(orPosParents)}/length(orPosParents)
+                     + w[currentIndex] >= x[currentIndex])
+        @constraint(m,
+                    orposparent[currentIndex],
+                    sum{x[orPosParentIndexes[a]], a=1:length(orPosParents)}/length(orPosParents)
+                     - v[currentIndex] <= x[currentIndex])
+    elseif numberofparents == length(andPosParents)
+        for a = 1:UPPERBOUND, b = 1:UPPERBOUND 
             @constraint(m,
-                        onlyOrPosParentBelow[currentIndex],
-                        r[currentIndex] + e[currentIndex] >= x[currentIndex])
-            @constraint(m,
-                        onlyOrPosparentAbove[currentIndex],
-                        r[currentIndex] - f[currentIndex] <= x[currentIndex])
-        elseif length(andPosParents) > 0 && length(andNegParents) == 0
-        else #andPos and orNeg an orPos
+                        findalltrue[currentIndex,a,b],
+                        u[andPosParentIndexes[1],a] + t[andPosParentIndexes[1],a]
+                         + u[andPosParentIndexes[2],b] + t[andPosParentIndexes[2],b]
+                         >= 4 * s[currentIndex,a,b])
         end
-    elseif length(orPosParents) >= 0 && length(andNegParents) >= 0
-=#
-    else #this is for nodes with no parents
+        @constraint(m,
+                    setBasedOnParents[currentIndex],
+                    sum{a*b*s[currentIndex,a,b], a=1:UPPERBOUND, b=1:UPPERBOUND}
+                     + w[currentIndex] >= x[currentIndex])
+        @constraint(m,
+                    setBasedOnParents[currentIndex],
+                    sum{a*b*s[currentIndex,a,b], a=1:UPPERBOUND, b=1:UPPERBOUND}
+                     - v[currentIndex] <= x[currentIndex])
     end
 end
-
 
 println("solving model")
 print(m)
