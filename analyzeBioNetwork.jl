@@ -70,8 +70,7 @@ for nodeName in keys(nodes)
         continue
     end
     parentIndexes = indexin(parents, nodesList)
-println("pidx\t", parentIndexes)
-#=
+
     for idx = 1: UPPERBOUND
         @constraint(m,
                     ifabove[currentIndex,idx],
@@ -126,7 +125,7 @@ println("pidx\t", parentIndexes)
                     orposparent[currentIndex],
                     sum{x[parentIndexes[a]], a=1:length(parents)}/length(parents)
                      - v[currentIndex] <= x[currentIndex])
-    end =#
+    end
 end
 
 println("solving model")
