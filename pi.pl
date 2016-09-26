@@ -8,10 +8,10 @@ type ModelParents
 end  
 
 type PIparents
-   andPosParents::Any
-   andNegParents::Any
-   orPosParents::Any
-   orNegParents::Any
+   andPosParents::Array
+   andNegParents::Array
+   orPosParents::Array
+   orNegParents::Array
 end
 
 # Assumptions:
@@ -45,17 +45,17 @@ function readFile(fname)
 
             push!(parents, parentName)
         else
-            posParents = Set{AbstractString}()
-            negParents = Set{AbstractString}()
+            posParents = AbstractString[]
+            negParents = AbstractString[]
             if posnegbool
                 push!(posParents, parentName)
             else
                 push!(negParents, parentName)
             end
-            node = PIparents(andBool? posParents: Set{AbstractString}(),
-                             andBool? negParents: Set{AbstractString}(),
-                             andBool? Set{AbstractString}(): posParents,
-                             andBool? Set{AbstractString}(): negParents)
+            node = PIparents(andBool? posParents: AbstractString[],
+                             andBool? negParents: AbstractString[],
+                             andBool? AbstractString[]: posParents,
+                             andBool? AbstractString[]: negParents)
                         
             PIs[childName] = node
         end
@@ -64,7 +64,7 @@ function readFile(fname)
     for line in data
         (parentName, childName, posneg, andor) = split(chomp(line), '\t')
         if !haskey(PIs, parentName) 
-            PIs[parentName] = PIparents(Set(),Set(),Set(),Set()) 
+            PIs[parentName] = PIparents(AbstractString[],AbstractString[],AbstractString[],AbstractString[]) 
         end
     end
 
@@ -78,7 +78,7 @@ function readFile(fname)
             else
                 orNodeName = AbstractString(nodeName, "_OR")
                 nodes[orNodName] = ModelParents("OR", PIs[nodeName].orPosParents)
-                union!(parents, Set{AbstractString}(orNodeName))
+                push!(parents, orNodeName)
             end
         end
 
@@ -92,27 +92,21 @@ function readFile(fname)
            end
         else
            pseudonodeIndex = 1
-println("parents\t", parents)
-
-           parentcollection = collect(parents)
-println("parentcollection\t", parentcollection) 
-           parentone = parentcollection[1]
-           parenttwo = parentcollection[2]
-println("parents", parentone, "\t", parenttwo)
-           pseudonodeName = "$parentone\_$parenttwo\_PSEUDONODE"
-println("pseudonodename\t", pseudonodeName)
-           nodes[pseudonodeName] = ModelParents("AND", Set(AbstractString(parentone),AbstractString(parenttwo)))
+           parentone = parents[1]
+           parenttwo = parents[2]
+           pseudonodeName = "$parentone\_PSEUDONODE\_$parenttwo"
+           nodes[pseudonodeName] = ModelParents("AND", AbstractString[parentone,parenttwo])
            for i = 3:length(parents)
-               newPseudonodeName = "$parentone\_$parenttwo\_PSEUDONODE"
-               parenti = parentcollection[i]
-               println("prarenti\t", parenti)
-               nodes[newPseudoNodeName]= ModelParents("AND", Set{AbstractString}(parenti, pseudoName))
+               parenti = parents[i]
+               newPseudonodeName = "$pseudonodeName\_PSEDUDONODE\_$parenti"
+               nodes[newPseudonodeName]= ModelParents("AND", AbstractString[pseudonodeName, parenti])
                pseudonodeName = newPseudonodeName
            end 
            nodeIndex = length(parents)
            for i = 1:length(negParents)
-               newPseudonodeName = "$parentone\_$parenttwo\_PSEUDONODE"
-               nodes[newPseudoNodeName]= ModelParents("ANDNEG", Set{AbstractString}(parentcollection[i], pseudoName))
+               parenti = parents[i]
+               newPseudonodeName = "$pseudonodeName\_PSEUDONODE\_$parenti"
+               nodes[newPseudonodeName]= ModelParents("ANDNEG", AbstractString[pseudonodeName, parenti])
                pseudonodeName = newPseudonodeName
            end
         end

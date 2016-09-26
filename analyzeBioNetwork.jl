@@ -64,13 +64,14 @@ for nodeName in keys(nodes)
 
     ###Linearizing multiplication of and nodes
     relation = nodes[nodeName].relation
-    parents = collect(nodes[nodeName].parents)
+    parents = nodes[nodeName].parents
 
     if length(parents) == 0
         continue
     end
-
-    parentIndexes = indexin([parents], nodesList)
+    parentIndexes = indexin(parents, nodesList)
+println("pidx\t", parentIndexes)
+#=
     for idx = 1: UPPERBOUND
         @constraint(m,
                     ifabove[currentIndex,idx],
@@ -125,7 +126,7 @@ for nodeName in keys(nodes)
                     orposparent[currentIndex],
                     sum{x[parentIndexes[a]], a=1:length(parents)}/length(parents)
                      - v[currentIndex] <= x[currentIndex])
-    end
+    end =#
 end
 
 println("solving model")
