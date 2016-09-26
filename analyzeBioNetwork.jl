@@ -6,7 +6,7 @@ using Gurobi
 m = Model(solver=GurobiSolver())
 include("pi.pl")
 
-UPPERBOUND = 200
+UPPERBOUND = 100
 NORMAL = UPPERBOUND/2
 M = 1000
 
@@ -31,6 +31,7 @@ nodesList = collect(keys(nodes))
 @variable(m, t[1:length(nodesList),1:UPPERBOUND], Bin)              #Neg being true
 @variable(m, s[1:length(nodesList),1:UPPERBOUND,1:UPPERBOUND], Bin) #Binary of two parent values
 
+
 @objective(m, Min, sum{ M*(y[i] + z[i] + w[i] + v[i]) #auxilary variables
                        + y[i]*(NORMAL-x[i]) #weighting for above NORMAL
                        + z[i]*(x[i]-NORMAL) #weighting for below NORMAL
@@ -42,7 +43,6 @@ nodesList = collect(keys(nodes))
 
 @constraint(m, xzconst[i=1:length(nodesList)], z[i]*NORMAL >= x[i] - NORMAL)
 @constraint(m, xyconst[i=1:length(nodesList)], y[i]*NORMAL >= NORMAL - x[i])
-
 
 if ismatch(r"Signaling_by_ERBB2", ARGS[1])
     idxs = indexin(["1963571", "p-10Y-ERBB3-1_[plasma_membrane]_54424"], nodesList)
@@ -56,6 +56,10 @@ elseif ismatch(r"DNA_Double-Strand_Break_Repair", ARGS[1])
 
     @constraint(m, RAD52, x[idxs[1]] == 0) 
     @constraint(m, secondone, x[idxs[2]] == 0) 
+elseif ismatch(r"PIP3_activates_AKT_signaling", ARGS[1])
+   idxs = indexin(["PIP4K2B_[cytosol]_152063", "5654186"], nodesList)
+   @constraint(m, PIP, x[idxs[1]] == 1)
+   @constraint(m, PIP, x[idxs[2]] == 1)
 end
 
 for nodeName in keys(nodes)
@@ -69,8 +73,8 @@ for nodeName in keys(nodes)
     if length(parents) == 0
         continue
     end
-    parentIndexes = indexin(parents, nodesList)
 
+    parentIndexes = indexin(parents, nodesList)
     for idx = 1: UPPERBOUND
         @constraint(m,
                     ifabove[currentIndex,idx],
@@ -125,17 +129,13 @@ for nodeName in keys(nodes)
                     orposparent[currentIndex],
                     sum{x[parentIndexes[a]], a=1:length(parents)}/length(parents)
                      - v[currentIndex] <= x[currentIndex])
-    end
+    end 
 end
 
 println("solving model")
+#print(m)
 solve(m)
 
-for i in eachindex(nodesList)
-        value = getvalue(x[i])
-        println( i, "\t", nodesList[i], "\t\t", value)
-end
-exit()
 function valueToState(value)
     if 70 > value
         return "Down Regulated"
@@ -249,6 +249,14 @@ elseif ismatch(r"DNA_Double-Strand_Break_Repair", ARGS[1])
                                     ]) != [0]
             value = getvalue(x[i])
             println( i, "\t", nodesList[i], "\t\t", value, "\t", valueToState(value))
+        end
+    end
+elseif ismatch(r"PIP3_activates_AKT", ARGS[1])
+    println("PIP3 results")
+    for i in eachindex(nodesList)
+        value = getvalue(x[i])
+        if value != NORMAL
+            println( i, "\t", nodesList[i], "\t\t", value)
         end
     end
 end

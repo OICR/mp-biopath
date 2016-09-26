@@ -74,10 +74,9 @@ function readFile(fname)
         if length(PIs[nodeName].orPosParents) > 0 
             if length(PIs[nodeName].andPosParents) == 0 && length(PIs[nodeName].andNegParents) == 0
                 nodes[nodeName] = ModelParents("OR", PIs[nodeName].orPosParents)
-                continue
             else
-                orNodeName = AbstractString(nodeName, "_OR")
-                nodes[orNodName] = ModelParents("OR", PIs[nodeName].orPosParents)
+                orNodeName = "$nodeName\_OR"
+                nodes[orNodeName] = ModelParents("OR", PIs[nodeName].orPosParents)
                 push!(parents, orNodeName)
             end
         end
@@ -92,22 +91,28 @@ function readFile(fname)
            end
         else
            pseudonodeIndex = 1
-           parentone = parents[1]
-           parenttwo = parents[2]
-           pseudonodeName = "$parentone\_PSEUDONODE\_$parenttwo"
-           nodes[pseudonodeName] = ModelParents("AND", AbstractString[parentone,parenttwo])
-           for i = 3:length(parents)
+           childNodeName = parents[1]
+           for i = 2:length(parents)
                parenti = parents[i]
-               newPseudonodeName = "$pseudonodeName\_PSEDUDONODE\_$parenti"
-               nodes[newPseudonodeName]= ModelParents("AND", AbstractString[pseudonodeName, parenti])
-               pseudonodeName = newPseudonodeName
+               if length(negParents) == 0 && i == length(parents)
+                   nodes[nodeName]= ModelParents("AND", AbstractString[childNodeName, parenti])
+                   continue
+               else
+                   newChildNodeName = "$childNodeName\_PSEUDONODE\_$parenti"               
+                   nodes[newChildNodeName]= ModelParents("AND", AbstractString[childNodeName, parenti])
+                   childNodeName = newChildNodeName
+               end
            end 
-           nodeIndex = length(parents)
+
            for i = 1:length(negParents)
                parenti = parents[i]
-               newPseudonodeName = "$pseudonodeName\_PSEUDONODE\_$parenti"
-               nodes[newPseudonodeName]= ModelParents("ANDNEG", AbstractString[pseudonodeName, parenti])
-               pseudonodeName = newPseudonodeName
+               if i == length(negParents)
+                   nodes[nodeName]= ModelParents("AND", AbstractString[childNodeName, parenti])
+               else
+                   newChildNodeName = "$childNodeName\_PSEUDONODE\_$parenti"
+                   nodes[newChildNodeName]= ModelParents("ANDNEG", AbstractString[childNodeName, parenti])
+                   childNodeName = newChildNodeName
+               end
            end
         end
     end 
