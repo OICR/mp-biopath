@@ -41,7 +41,6 @@ nodesList = collect(keys(nodes))
 
 if ismatch(r"test", ARGS[1])
     idxs = indexin(["b", "c"], nodesList)
-    println(idxs)
     @constraint(m, test, x[idxs[1]] == 10)
     @constraint(m, test, x[idxs[2]] == 5)
 end
@@ -68,10 +67,7 @@ for nodeName in keys(nodes)
     currentIndexes = indexin([nodeName], nodesList)
     currentIndex = currentIndexes[1]
 
-    ###Linearizing multiplication of and nodes
-    relation = nodes[nodeName].relation
     parents = nodes[nodeName].parents
-
     parentIndexes = indexin(parents, nodesList)
     for idx = 1: UPPERBOUND
         @constraint(m,
@@ -82,7 +78,7 @@ for nodeName in keys(nodes)
             idx >= x[currentIndex] * t[currentIndex,idx])
     end
 
-    if relation == "ROOT"
+    if nodes[nodeName].relation == "ROOT"
         @constraint(m, xzconst[currentIndex], z[currentIndex]*NORMAL >= x[currentIndex] - NORMAL)
         @constraint(m, xyconst[currentIndex], y[currentIndex]*NORMAL >= NORMAL - x[currentIndex])
         continue
@@ -127,7 +123,6 @@ for nodeName in keys(nodes)
                     totals[currentIndex],
                     sum{s[currentIndex,a,b], a = 1:UPPERBOUND, b = 1:UPPERBOUND} == 1)
     elseif nodes[nodeName].relation == "OR"
-        println("OR")
         @constraint(m,
             orposparentbelow[currentIndex],
             sum{x[parentIndexes[a]], a = 1:length(parents)} / length(parents)
