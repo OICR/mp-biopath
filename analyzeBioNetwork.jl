@@ -7,7 +7,7 @@ m = Model(solver=GurobiSolver())
 include("pi.pl")
 
 UPPERBOUND = 20
-NORMAL = UPPERBOUND/4
+NORMAL = UPPERBOUND/2
 M = 1000
 
 if length(ARGS) == 0
@@ -24,14 +24,14 @@ nodesList = collect(keys(nodes))
 ## Auxilary 
 @variable(m, z[1:length(nodesList)], Bin)                           #Above Normal
 @variable(m, y[1:length(nodesList)], Bin)                           #Below Normal
-@variable(m, 0 <= x[1:length(nodesList)] <= UPPERBOUND, Int)        ###actual nodes !!!
+@variable(m, 0 <= x[1:length(nodesList)] <= UPPERBOUND, Int, start = NORMAL)        ###actual nodes !!!
 @variable(m, 0 <= w[1:length(nodesList)] <= UPPERBOUND, Int)        #Above and optomized value
 @variable(m, 0 <= v[1:length(nodesList)] <= UPPERBOUND, Int)        #Below and optomized value
 @variable(m, u[1:length(nodesList),1:UPPERBOUND], Bin)              #Above being true 
 @variable(m, t[1:length(nodesList),1:UPPERBOUND], Bin)              #Neg being true
 @variable(m, s[1:length(nodesList),1:UPPERBOUND,1:UPPERBOUND], Bin) #Binary of two parent values
 
-@objective(m, Min, sum{ y[i] + z[i] + M * (w[i] + v[i]) #auxilary variables
+@objective(m, Min, sum{ NORMAL * (y[i] + z[i]) + M * (w[i] + v[i]) #auxilary variables
                        + y[i]*(NORMAL - x[i]) #weighting for above NORMAL
                        + z[i]*(x[i] - NORMAL) #weighting for below NORMAL
                         , i=1:length(nodesList)}
@@ -79,8 +79,8 @@ for nodeName in keys(nodes)
     end
 
     if nodes[nodeName].relation == "ROOT"
-        @constraint(m, xzconst[currentIndex], z[currentIndex]*NORMAL >= x[currentIndex] - NORMAL)
-        @constraint(m, xyconst[currentIndex], y[currentIndex]*NORMAL >= NORMAL - x[currentIndex])
+        @constraint(m, xzconst[currentIndex], z[currentIndex] * NORMAL >= x[currentIndex] - NORMAL)
+        @constraint(m, xyconst[currentIndex], y[currentIndex] * NORMAL >= NORMAL - x[currentIndex])
         continue
     end
 
@@ -270,6 +270,8 @@ else
     println("x")
     println(getvalue(x))
     println("y")
+    println(getvalue(y))
+    println("z")
     println(getvalue(y))
     println("v")
     println(getvalue(v))
