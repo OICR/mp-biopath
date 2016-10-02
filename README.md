@@ -40,3 +40,13 @@ julia analyzeBioNetwork.jl <pi filename>
 
 ##Essential Genes source
 http://ogee.medgenius.info/browse/
+
+##Convert gene names to HUGO
+
+http://useast.ensembl.org/Help/Faq?id=125
+
+#Got list of unique genes with following command
+
+```bash
+cut -f 3 essential_9606_all.txt | sort | uniq > essential_9606_all_gene_ids.txt
+```
