@@ -57,6 +57,6 @@ cut -f 3 essential_9606_all.txt | sort | uniq > essential_9606_all_gene_ids.txt
 The two files sl_human and sdl_human were downloaded from: http://histone.sce.ntu.edu.sg/SynLethDB/downloadPage.php
 
 And more information about the data can be found in the following articles:
-- https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4445436/ 
+- https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4445436/ "The authors also analyzed synthetic dosage lethality (SDL), which is the overexpression of a gene that leads to the essentiality of a second gene, making a SDL pair"
 - http://nar.oxfordjournals.org/content/early/2015/10/29/nar.gkv1108.full 
 
