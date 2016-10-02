@@ -3,11 +3,11 @@
 using JuMP
 using Gurobi
 
+m = Model(solver=GurobiSolver())
 include("pi.pl")
 
-println("Running analysis on file:")
-
-NORMAL = 100
+UPPERBOUND = 20
+NORMAL = UPPERBOUND/2
 M = 1000
 
 if length(ARGS) == 0
@@ -17,33 +17,35 @@ end
 
 println("Performing analysis on pairwise interaction file: ", ARGS[1])
 
-pairwiseInteractions = Pi.readFile(ARGS[1])
-nodesList = collect(keys(pairwiseInteractions))
+nodes = Pi.readFile(ARGS[1])
 
-m = Model(solver=GurobiSolver())
-
-# Variables
-
-## Node
-@variable(m, x[1:length(nodesList)] >=0, Int)
+nodesList = collect(keys(nodes))
 
 ## Auxilary 
-@variable(m, z[1:length(nodesList)], Bin)  #Above Normal
-@variable(m, y[1:length(nodesList)], Bin)  #Below Normal
-@variable(m, o[1:length(nodesList)], Int)  #Min or max value of the node without neg reg
-@variable(m, n[1:length(nodesList)], Int)  #for neg regulation
+@variable(m, z[1:length(nodesList)], Bin)                           #Above Normal
+@variable(m, y[1:length(nodesList)], Bin)                           #Below Normal
+@variable(m, 0 <= x[1:length(nodesList)] <= UPPERBOUND, Int, start = NORMAL)        ###actual nodes !!!
+@variable(m, 0 <= w[1:length(nodesList)] <= UPPERBOUND, Int)        #Above and optomized value
+@variable(m, 0 <= v[1:length(nodesList)] <= UPPERBOUND, Int)        #Below and optomized value
+@variable(m, u[1:length(nodesList),1:UPPERBOUND], Bin)              #Above being true 
+@variable(m, t[1:length(nodesList),1:UPPERBOUND], Bin)              #Neg being true
+@variable(m, s[1:length(nodesList),1:UPPERBOUND,1:UPPERBOUND], Bin) #Binary of two parent values
 
-# Objective funtion
-@objective(m, Min, sum{ M*(y[i]+z[i]) #auxilary variables
-                       + y[i]*(NORMAL-x[i]) #weighting for above NORMAL
-                       + z[i]*(x[i]-NORMAL) #weighting for below NORMAL
-                        , i=1:length(nodesList)})
+@objective(m, Min, sum{ NORMAL * (y[i] + z[i]) + M * (w[i] + v[i]) #auxilary variables
+                       + y[i]*(NORMAL - x[i]) #weighting for above NORMAL
+                       + z[i]*(x[i] - NORMAL) #weighting for below NORMAL
+                        , i=1:length(nodesList)}
+                       - sum{ 8*(u[i,j]*t[i,j]), i = 1:length(nodesList), j = 1:UPPERBOUND}
+                       - sum{s[i,k,l],i = 1:length(nodesList),
+                             k = 1:UPPERBOUND, l = 1:UPPERBOUND})
 
-@constraint(m, xzconst[i=1:length(nodesList)], z[i]*NORMAL >= x[i] - NORMAL)
-@constraint(m, xyconst[i=1:length(nodesList)], y[i]*NORMAL >= NORMAL - x[i])
+if ismatch(r"test", ARGS[1])
+    idxs = indexin(["b", "c"], nodesList)
+    @constraint(m, test, x[idxs[1]] == 10)
+    @constraint(m, test, x[idxs[2]] == 5)
+end
 
 if ismatch(r"Signaling_by_ERBB2", ARGS[1])
-println( search(ARGS[1], "Signaling_by_ERBB2") )
     idxs = indexin(["1963571", "p-10Y-ERBB3-1_[plasma_membrane]_54424"], nodesList)
     @constraint(m, EGFR, x[idxs[1]] == 0)
     @constraint(m, ERBB3, x[idxs[2]] == 0)
@@ -55,42 +57,90 @@ elseif ismatch(r"DNA_Double-Strand_Break_Repair", ARGS[1])
 
     @constraint(m, RAD52, x[idxs[1]] == 0) 
     @constraint(m, secondone, x[idxs[2]] == 0) 
+elseif ismatch(r"PIP3_activates_AKT_signaling", ARGS[1])
+   idxs = indexin(["PIP4K2B_[cytosol]_152063", "5654186"], nodesList)
+   @constraint(m, PIP, x[idxs[1]] == 1)
+   @constraint(m, PIP, x[idxs[2]] == 1)
 end
 
-for (nodeName, node) in pairwiseInteractions
+for nodeName in keys(nodes)
     currentIndexes = indexin([nodeName], nodesList)
     currentIndex = currentIndexes[1]
 
-    orPosParents =  collect(node.orPosParents)
-    orPosParentIndexes = indexin(orPosParents, nodesList) 
-    if length(orPosParentIndexes) > 0
-        @constraint(m, 
-          orposreg[currentIndex], 
-          sum{x[parentIndex],
-              parentIndex=orPosParentIndexes}/length(orPosParentIndexes)  >= x[currentIndex])
-        #need to add "- n[currentIndex]" when loops are fixed
+    parents = nodes[nodeName].parents
+    parentIndexes = indexin(parents, nodesList)
+    for idx = 1: UPPERBOUND
+        @constraint(m,
+            ifabove[currentIndex,idx],
+            x[currentIndex] >= u[currentIndex,idx] * idx)
+        @constraint(m,
+            ifbelow[currentIndex,idx],
+            idx >= x[currentIndex] * t[currentIndex,idx])
     end
 
-    andNegParents =  collect(node.andNegParents)
-    andNegParentIndexes = indexin(andNegParents, nodesList) 
-    if length(andNegParentIndexes) > 0
-        @constraint(m, 
-          andnegreg[currentIndex], 
-          sum{x[parentIndex],
-              parentIndex=andNegParentIndexes} - length(andNegParentIndexes)*NORMAL == n[currentIndex])
-    else
-        @constraint(m, n[currentIndex] == 0)
+    if nodes[nodeName].relation == "ROOT"
+        @constraint(m, xzconst[currentIndex], z[currentIndex] * NORMAL >= x[currentIndex] - NORMAL)
+        @constraint(m, xyconst[currentIndex], y[currentIndex] * NORMAL >= NORMAL - x[currentIndex])
+        continue
     end
 
-    for parent in node.andPosParents
-        parentIndexes = indexin([parent], nodesList)
-        parentIndex = parentIndexes[1]
-        @constraint(m, andposreg[parentIndex], x[currentIndex] <= x[parentIndex]) #" - n[currentIndex])"
+    if length(parents) == 1
+        @constraint(m,
+            andoneparentBelow[currentIndex],
+            x[parentIndexes[1]] + w[currentIndex] >= x[currentIndex])
+        @constraint(m,
+            andoneparentAbove[currentIndex],
+            x[parentIndexes[1]] - v[currentIndex] <= x[currentIndex])
+    elseif nodes[nodeName].relation == "AND" || nodes[nodeName].relation == "ANDNEG"
+        for a = 1:UPPERBOUND, b = 1:UPPERBOUND 
+            @constraint(m,
+                findalltrue[currentIndex,a,b],
+                u[parentIndexes[1],a] + t[parentIndexes[1],a]
+                 + u[parentIndexes[2],b] + t[parentIndexes[2],b]
+                 >= 4 * s[currentIndex,a,b])
+        end
+
+        if nodes[nodeName].relation == "AND"
+            @constraint(m,
+                setBasedOnParents[currentIndex],
+                sum{(a / NORMAL) * (b / NORMAL) * s[currentIndex,a,b], a = 1:UPPERBOUND, b = 1:UPPERBOUND} * NORMAL
+                         + w[currentIndex] >= x[currentIndex])
+            @constraint(m,
+                setBasedOnParents[currentIndex],
+                sum{(a / NORMAL)*(b / NORMAL) * s[currentIndex,a,b], a = 1:UPPERBOUND, b = 1:UPPERBOUND} * NORMAL
+                 - v[currentIndex] <= x[currentIndex])
+        else #ANDNEG
+            @constraint(m,
+                setBasedOnParents[currentIndex],
+                sum{(a / NORMAL) / (b / NORMAL) * s[currentIndex,a,b], a = 1:UPPERBOUND, b = 1:UPPERBOUND} * NORMAL
+                 + w[currentIndex] >= x[currentIndex])
+            @constraint(m,
+                setBasedOnParents[currentIndex],
+                sum{(a / NORMAL) / (b / NORMAL) * s[currentIndex,a,b], a = 1:UPPERBOUND, b = 1:UPPERBOUND} * NORMAL
+                 - v[currentIndex] <= x[currentIndex])
+        end
+        @constraint(m,
+                    totals[currentIndex],
+                    sum{s[currentIndex,a,b], a = 1:UPPERBOUND, b = 1:UPPERBOUND} == 1)
+    elseif nodes[nodeName].relation == "OR"
+        @constraint(m,
+            orposparentbelow[currentIndex],
+            sum{x[parentIndexes[a]], a = 1:length(parents)} / length(parents)
+             + w[currentIndex] >= x[currentIndex])
+        @constraint(m,
+            orposparentabove[currentIndex],
+            sum{x[parentIndexes[a]], a = 1:length(parents)} / length(parents)
+             - v[currentIndex] <= x[currentIndex])
     end
+
+    
 end
 
-solve(m)
+
+println("solving model")
 #print(m)
+#exit()
+solve(m)
 
 function valueToState(value)
     if 70 > value
@@ -207,4 +257,34 @@ elseif ismatch(r"DNA_Double-Strand_Break_Repair", ARGS[1])
             println( i, "\t", nodesList[i], "\t\t", value, "\t", valueToState(value))
         end
     end
+elseif ismatch(r"PIP3_activates_AKT", ARGS[1])
+    println("PIP3 results")
+    for i in eachindex(nodesList)
+        value = getvalue(x[i])
+        if value != NORMAL
+            println( i, "\t", nodesList[i], "\t\t", value)
+        end
+    end
+else
+    println(nodesList)
+    println("x")
+    println(getvalue(x))
+    println("y")
+    println(getvalue(y))
+    println("z")
+    println(getvalue(y))
+    println("v")
+    println(getvalue(v))
+    println("w")
+    println(getvalue(w))
+    println("u")
+    println(getvalue(u))
+    println("t")
+    println(getvalue(t))
+
+
+ #   println("s")
+ #   println(getvalue(s))
+
+
 end

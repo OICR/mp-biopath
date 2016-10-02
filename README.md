@@ -31,3 +31,12 @@ Pkg.add("JuMP")
 ```julia
 Pkg.add("Gurobi")
 ```
+
+##Running the package
+
+```bash
+julia analyzeBioNetwork.jl <pi filename>
+```
+
+##Essential Genes source
+http://ogee.medgenius.info/browse/
