@@ -38,3 +38,5 @@ Pkg.add("Gurobi")
 julia analyzeBioNetwork.jl <pi filename>
 ```
 
+##Essential Genes source
+http://ogeedb.embl.de/#overview:
