@@ -4,7 +4,7 @@ using JuMP
 using Gurobi
 
 m = Model(solver=GurobiSolver())
-include("pi.pl")
+include("pi.jl")
 
 UPPERBOUND = 10
 NORMAL = UPPERBOUND/2
