@@ -59,26 +59,26 @@ elseif ismatch(r"DNA_Double-Strand_Break_Repair", ARGS[1])
     @constraint(m, RAD52, x[observedidxs[1]] == 0) 
     @constraint(m, secondone, x[observedidxs[2]] == 0) 
 elseif ismatch(r"PIP3_activates_AKT_signaling", ARGS[1])
- #test AKT upregulated
- #  observedidxs = indexin(["AKT1_[cytosol]_58253", "AKT2_[cytosol]_49860", "AKT3_[cytosol]_415917"], nodesList)
- #  @constraint(m, AKT1, x[observedidxs[1]] == UPPERBOUND)
- #  @constraint(m, AKT2, x[observedidxs[2]] == UPPERBOUND)
- #  @constraint(m, AKT3, x[observedidxs[2]] == UPPERBOUND)
+    #test AKT upregulated
+    #observedidxs = indexin(["AKT1_[cytosol]_58253", "AKT2_[cytosol]_49860", "AKT3_[cytosol]_415917"], nodesList)
+    #@constraint(m, AKT1, x[observedidxs[1]] == UPPERBOUND)
+    #@constraint(m, AKT2, x[observedidxs[2]] == UPPERBOUND)
+    #@constraint(m, AKT3, x[observedidxs[2]] == UPPERBOUND)
 
- #test PIK3CA upgregulated test
- #  observedidxs = indexin(["PIK3CA_[cytosol]_61074"], nodesList)
- #  @constraint(m, PIK3CA, x[observedidxs[1]] == UPPERBOUND)
+    #test PIK3CA upgregulated test
+    #observedidxs = indexin(["PIK3CA_[cytosol]_61074"], nodesList)
+    #@constraint(m, PIK3CA, x[observedidxs[1]] == UPPERBOUND)
 
- #test3 PTEN downregulated
-   observedidxs = indexin(["PTEN_mRNA_[cytosol]_2318745", "PTEN_Gene_[nucleoplasm]_5632940"], nodesList)
-   @constraint(m, PTENcytosol, x[observedidxs[1]] == 1)
-   @constraint(m, PTENnucleoplasm, x[observedidxs[2]] == 1)
+    #test3 PTEN downregulated
+    observedidxs = indexin(["PTEN_mRNA_[cytosol]_2318745", "PTEN_Gene_[nucleoplasm]_5632940"], nodesList)
+    @constraint(m, PTENcytosol, x[observedidxs[1]] == 1)
+    @constraint(m, PTENnucleoplasm, x[observedidxs[2]] == 1)
 
 
 elseif ismatch(r"DNA_Damage_Reversal", ARGS[1])
-   println("Setting obser for DNA_Damage_Reversal")
-   observedidxs = indexin(["5657646"], nodesList)
-   @constraint(m, oneetadsDNA, x[observedidxs[1]] == 1)
+    println("Setting obser for DNA_Damage_Reversal")
+    observedidxs = indexin(["5657646"], nodesList)
+    @constraint(m, oneetadsDNA, x[observedidxs[1]] == 1)
 end
 
 for nodeName in keys(nodes)
@@ -187,9 +187,9 @@ println("solving model")
 solve(m)
 
 function valueToState(value)
-    if 70 > value
+    if NORMAL > value
         return "Down Regulated"
-    elseif 130 < value
+    elseif NORMAL < value
         return "Up Regulated"
     else
         return "Normal"
