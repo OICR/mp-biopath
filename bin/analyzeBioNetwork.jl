@@ -87,9 +87,6 @@ for nodeName in keys(nodes)
 
     observedIndex = indexin([currentIndex], observedidxs)
 
-    parents = nodes[nodeName].parents
-    parentIndexes = indexin(parents, nodesList)
-
     for idx = 1: UPPERBOUND
         @constraint(m,
             ifabove[currentIndex,idx],
@@ -98,6 +95,7 @@ for nodeName in keys(nodes)
             ifbelow[currentIndex,idx],
             idx >= x[currentIndex] * t[currentIndex,idx])
     end
+
     if nodes[nodeName].relation == "ROOT" && observedIndex[1] == 0
         @constraint(m, xzconst[currentIndex], z[currentIndex] * NORMAL >= x[currentIndex] - NORMAL)
         @constraint(m, xyconst[currentIndex], y[currentIndex] * NORMAL >= NORMAL - x[currentIndex])
@@ -106,7 +104,8 @@ for nodeName in keys(nodes)
         @constraint(m, yzxconstzero[currentIndex], z[currentIndex] + y[currentIndex] == 0)
     end
 
-    if length(parents) == 1
+    if (nodes[nodeName].relation != "OR" && (length( nodes[nodeName].parents) == 1))
+        parentIndexes = indexin(nodes[nodeName].parents, nodesList)
         if observedIndex[1] != 0
             @constraint(m,
                 andoneparentBelow[currentIndex],
@@ -119,6 +118,7 @@ for nodeName in keys(nodes)
             @constraint(m, wvconstzero[currentIndex], w[currentIndex] + v[currentIndex] == 0)
         end
     elseif nodes[nodeName].relation == "AND" || nodes[nodeName].relation == "ANDNEG"
+        parentIndexes = indexin(nodes[nodeName].parents, nodesList)
         for a = 1:UPPERBOUND, b = 1:UPPERBOUND 
             @constraint(m,
                 findalltrue[currentIndex,a,b],
@@ -162,19 +162,21 @@ for nodeName in keys(nodes)
                     totals[currentIndex],
                     sum{s[currentIndex,a,b], a = 1:UPPERBOUND, b = 1:UPPERBOUND} == 1)
     elseif nodes[nodeName].relation == "OR"
+        posParentIdxs = indexin(nodes[nodeName].posParents, nodesList)
+        negParentIdxs = indexin(nodes[nodeName].negParents, nodesList)
         if true || observedIndex[1] != 0
             @constraint(m,
                 orposparentbelow[currentIndex],
-                sum{x[parentIndexes[a]], a = 1:length(parents)} / length(parents)
+                ((sum{x[posParentIdxs[a]], a = 1:length(posParentIdxs)} + sum{UPPERBOUND - x[negParentIdxs[b]], b = 1:length(negParentIdxs)}) / (length(posParentIdxs) + length(negParentIdxs)))
                  + w[currentIndex] >= x[currentIndex])
             @constraint(m,
                 orposparentabove[currentIndex],
-                sum{x[parentIndexes[a]], a = 1:length(parents)} / length(parents)
+                ((sum{x[posParentIdxs[a]], a = 1:length(posParentIdxs)} + sum{UPPERBOUND - x[negParentIdxs[b]], b = 1:length(negParentIdxs)}) / (length(posParentIdxs) + length(negParentIdxs)))
                  - v[currentIndex] <= x[currentIndex])
         else
             @constraint(m,
                 orposparentbelow[currentIndex],
-                sum{x[parentIndexes[a]], a = 1:length(parents)} / length(parents) == x[currentIndex])
+                sum{x[parentIdxs[a]], a = 1:length(parents)} / length(parents) == x[currentIndex])
         end
     end
 end

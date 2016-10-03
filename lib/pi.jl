@@ -2,15 +2,22 @@ module Pi
 
 export readPiFile
 
-type ModelParents
+type ModelANDParents
    relation::Any
    parents::Any
-end  
+end
+
+type ModelORParents
+   relation::Any
+   posParents::Any
+   negParents::Any
+end
 
 type PIparents
    andPosParents::Array
    andNegParents::Array
    orPosParents::Array
+   orNegParents::Array
 end
 
 # Assumptions:
@@ -37,7 +44,9 @@ function readFile(fname)
                              PIs[childName].andPosParents:
                              PIs[childName].orPosParents
             else
-                parents = PIs[childName].andNegParents
+                parents = andBool?
+                             PIs[childName].andNegParents:
+                             PIs[childName].orNegParents
             end
 
             push!(parents, parentName)
@@ -52,7 +61,8 @@ function readFile(fname)
             
             node = PIparents(andBool? posParents: AbstractString[],
                              andBool? negParents: AbstractString[],
-                             andBool? AbstractString[]: posParents)
+                             andBool? AbstractString[]: posParents,
+                             andBool? AbstractString[]: negParents)
             
             PIs[childName] = node
         end
@@ -61,7 +71,7 @@ function readFile(fname)
     for line in data
         (parentName, childName, posneg, andor) = split(chomp(line), '\t')
         if !haskey(PIs, parentName) 
-            PIs[parentName] = PIparents(AbstractString[],AbstractString[],AbstractString[]) 
+            PIs[parentName] = PIparents(AbstractString[],AbstractString[],AbstractString[],AbstractString[]) 
         end
     end
 
@@ -69,35 +79,35 @@ function readFile(fname)
     for nodeName in keys(PIs)
         parents = PIs[nodeName].andPosParents
 
-        if(length(PIs[nodeName].andPosParents) + length(PIs[nodeName].andNegParents)) == 0
-            if length(PIs[nodeName].orPosParents) > 0
-                nodes[nodeName] = ModelParents("OR", PIs[nodeName].orPosParents)
+        if (length(PIs[nodeName].andPosParents) + length(PIs[nodeName].andNegParents)) == 0
+            if (length(PIs[nodeName].orPosParents) + length(PIs[nodeName].orNegParents)) > 0
+                nodes[nodeName] = ModelORParents("OR", PIs[nodeName].orPosParents, PIs[nodeName].orNegParents)
             else
-                nodes[nodeName] = ModelParents("ROOT", parents)
+                nodes[nodeName] = ModelANDParents("ROOT", parents)
             end
         else
-            if length(PIs[nodeName].orPosParents) > 0 
+            if (length(PIs[nodeName].orPosParents) + length(PIs[nodeName].orNegParents)) > 0 
                 orNodeName = "$nodeName\_OR"
-                nodes[orNodeName] = ModelParents("OR", PIs[nodeName].orPosParents)
+                nodes[orNodeName] = ModelORParents("OR", PIs[nodeName].orPosParents, PIs[nodeName].orNegParents)
                 push!(parents, orNodeName)
             end
     
             negParents = PIs[nodeName].andNegParents
             if length(parents) == 1 && length(negParents) == 1
-                nodes[nodeName] = ModelParents("ANDNEG", union(parents, negParents))
+                nodes[nodeName] = ModelANDParents("ANDNEG", union(parents, negParents))
             elseif length(parents) == 1 && length(negParents) == 0
-                nodes[nodeName] = ModelParents("AND", parents)
+                nodes[nodeName] = ModelANDParents("AND", parents)
             else
                pseudonodeIndex = 1
                childNodeName = parents[1]
                for i = 2:length(parents)
                    parenti = parents[i]
                    if length(negParents) == 0 && i == length(parents)
-                       nodes[nodeName]= ModelParents("AND", AbstractString[childNodeName, parenti])
+                       nodes[nodeName]= ModelANDParents("AND", AbstractString[childNodeName, parenti])
                        continue
                    else
                        newChildNodeName = "$childNodeName\_PSEUDONODE\_$parenti"               
-                       nodes[newChildNodeName]= ModelParents("AND", AbstractString[childNodeName, parenti])
+                       nodes[newChildNodeName]= ModelANDParents("AND", AbstractString[childNodeName, parenti])
                        childNodeName = newChildNodeName
                    end
                end 
@@ -105,15 +115,16 @@ function readFile(fname)
                for i = 1:length(negParents)
                    parenti = parents[i]
                    if i == length(negParents)
-                       nodes[nodeName]= ModelParents("AND", AbstractString[childNodeName, parenti])
+                       nodes[nodeName]= ModelANDParents("AND", AbstractString[childNodeName, parenti])
                    else
                        newChildNodeName = "$childNodeName\_PSEUDONODE\_$parenti"
-                       nodes[newChildNodeName]= ModelParents("ANDNEG", AbstractString[childNodeName, parenti])
+                       nodes[newChildNodeName]= ModelANDParents("ANDNEG", AbstractString[childNodeName, parenti])
                        childNodeName = newChildNodeName
                    end
                end
             end
         end
+
     end 
 
     close(f1)
