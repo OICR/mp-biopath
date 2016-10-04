@@ -60,3 +60,6 @@ And more information about the data can be found in the following articles:
 - https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4445436/ "The authors also analyzed synthetic dosage lethality (SDL), which is the overexpression of a gene that leads to the essentiality of a second gene, making a SDL pair"
 - http://nar.oxfordjournals.org/content/early/2015/10/29/nar.gkv1108.full 
 
+#Coespression DB API
+
+http://coxpresdb.jp/help/API.shtml
