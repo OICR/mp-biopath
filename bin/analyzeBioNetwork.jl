@@ -3,12 +3,15 @@
 using JuMP
 using Gurobi
 
-m = Model(solver=GurobiSolver())
+model = Model(solver=GurobiSolver())
 include("../lib/pi.jl")
 
-UPPERBOUND = 10
-NORMAL = UPPERBOUND/2
-M = 100000
+LB = 0.0001
+UB = 10
+
+weightRoot = 5
+weightMeasured = 10000
+weightHard = 1000
 
 if length(ARGS) == 0
     println("Please provide the path to the pairwise interaction file in the first line")
@@ -21,172 +24,97 @@ nodes = Pi.readFile(ARGS[1])
 
 nodesList = collect(keys(nodes))
 
-## Auxilary
-@variable(m, z[1:length(nodesList)], Bin)                           #Above Normal
-@variable(m, y[1:length(nodesList)], Bin)                           #Below Normal
-@variable(m, 0 <= x[1:length(nodesList)] <= UPPERBOUND, Int, start = NORMAL)        ###actual nodes !!!
-@variable(m, 0 <= w[1:length(nodesList)] <= UPPERBOUND, Int, start = 0)        #Above and optomized value
-@variable(m, 0 <= v[1:length(nodesList)] <= UPPERBOUND, Int, start = 0)        #Below and optomized value
-@variable(m, u[1:length(nodesList),1:UPPERBOUND], Bin)              #Above being true
-@variable(m, t[1:length(nodesList),1:UPPERBOUND], Bin)              #Neg being true
-@variable(m, s[1:length(nodesList),1:UPPERBOUND,1:UPPERBOUND], Bin) #Binary of two parent values
 
-@objective(m, Min, sum{ 100 * NORMAL * (y[i] + z[i]) + M * (w[i] + v[i]) #auxilary variables
-                       + 8 * y[i]*(NORMAL - x[i]) #weighting for above NORMAL
-                       + 8 * z[i]*(x[i] - NORMAL) #weighting for below NORMAL
-                        , i=1:length(nodesList)}
-                       - sum{ 8 * u[i,j], i = 1:length(nodesList), j = 1:UPPERBOUND}
-                       - sum{ 8 * t[i,j], i = 1:length(nodesList), j = 1:UPPERBOUND}
-                       - sum{s[i,k,l],i = 1:length(nodesList),
-                             k = 1:UPPERBOUND, l = 1:UPPERBOUND})
-# Observed
-observedidxs = Array{Integer}()
+measuredIdxs = Array{Integer}()
 
 if ismatch(r"test", ARGS[1])
-    observedidxs = indexin(["b", "c", "a"], nodesList)
-    @constraint(m, test, x[observedidxs[1]] == 10)
-    @constraint(m, test, x[observedidxs[2]] == 5)
+    measuredIdxs = indexin(["b", "c", "a"], nodesList)
 elseif ismatch(r"Signaling_by_ERBB2", ARGS[1])
-    observedidxs = indexin(["1963571", "p-10Y-ERBB3-1_[plasma_membrane]_54424"], nodesList)
-    @constraint(m, EGFR, x[observedidxs[1]] == 0)
-    @constraint(m, ERBB3, x[observedidxs[2]] == 0)
+    measuredIdxs = indexin(["1963571", "p-10Y-ERBB3-1_[plasma_membrane]_54424"], nodesList)
 elseif ismatch(r"DNA_Double-Strand_Break_Repair", ARGS[1])
-    idxs = indexin(["RAD52_[nucleoplasm]_62640",
+    measuredIdxs = indexin(["RAD52_[nucleoplasm]_62640",
 #                    "PALB2_[nucleoplasm]_241569",
                    "BRCA2_[nucleoplasm]_50952"
                    ], nodesList)
-
-    @constraint(m, RAD52, x[observedidxs[1]] == 0)
-    @constraint(m, secondone, x[observedidxs[2]] == 0)
 elseif ismatch(r"PIP3_activates_AKT_signaling", ARGS[1])
     #test AKT upregulated
-    #observedidxs = indexin(["AKT1_[cytosol]_58253", "AKT2_[cytosol]_49860", "AKT3_[cytosol]_415917"], nodesList)
-    #@constraint(m, AKT1, x[observedidxs[1]] == UPPERBOUND)
-    #@constraint(m, AKT2, x[observedidxs[2]] == UPPERBOUND)
-    #@constraint(m, AKT3, x[observedidxs[2]] == UPPERBOUND)
+    #measuredidxs = indexin(["AKT1_[cytosol]_58253", "AKT2_[cytosol]_49860", "AKT3_[cytosol]_415917"], nodesList)
 
     #test PIK3CA upgregulated test
-    #observedidxs = indexin(["PIK3CA_[cytosol]_61074"], nodesList)
-    #@constraint(m, PIK3CA, x[observedidxs[1]] == UPPERBOUND)
+    #measuredidxs = indexin(["PIK3CA_[cytosol]_61074"], nodesList)
 
     #test3 PTEN downregulated
-    observedidxs = indexin(["PTEN_mRNA_[cytosol]_2318745"], nodesList)
-    @constraint(m, PTENcytosol, x[observedidxs[1]] == 1)
+    measuredIdxs = indexin(["PTEN_mRNA_[cytosol]_2318745"], nodesList)
 elseif ismatch(r"DNA_Damage_Reversal", ARGS[1])
-    println("Setting obser for DNA_Damage_Reversal")
-    observedidxs = indexin(["5657646"], nodesList)
-    @constraint(m, oneetadsDNA, x[observedidxs[1]] == 1)
+    measuredIdxs = indexin(["5657646"], nodesList)
 end
 
+@variable(model, LB <= x[1:length(nodesList)] <= UB, start = 1)
+@variable(model, LB <= x_bar[1:length(nodesList)] <= UB, start = 1)
+@variable(model, m[1:length(measuredIdxs)])
+
+rootIdxs = []
+variableIdxs = []
 for nodeName in keys(nodes)
-    currentIndexes = indexin([nodeName], nodesList)
-    currentIndex = currentIndexes[1]
+    nodeIdxs = indexin([nodeName], nodesList)
+    nodeIndex = nodeIdxs[1]
 
-    observedIndex = indexin([currentIndex], observedidxs)
-
-    for idx = 1: UPPERBOUND
-        @constraint(m,
-            ifabove[currentIndex,idx],
-            x[currentIndex] >= u[currentIndex,idx] * idx)
-        @constraint(m,
-            ifbelow[currentIndex,idx],
-            idx >= x[currentIndex] * t[currentIndex,idx])
+    measured = false
+    j = 0
+    for measuredIdx in measuredIdxs
+        j = j + 1
+        if measuredIdx == nodeIdxs
+            measured = true
+            @constraint(model, measure[nodeIndex], m[j] == 1)
+            break
+        end
     end
 
-    if nodes[nodeName].relation == "ROOT" && observedIndex[1] == 0
-        @constraint(m, xzconst[currentIndex], z[currentIndex] * NORMAL >= x[currentIndex] - NORMAL)
-        @constraint(m, xyconst[currentIndex], y[currentIndex] * NORMAL >= NORMAL - x[currentIndex])
-        continue
+    if nodes[nodeName].relation == "ROOT"
+        if !measured
+           push!(rootIdxs, nodeIdxs[1])
+        end
     else
-        @constraint(m, yzxconstzero[currentIndex], z[currentIndex] + y[currentIndex] == 0)
-    end
-
-    if (nodes[nodeName].relation != "OR" && (length( nodes[nodeName].parents) == 1))
+        push!(variableIdxs, nodeIdxs[1])
         parentIndexes = indexin(nodes[nodeName].parents, nodesList)
-        if observedIndex[1] != 0
-            @constraint(m,
-                andoneparentBelow[currentIndex],
-                x[parentIndexes[1]] + w[currentIndex] >= x[currentIndex])
-            @constraint(m,
-                andoneparentAbove[currentIndex],
-                x[parentIndexes[1]] - v[currentIndex] <= x[currentIndex])
-        else
-            @constraint(m, wvconstzero[currentIndex], x[currentIndex] == x[parentIndexes[1]])
-            @constraint(m, wvconstzero[currentIndex], w[currentIndex] + v[currentIndex] == 0)
-        end
-    elseif nodes[nodeName].relation == "AND" || nodes[nodeName].relation == "ANDNEG"
-        parentIndexes = indexin(nodes[nodeName].parents, nodesList)
-        for a = 1:UPPERBOUND, b = 1:UPPERBOUND
-            @constraint(m,
-                findalltrue[currentIndex,a,b],
-                u[parentIndexes[1],a] + t[parentIndexes[1],a]
-                 + u[parentIndexes[2],b] + t[parentIndexes[2],b]
-                 >= 4 * s[currentIndex,a,b])
-        end
-
-        if true || observedIndex[1] != 0
-            if nodes[nodeName].relation == "AND"
-                @constraint(m,
-                    setBasedOnParents[currentIndex],
-                    sum{(a / NORMAL) * (b / NORMAL) * s[currentIndex,a,b], a = 1:UPPERBOUND, b = 1:UPPERBOUND} * NORMAL
-                             + w[currentIndex] >= x[currentIndex])
-                @constraint(m,
-                    setBasedOnParents[currentIndex],
-                    sum{(a / NORMAL)*(b / NORMAL) * s[currentIndex,a,b], a = 1:UPPERBOUND, b = 1:UPPERBOUND} * NORMAL
-                     - v[currentIndex] <= x[currentIndex])
-            else #ANDNEG
-                @constraint(m,
-                    setBasedOnParents[currentIndex],
-                    sum{(a / NORMAL) / (b / NORMAL) * s[currentIndex,a,b], a = 1:UPPERBOUND, b = 1:UPPERBOUND} * NORMAL
-                     + w[currentIndex] >= x[currentIndex])
-                @constraint(m,
-                    setBasedOnParents[currentIndex],
-                    sum{(a / NORMAL) / (b / NORMAL) * s[currentIndex,a,b], a = 1:UPPERBOUND, b = 1:UPPERBOUND} * NORMAL
-                     - v[currentIndex] <= x[currentIndex])
+        if nodes[nodeName].relation == "AND"
+            if length(parentIndexes) == 1
+                @constraint(model,
+                            and[nodeIndex],
+                            x[parentIndexes[1]] == x_bar[nodeIndex])
+            else
+                 @constraint(model,
+                             and[nodeIndex],
+                             x[parentIndexes[1]] * x[parentIndexes[2]] == x_bar[nodeIndex])
             end
-        else
-             if nodes[nodeName].relation == "AND"
-                @constraint(m,
-                    setBasedOnParents[currentIndex],
-                    sum{(a / NORMAL) * (b / NORMAL) * s[currentIndex,a,b], a = 1:UPPERBOUND, b = 1:UPPERBOUND} * NORMAL  == x[currentIndex])
-            else #ANDNEG
-                @constraint(m,
-                    setBasedOnParents[currentIndex],
-                    sum{(a / NORMAL) / (b / NORMAL) * s[currentIndex,a,b], a = 1:UPPERBOUND, b = 1:UPPERBOUND} * NORMAL == x[currentIndex])
-            end
-        end
-        @constraint(m,
-                    totals[currentIndex],
-                    sum{s[currentIndex,a,b], a = 1:UPPERBOUND, b = 1:UPPERBOUND} == 1)
-    elseif nodes[nodeName].relation == "OR"
-        posParentIdxs = indexin(nodes[nodeName].posParents, nodesList)
-        negParentIdxs = indexin(nodes[nodeName].negParents, nodesList)
-        if true || observedIndex[1] != 0
+        elseif nodes[nodeName].relation == "ANDNEG"
+            @constraint(model,
+                        and[nodeIndex],
+                        x[parentIndexes[1]] / x[parentIndexes[2]] == x_bar[nodeIndex])
+        elseif nodes[nodeName].relation == "OR"
+            posParentIdxs = indexin(nodes[nodeName].posParents, nodesList)
             @constraint(m,
                 orposparentbelow[currentIndex],
-                ((sum{x[posParentIdxs[a]], a = 1:length(posParentIdxs)} + sum{UPPERBOUND - x[negParentIdxs[b]], b = 1:length(negParentIdxs)}) / (length(posParentIdxs) + length(negParentIdxs)))
-                 + w[currentIndex] >= x[currentIndex])
-            @constraint(m,
-                orposparentabove[currentIndex],
-                ((sum{x[posParentIdxs[a]], a = 1:length(posParentIdxs)} + sum{UPPERBOUND - x[negParentIdxs[b]], b = 1:length(negParentIdxs)}) / (length(posParentIdxs) + length(negParentIdxs)))
-                 - v[currentIndex] <= x[currentIndex])
-        else
-            @constraint(m,
-                orposparentbelow[currentIndex],
-                sum{x[parentIdxs[a]], a = 1:length(parents)} / length(parents) == x[currentIndex])
+                sum{x[posParentIdxs[a]], a = 1:length(posParentIdxs)} / length(posParentIdxs) ==  x_bar[nodeIndex])
         end
     end
 end
+
+@objective(model,
+           Min,
+           sum{weightHard * (x[variableIdxs[i]] - x_bar[variableIdxs[i]])^2, i = 1:length(variableIdxs)}
+           + sum{weightMeasured * (x[measuredIdxs[j]] - m[j])^2, j = 1:length(measuredIdxs)}
+           + sum{weightRoot * (x[rootIdxs[k]] - 1)^2, k = 1:length(rootIdxs)})
 
 println("solving model")
-#print(m)
+#print(model)
 #exit()
-solve(m)
+solve(model)
 
 function valueToState(value)
-    if NORMAL > value
+    if 1 > value
         return "Down Regulated"
-    elseif NORMAL < value
+    elseif 1 < value
         return "Up Regulated"
     else
         return "Normal"
