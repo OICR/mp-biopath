@@ -21,17 +21,17 @@ nodes = Pi.readFile(ARGS[1])
 
 nodesList = collect(keys(nodes))
 
-## Auxilary 
+## Auxilary
 @variable(m, z[1:length(nodesList)], Bin)                           #Above Normal
 @variable(m, y[1:length(nodesList)], Bin)                           #Below Normal
 @variable(m, 0 <= x[1:length(nodesList)] <= UPPERBOUND, Int, start = NORMAL)        ###actual nodes !!!
 @variable(m, 0 <= w[1:length(nodesList)] <= UPPERBOUND, Int, start = 0)        #Above and optomized value
 @variable(m, 0 <= v[1:length(nodesList)] <= UPPERBOUND, Int, start = 0)        #Below and optomized value
-@variable(m, u[1:length(nodesList),1:UPPERBOUND], Bin)              #Above being true 
+@variable(m, u[1:length(nodesList),1:UPPERBOUND], Bin)              #Above being true
 @variable(m, t[1:length(nodesList),1:UPPERBOUND], Bin)              #Neg being true
 @variable(m, s[1:length(nodesList),1:UPPERBOUND,1:UPPERBOUND], Bin) #Binary of two parent values
 
-@objective(m, Min, sum{ 8 * NORMAL * (y[i] + z[i]) + M * (w[i] + v[i]) #auxilary variables
+@objective(m, Min, sum{ 100 * NORMAL * (y[i] + z[i]) + M * (w[i] + v[i]) #auxilary variables
                        + 8 * y[i]*(NORMAL - x[i]) #weighting for above NORMAL
                        + 8 * z[i]*(x[i] - NORMAL) #weighting for below NORMAL
                         , i=1:length(nodesList)}
@@ -56,8 +56,8 @@ elseif ismatch(r"DNA_Double-Strand_Break_Repair", ARGS[1])
                    "BRCA2_[nucleoplasm]_50952"
                    ], nodesList)
 
-    @constraint(m, RAD52, x[observedidxs[1]] == 0) 
-    @constraint(m, secondone, x[observedidxs[2]] == 0) 
+    @constraint(m, RAD52, x[observedidxs[1]] == 0)
+    @constraint(m, secondone, x[observedidxs[2]] == 0)
 elseif ismatch(r"PIP3_activates_AKT_signaling", ARGS[1])
     #test AKT upregulated
     #observedidxs = indexin(["AKT1_[cytosol]_58253", "AKT2_[cytosol]_49860", "AKT3_[cytosol]_415917"], nodesList)
@@ -70,11 +70,8 @@ elseif ismatch(r"PIP3_activates_AKT_signaling", ARGS[1])
     #@constraint(m, PIK3CA, x[observedidxs[1]] == UPPERBOUND)
 
     #test3 PTEN downregulated
-    observedidxs = indexin(["PTEN_mRNA_[cytosol]_2318745", "PTEN_Gene_[nucleoplasm]_5632940"], nodesList)
+    observedidxs = indexin(["PTEN_mRNA_[cytosol]_2318745"], nodesList)
     @constraint(m, PTENcytosol, x[observedidxs[1]] == 1)
-    @constraint(m, PTENnucleoplasm, x[observedidxs[2]] == 1)
-
-
 elseif ismatch(r"DNA_Damage_Reversal", ARGS[1])
     println("Setting obser for DNA_Damage_Reversal")
     observedidxs = indexin(["5657646"], nodesList)
@@ -119,16 +116,16 @@ for nodeName in keys(nodes)
         end
     elseif nodes[nodeName].relation == "AND" || nodes[nodeName].relation == "ANDNEG"
         parentIndexes = indexin(nodes[nodeName].parents, nodesList)
-        for a = 1:UPPERBOUND, b = 1:UPPERBOUND 
+        for a = 1:UPPERBOUND, b = 1:UPPERBOUND
             @constraint(m,
                 findalltrue[currentIndex,a,b],
                 u[parentIndexes[1],a] + t[parentIndexes[1],a]
                  + u[parentIndexes[2],b] + t[parentIndexes[2],b]
                  >= 4 * s[currentIndex,a,b])
         end
-           
+
         if true || observedIndex[1] != 0
-            if nodes[nodeName].relation == "AND" 
+            if nodes[nodeName].relation == "AND"
                 @constraint(m,
                     setBasedOnParents[currentIndex],
                     sum{(a / NORMAL) * (b / NORMAL) * s[currentIndex,a,b], a = 1:UPPERBOUND, b = 1:UPPERBOUND} * NORMAL
@@ -148,7 +145,7 @@ for nodeName in keys(nodes)
                      - v[currentIndex] <= x[currentIndex])
             end
         else
-             if nodes[nodeName].relation == "AND" 
+             if nodes[nodeName].relation == "AND"
                 @constraint(m,
                     setBasedOnParents[currentIndex],
                     sum{(a / NORMAL) * (b / NORMAL) * s[currentIndex,a,b], a = 1:UPPERBOUND, b = 1:UPPERBOUND} * NORMAL  == x[currentIndex])
@@ -220,7 +217,7 @@ if ismatch(r"Signaling_by_ERBB2", ARGS[1])
             println( i, "\t", nodesList[i], "\t\t", value, "\t", valueToState(value))
         end
     end
-    
+
     println()
     println("ERBB3 path")
     for i in eachindex(nodesList)
@@ -238,7 +235,7 @@ if ismatch(r"Signaling_by_ERBB2", ARGS[1])
         end
     end
 
-elseif ismatch(r"DNA_Double-Strand_Break_Repair", ARGS[1]) 
+elseif ismatch(r"DNA_Double-Strand_Break_Repair", ARGS[1])
    println("rad52")
    for i in eachindex(nodesList)
         if indexin([nodesList[i]], ["rad52_[nucleoplasm]_62640",
@@ -271,7 +268,7 @@ elseif ismatch(r"DNA_Double-Strand_Break_Repair", ARGS[1])
                                     "5693593_RLE",
                                     "5686104",
                                     "5686440_RLE", #slit over these three reactions
-                                    "5693539_RLE", 
+                                    "5693539_RLE",
                                     "5693589_RLE",
                                     "5686432",
                                     "5686469_RLE", #lethal node
