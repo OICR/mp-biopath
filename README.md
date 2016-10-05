@@ -63,3 +63,7 @@ And more information about the data can be found in the following articles:
 ##Coexpression Data
 
 http://coxpresdb.jp/download.shtml
+
+##Coespression DB API
+
+http://coxpresdb.jp/help/API.shtml
