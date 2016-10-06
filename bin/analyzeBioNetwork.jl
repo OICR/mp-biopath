@@ -1,9 +1,13 @@
 #!/usr/bin/env julia
 
 using JuMP
-using Gurobi
 
-model = Model(solver=GurobiSolver())
+using JuMP, AmplNLWriter
+#model = Model(solver=CouenneNLSolver())
+model = Model(solver=BonminNLSolver())
+
+#using Gurobi
+#model = Model(solver=GurobiSolver())
 include("../lib/pi.jl")
 
 LB = 0.0001
