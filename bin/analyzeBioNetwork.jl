@@ -2,12 +2,12 @@
 
 using JuMP
 
-using JuMP, AmplNLWriter
+#using JuMP, AmplNLWriter
 #model = Model(solver=CouenneNLSolver())
-model = Model(solver=BonminNLSolver())
+#model = Model(solver=BonminNLSolver())
 
-#using Gurobi
-#model = Model(solver=GurobiSolver())
+using Gurobi
+model = Model(solver=GurobiSolver())
 include("../lib/pi.jl")
 
 LB = 0.0001
@@ -15,7 +15,7 @@ UB = 10
 
 weightRoot = 5
 weightMeasured = 10000
-weightHard = 1000
+weightHard = 10
 
 if length(ARGS) == 0
     println("Please provide the path to the pairwise interaction file in the first line")
@@ -32,7 +32,7 @@ nodesList = collect(keys(nodes))
 measuredIdxs = Array{Integer}()
 
 if ismatch(r"test", ARGS[1])
-    measuredIdxs = indexin(["b", "c", "a"], nodesList)
+    measuredIdxs = indexin(["b", "a"], nodesList)
 elseif ismatch(r"Signaling_by_ERBB2", ARGS[1])
     measuredIdxs = indexin(["1963571", "p-10Y-ERBB3-1_[plasma_membrane]_54424"], nodesList)
 elseif ismatch(r"DNA_Double-Strand_Break_Repair", ARGS[1])
@@ -55,6 +55,8 @@ end
 
 @variable(model, LB <= x[1:length(nodesList)] <= UB, start = 1)
 @variable(model, LB <= x_bar[1:length(nodesList)] <= UB, start = 1)
+@variable(model, LB <= p[1:length(nodesList)] <= UB)
+@variable(model, LB <= n[1:length(nodesList)] <= UB)
 @variable(model, m[1:length(measuredIdxs)])
 
 rootIdxs = []
@@ -67,38 +69,69 @@ for nodeName in keys(nodes)
     j = 0
     for measuredIdx in measuredIdxs
         j = j + 1
-        if measuredIdx == nodeIdxs
+        if measuredIdx == nodeIndex
             measured = true
-            @constraint(model, measure[nodeIndex], m[j] == 1)
+            @constraint(model, measure[nodeIndex], m[j] == LB)
             break
         end
     end
 
     if nodes[nodeName].relation == "ROOT"
-        if !measured
-           push!(rootIdxs, nodeIdxs[1])
+        if measured
+            @constraint(model,
+                        pindexrootmeasured[nodeIndex],
+                        p[nodeIndex] >= x[nodeIndex] - m[j])
+            @constraint(model,
+                        nindexrootmeasured[nodeIndex],
+                        n[nodeIndex] >= m[j] - x[nodeIndex])
+        else
+            @constraint(model,
+                        pindexroot[nodeIndex],
+                        p[nodeIndex] >= x[nodeIndex] - 1)
+            @constraint(model,
+                        nindexroot[nodeIndex],
+                        n[nodeIndex] >= 1 - x[nodeIndex])
+            push!(rootIdxs, nodeIdxs[1])
         end
     else
+        if measured
+            @constraint(model,
+                        pindexrootmeasured[nodeIndex],
+                        p[nodeIndex] >= x[nodeIndex] - m[j])
+            @constraint(model,
+                        nindexrootmeasured[nodeIndex],
+                        n[nodeIndex] >= m[j] - x[nodeIndex])
+        else
+            @constraint(model,
+                        pindex[nodeIndex],
+                        p[nodeIndex] >= x[nodeIndex] - x_bar[nodeIndex])
+            @constraint(model,
+                        nindex[nodeIndex],
+                        n[nodeIndex] >= x_bar[nodeIndex] - x[nodeIndex])
+        end
+
         push!(variableIdxs, nodeIdxs[1])
-        parentIndexes = indexin(nodes[nodeName].parents, nodesList)
+
         if nodes[nodeName].relation == "AND"
+            parentIndexes = indexin(nodes[nodeName].parents, nodesList)
             if length(parentIndexes) == 1
                 @constraint(model,
                             and[nodeIndex],
                             x[parentIndexes[1]] == x_bar[nodeIndex])
             else
-                 @constraint(model,
+                 @NLconstraint(model,
                              and[nodeIndex],
                              x[parentIndexes[1]] * x[parentIndexes[2]] == x_bar[nodeIndex])
             end
         elseif nodes[nodeName].relation == "ANDNEG"
-            @constraint(model,
+            parentIndexes = indexin(nodes[nodeName].parents, nodesList)
+            @NLconstraint(model,
                         and[nodeIndex],
                         x[parentIndexes[1]] / x[parentIndexes[2]] == x_bar[nodeIndex])
         elseif nodes[nodeName].relation == "OR"
             posParentIdxs = indexin(nodes[nodeName].posParents, nodesList)
-            @constraint(m,
-                orposparentbelow[currentIndex],
+            @constraint(model,
+                orposparentbelow[nodeIndex],
                 sum{x[posParentIdxs[a]], a = 1:length(posParentIdxs)} / length(posParentIdxs) ==  x_bar[nodeIndex])
         end
     end
@@ -106,20 +139,19 @@ end
 
 @objective(model,
            Min,
-           sum{weightHard * (x[variableIdxs[i]] - x_bar[variableIdxs[i]])^2, i = 1:length(variableIdxs)}
-           + sum{weightMeasured * (x[measuredIdxs[j]] - m[j])^2, j = 1:length(measuredIdxs)}
-           + sum{weightRoot * (x[rootIdxs[k]] - 1)^2, k = 1:length(rootIdxs)})
+           weightHard * sum{p[variableIdxs[i]] + n[variableIdxs[i]], i = 1:length(variableIdxs)}
+           + weightMeasured * sum{p[measuredIdxs[j]] + n[measuredIdxs[j]], j = 1:length(measuredIdxs)}
+           + weightRoot * sum{p[rootIdxs[k]] + n[rootIdxs[k]], k = 1:length(rootIdxs)})
 
 println("solving model")
-#print(model)
-#exit()
+print(model)
 solve(model)
 
 function valueToState(value)
-    if 1 > value
-        return "Down Regulated"
-    elseif 1 < value
+    if 1.1 < value
         return "Up Regulated"
+    elseif 0.9 > value
+        return "Down Regulated"
     else
         return "Normal"
     end
@@ -244,25 +276,13 @@ else
         value = getvalue(x[i])
         println( i, "\t", nodesList[i], "\t\t", value, "\t", valueToState(value))
     end
-#=    println(nodesList)
-    println("x")
-    println(getvalue(x))
-    println("y")
-    println(getvalue(y))
-    println("z")
-    println(getvalue(y))
-    println("v")
-    println(getvalue(v))
-    println("w")
-    println(getvalue(w))
-    println("u")
-    println(getvalue(u))
-    println("t")
-    println(getvalue(t))
-=#
-
- #   println("s")
- #   println(getvalue(s))
-
-
+    println("using MeasureedIdxs")
+    println(m)
+    for measuredIdx in measuredIdxs
+        println("measured")
+        println(measuredIdx)
+        println(getvalue(x[measuredIdx]))
+    end
+    println("m")
+    println(getvalue(m))
 end
