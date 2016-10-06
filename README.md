@@ -16,6 +16,8 @@ on Linux type
 apt-get install julia
 ```
 
+
+
 ##Julia dependencies 
 
 use the Julia console to install Julia external modules
@@ -24,6 +26,10 @@ use the Julia console to install Julia external modules
 https://jump.readthedocs.io/en/latest/index.html
 ```julia
 Pkg.add("JuMP")
+```
+###ArgParse
+```julia
+Pkg.add("ArgParse")
 ```
 
 ###Gurobi
