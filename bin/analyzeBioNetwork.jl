@@ -5,6 +5,8 @@ using ArgParse
 include("../lib/pi.jl")
 include("../lib/observations.jl")
 include("../lib/nlmodel.jl")
+include("../lib/keyoutputs.jl")
+include("../lib/essential.jl")
 
 function parse_commandline()
     s = ArgParseSettings("This program infers the value of nodes in Reactome pathways from observation data.",
@@ -29,6 +31,11 @@ function parse_commandline()
         "--find-si"
             help = "When this option is set do not provide any observations. This will systemattically analyze the network and find all synthetically lethal pairs."
             action = :store_true
+        "--key-outputs"
+            help = "If this is set it will prepare output based on ./data/keyoutputs.tsv"
+            action = :store_true
+        "--essential-genes"
+            help = "If this is specified a report will be made with regards to essential genes"
         "--verbose", "-v"
             help = "This will cause output to be printed to standard out."
             action = :store_true
@@ -53,30 +60,44 @@ function main()
         end
     end
 
+   # essentialgenes = Essential.getNodes()
+    keyoutputs = Keyoutputs.getNodes()
+
     nodes = Pi.readFile(parsed_args["pairwise-interaction-file"])
 
-    measuredIdxs = Array{Integer}()  
-    if parsed_args["find-si"] 
+    measuredIdxs = Array{Integer}()
+    if parsed_args["find-si"]
         println("to do")
     else
-        if parsed_args["observation-file"] == nothing
+        if parsed_args["observation-file"] != nothing
+            observations = Observations.copynumberIdxs(parsed_args["observation-file"])
+            for sample in observations["columns"]
+                if sample == "Gene"
+                    continue
+                end
+                if parsed_args["verbose"]
+                    println("Running $sample")
+                end
+                samplenodestate = observations["samplenodestate"]
+                nodestate = samplenodestate[sample]
+                NLmodel.run(nodes,
+                            nodestate,
+                            parsed_args["lowerbound"],
+                            parsed_args["upperbound"],
+                            parsed_args["downregulated-cutoff"],
+                            parsed_args["upregulated-cutoff"],
+                            parsed_args["verbose"])
+
+            end
+        else
             #in future need to make it say a warning that you need to provide an observation file if --find-si not specified
             measuredIdxs = Observations.testIdxs(parsed_args["pairwise-interaction-file"], nodes)
             if parsed_args["verbose"]
                  println("Measured indexes: $measuredIdxs")
             end
-        else
-            println(parsed_args["pairwise-interaction-file"])
         end
     end
-
-    NLmodel.run(nodes,
-                measuredIdxs,
-                parsed_args["lowerbound"],
-                parsed_args["upperbound"],
-                parsed_args["downregulated-cutoff"],
-                parsed_args["upregulated-cutoff"],
-                parsed_args["verbose"])
+    exit()
 end
 
 main()

@@ -22,16 +22,6 @@ apt-get install julia
 
 use the Julia console to install Julia external modules
 
-###Jump
-https://jump.readthedocs.io/en/latest/index.html
-```julia
-Pkg.add("JuMP")
-```
-###ArgParse
-```julia
-Pkg.add("ArgParse")
-```
-
 ###Gurobi
 
 ```julia
@@ -41,7 +31,7 @@ Pkg.add("Gurobi")
 ##Running the package
 
 ```bash
-julia analyzeBioNetwork.jl <pi filename>
+julia bin/analyzeBioNetwork.jl --help
 ```
 
 ##Essential Genes source

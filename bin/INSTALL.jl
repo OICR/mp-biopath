@@ -1,0 +1,6 @@
+Pkg.add("JuMP")
+Pkg.add("ArgParse")
+Pkg.add("CoinOptServices")
+Pkg.add("AmplNLWriter")
+Pkg.add("DataFrames")
+Pkg.add("DataArrays")

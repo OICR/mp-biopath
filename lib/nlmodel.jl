@@ -4,42 +4,51 @@ using JuMP, AmplNLWriter
 
 #using JuMP
 #using Gurobi
- 
-function run(nodes, measuredIdxs, LB, UB, downregulatedCutoff, upregulatedCutoff, verbose)
+
+function run(nodes, measurednodestate, LB, UB, downregulatedCutoff, upregulatedCutoff, verbose )
     #model = Model(solver=CouenneNLSolver())
     model = Model(solver=BonminNLSolver())
-   
+
     #model = Model(solver=GurobiSolver())
 
     weightRoot = 5
     weightMeasured = 10000
     weightHard = 10
-    
+
     nodesList = collect(keys(nodes))
-    
+
     @variable(model, LB <= x[1:length(nodesList)] <= UB, start = 1)
     @variable(model, LB <= x_bar[1:length(nodesList)] <= UB, start = 1)
     @variable(model, LB <= p[1:length(nodesList)] <= UB)
     @variable(model, LB <= n[1:length(nodesList)] <= UB)
-    @variable(model, m[1:length(measuredIdxs)])
-    
+    @variable(model, m[1:length(keys(measurednodestate))])
+
     rootIdxs = []
     variableIdxs = []
+    for node in collect(keys(measurednodestate))
+        if indexin([node],nodesList) == [0]
+            delete!(measurednodestate, node)
+        end
+    end
+
+    measuredIdxs = indexin(collect(keys(measurednodestate)), nodesList)
+
     for nodeName in keys(nodes)
         nodeIdxs = indexin([nodeName], nodesList)
         nodeIndex = nodeIdxs[1]
-    
+
         measured = false
         j = 0
-        for measuredIdx in measuredIdxs
+        for node in collect(keys(measurednodestate))
             j = j + 1
-            if measuredIdx == nodeIndex
+            if measuredIdxs[j] == nodeIndex
                 measured = true
-                @constraint(model, measure[nodeIndex], m[j] == LB)
+                rhs = measurednodestate[node] < LB? LB: measurednodestate[node]
+                @constraint(model, measure[nodeIndex], m[j] == rhs)
                 break
             end
         end
-    
+
         if nodes[nodeName].relation == "ROOT"
             if measured
                 @constraint(model,
@@ -73,9 +82,9 @@ function run(nodes, measuredIdxs, LB, UB, downregulatedCutoff, upregulatedCutoff
                             nindex[nodeIndex],
                             n[nodeIndex] >= x_bar[nodeIndex] - x[nodeIndex])
             end
-    
+
             push!(variableIdxs, nodeIdxs[1])
-    
+
             if nodes[nodeName].relation == "AND"
                 parentIndexes = indexin(nodes[nodeName].parents, nodesList)
                 if length(parentIndexes) == 1
@@ -100,7 +109,7 @@ function run(nodes, measuredIdxs, LB, UB, downregulatedCutoff, upregulatedCutoff
             end
         end
     end
-    
+
     @objective(model,
                Min,
                weightHard * sum{p[variableIdxs[i]] + n[variableIdxs[i]], i = 1:length(variableIdxs)}
@@ -114,10 +123,10 @@ function run(nodes, measuredIdxs, LB, UB, downregulatedCutoff, upregulatedCutoff
 
     solve(model)
 
-    for i in eachindex(nodesList)
-        value = getvalue(x[i])
-        println( i, "\t", nodesList[i], "\t\t", value, "\t", valueToState(value, downregulatedCutoff, upregulatedCutoff))
-    end
+ #   for i in eachindex(nodesList)
+ #       value = getvalue(x[i])
+ #       println( i, "\t", nodesList[i], "\t\t", value, "\t", valueToState(value, downregulatedCutoff, upregulatedCutoff))
+ #   end
 end
 
 function valueToState(value, downregulatedCutoff, upregulatedCutoff)
