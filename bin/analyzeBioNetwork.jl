@@ -63,7 +63,6 @@ function main()
 
     nodes = Pi.readFile(parsed_args["pairwise-interaction-file"])
 
-    measuredIdxs = Array{Integer}()
     if parsed_args["find-si"]
         essentialgenes = Essential.getGenes(collect(keys(nodes)))
 
@@ -71,6 +70,9 @@ function main()
 
         for i in [0,2]
             for node in keys(nodes)
+                if contains(node, "PSEUDONODE")
+                    continue
+                end
                 if in(node, Set(essentialgenes)) == false || i == 2
                     sampleresults = NLmodel.run(nodes,
                                                 Dict(node => i),
@@ -93,21 +95,25 @@ function main()
             end
         end
 
-        syntheticallylethalpair = Array{Dict}()
+        syntheticallylethalpairs = Array{Any}[]
 
         for i in [0,2]
             for j in [0,2]
                 for nodeone in keys(nodes)
                     for nodetwo in keys(nodes)
+                        if contains(nodeone, "PSEUDONODE") || contains(nodetwo, "PSEUDONODE")
+                            continue
+                        end
+
                         if (nodeone == nodetwo && i == j) || in(nodeone, Set(essentialgenes)) || in(nodetwo, Set(essentialgenes))
                             continue
                         end
 
-                        if (haskey(quasiessentialnodestates, nodeone) && (quasiessentialnodestates[nodenone] == i))
+                        if (haskey(quasiessentialnodestates, nodeone) && (quasiessentialnodestates[nodeone] == i))
                             continue
                         end
 
-                        if (haskey(quasiessentialnodestates, nodeone) && (quasiessentialnodestates[nodenone] == j))
+                        if (haskey(quasiessentialnodestates, nodetwo) && (quasiessentialnodestates[nodetwo] == j))
                             continue
                         end
 
@@ -126,7 +132,9 @@ function main()
                                                          parsed_args["downregulated-cutoff"],
                                                          parsed_args["upregulated-cutoff"])
                             if state == "Down Regulated"
-                                push(syntheticallylethalpair, Dict(nodeone => i, nodetwo => j))
+                                #pair = Dict{Any,Any}(nodeone => i, nodetwo => j)
+                                push!(syntheticallylethalpairs, [nodeone,i,nodetwo,j,noderesult])
+                                #continue
                             end
                         end
                     end
