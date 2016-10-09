@@ -5,7 +5,7 @@ using JuMP, AmplNLWriter
 #using JuMP
 #using Gurobi
 
-function run(nodes, measurednodestate, LB, UB, downregulatedCutoff, upregulatedCutoff, verbose )
+function run(nodes, measurednodestate, keyoutputs, LB, UB, downregulatedCutoff, upregulatedCutoff, verbose)
     #model = Model(solver=CouenneNLSolver())
     model = Model(solver=BonminNLSolver())
 
@@ -123,10 +123,26 @@ function run(nodes, measurednodestate, LB, UB, downregulatedCutoff, upregulatedC
 
     solve(model)
 
- #   for i in eachindex(nodesList)
- #       value = getvalue(x[i])
- #       println( i, "\t", nodesList[i], "\t\t", value, "\t", valueToState(value, downregulatedCutoff, upregulatedCutoff))
- #   end
+    keyresults = Dict()
+    keyoutputsArray = collect(keyoutputs)
+    if length(keyoutputs) > 0
+        keyoutputIdx = indexin(keyoutputsArray, nodesList)
+        for i in keyoutputIdx
+            if i != 0
+                keyresults[nodesList[i]] = getvalue(x[i])
+            end
+        end
+    else
+        for i in eachindex(nodesList)
+            keyresults[nodesList[i]] = getvalue(x[i])
+        end
+    end
+
+    #for nodeName in collect(keys(keyresults))
+    #    println( nodeName, "\t\t", keyresults[nodeName], "\t", valueToState(keyresults[nodeName], downregulatedCutoff, upregulatedCutoff))
+    #end
+
+    return keyresults
 end
 
 function valueToState(value, downregulatedCutoff, upregulatedCutoff)

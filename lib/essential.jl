@@ -1,5 +1,7 @@
 module Essential
 
+include("observations.jl")
+
 function getNodes()
     ensembleToHugo = Dict{}()
 
@@ -19,7 +21,25 @@ function getNodes()
         end
     end
 
-    return Set(essentialgenesHugo)
+
+
+    genetonode = Observations.geneToNode()
+
+    essentialnodes = ASCIIString[]
+
+    for hugogene in essentialgenesHugo
+        if haskey(genetonode, hugogene)
+            for node in genetonode[hugogene]
+                push!(essentialnodes, node)
+            end
+        end
+    end
+
+    return essentialnodes
+end
+
+function getGenes(nodes)
+    return collect(intersect(Set(nodes), Set(getNodes())))
 end
 
 end

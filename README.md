@@ -63,3 +63,9 @@ http://coxpresdb.jp/download.shtml
 ##Coespression DB API
 
 http://coxpresdb.jp/help/API.shtml
+
+##test 
+
+```bash
+julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways\ where\ negative\ OR\ is\ AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt ~/git/PGM/InputDataForTesting/Mock_Short_Input_Data_for_PIP3_Activates_AKT_Signaling_Text.txt --key-outputs
+```bash

@@ -7,6 +7,7 @@ include("../lib/observations.jl")
 include("../lib/nlmodel.jl")
 include("../lib/keyoutputs.jl")
 include("../lib/essential.jl")
+include("../lib/results.jl")
 
 function parse_commandline()
     s = ArgParseSettings("This program infers the value of nodes in Reactome pathways from observation data.",
@@ -60,44 +61,117 @@ function main()
         end
     end
 
-   # essentialgenes = Essential.getNodes()
-    keyoutputs = Keyoutputs.getNodes()
-
     nodes = Pi.readFile(parsed_args["pairwise-interaction-file"])
 
     measuredIdxs = Array{Integer}()
     if parsed_args["find-si"]
-        println("to do")
+        essentialgenes = Essential.getGenes(collect(keys(nodes)))
+
+        quasiessentialnodestates = Dict()
+
+        for i in [0,2]
+            for node in keys(nodes)
+                if in(node, Set(essentialgenes)) == false || i == 2
+                    sampleresults = NLmodel.run(nodes,
+                                                Dict(node => i),
+                                                essentialgenes,
+                                                parsed_args["lowerbound"],
+                                                parsed_args["upperbound"],
+                                                parsed_args["downregulated-cutoff"],
+                                                parsed_args["upregulated-cutoff"],
+                                                parsed_args["verbose"])
+
+                    for noderesult in values(sampleresults)
+                        state = NLmodel.valueToState(noderesult,
+                                                     parsed_args["downregulated-cutoff"],
+                                                     parsed_args["upregulated-cutoff"])
+                        if state == "Down Regulated"
+                            quasiessentialnodestates[node] = i
+                        end
+                    end
+                end
+            end
+        end
+
+        syntheticallylethalpair = Array{Dict}()
+
+        for i in [0,2]
+            for j in [0,2]
+                for nodeone in keys(nodes)
+                    for nodetwo in keys(nodes)
+                        if (nodeone == nodetwo && i == j) || in(nodeone, Set(essentialgenes)) || in(nodetwo, Set(essentialgenes))
+                            continue
+                        end
+
+                        if (haskey(quasiessentialnodestates, nodeone) && (quasiessentialnodestates[nodenone] == i))
+                            continue
+                        end
+
+                        if (haskey(quasiessentialnodestates, nodeone) && (quasiessentialnodestates[nodenone] == j))
+                            continue
+                        end
+
+                        sampleresults = NLmodel.run(nodes,
+                                                    Dict(nodeone => i,
+                                                         nodetwo => j),
+                                                    essentialgenes,
+                                                    parsed_args["lowerbound"],
+                                                    parsed_args["upperbound"],
+                                                    parsed_args["downregulated-cutoff"],
+                                                    parsed_args["upregulated-cutoff"],
+                                                    parsed_args["verbose"])
+
+                        for noderesult in values(sampleresults)
+                            state = NLmodel.valueToState(noderesult,
+                                                         parsed_args["downregulated-cutoff"],
+                                                         parsed_args["upregulated-cutoff"])
+                            if state == "Down Regulated"
+                                push(syntheticallylethalpair, Dict(nodeone => i, nodetwo => j))
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        println(syntheticallylethalpair)
     else
         if parsed_args["observation-file"] != nothing
             observations = Observations.copynumberIdxs(parsed_args["observation-file"])
+
+            keyoutputs = parsed_args["key-outputs"]? Keyoutputs.getNodes(): Set()
+
+            nodesampleresults = Dict()
             for sample in observations["columns"]
                 if sample == "Gene"
                     continue
                 end
+
                 if parsed_args["verbose"]
                     println("Running $sample")
                 end
+
                 samplenodestate = observations["samplenodestate"]
                 nodestate = samplenodestate[sample]
-                NLmodel.run(nodes,
-                            nodestate,
-                            parsed_args["lowerbound"],
-                            parsed_args["upperbound"],
-                            parsed_args["downregulated-cutoff"],
-                            parsed_args["upregulated-cutoff"],
-                            parsed_args["verbose"])
 
+                sampleresults = NLmodel.run(nodes,
+                                            nodestate,
+                                            keyoutputs,
+                                            parsed_args["lowerbound"],
+                                            parsed_args["upperbound"],
+                                            parsed_args["downregulated-cutoff"],
+                                            parsed_args["upregulated-cutoff"],
+                                            parsed_args["verbose"])
+
+                for nodeName in keys(sampleresults)
+                    if length(keys(nodesampleresults)) == 0 || haskey(nodesampleresults, nodeName) == false
+                        nodesampleresults[nodeName] = Dict()
+                    end
+                    nodesampleresults[nodeName][sample] = sampleresults[nodeName]
+                end
             end
-        else
-            #in future need to make it say a warning that you need to provide an observation file if --find-si not specified
-            measuredIdxs = Observations.testIdxs(parsed_args["pairwise-interaction-file"], nodes)
-            if parsed_args["verbose"]
-                 println("Measured indexes: $measuredIdxs")
-            end
+            Results.createcsv(nodesampleresults, observations["columns"], parsed_args["observation-file"])
         end
     end
-    exit()
 end
 
 main()
