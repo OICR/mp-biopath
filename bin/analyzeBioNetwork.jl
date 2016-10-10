@@ -18,11 +18,11 @@ function parse_commandline()
         "--downregulated-cutoff"
             help = "This determines at which level the node is determined to be down regulated."
             arg_type = Float64
-            default = 0.9
+            default = 0.5
         "--upregulated-cutoff"
             help = "This determines at which level the node is determined to be upregulated."
             arg_type = Float64
-            default = 1.1
+            default = 1.5
         "--upperbound", "-u"
             arg_type = Int
             default = 10
