@@ -96,6 +96,9 @@ function main()
         end
 
         syntheticallylethalpairs = Array{Any}[]
+        pairwisefile = parsed_args["pairwise-interaction-file"]
+        sifilename = join([pairwisefile, "si"], ".")
+        sioutfile = open(sifilename, "w")
 
         for i in [0,2]
             for j in [0,2]
@@ -133,6 +136,7 @@ function main()
                                                          parsed_args["upregulated-cutoff"])
                             if state == "Down Regulated"
                                 #pair = Dict{Any,Any}(nodeone => i, nodetwo => j)
+                                write(sioutfile, "$nodeone\t$i\t$nodetwo\t$j\t$noderesult\n")
                                 push!(syntheticallylethalpairs, [nodeone,i,nodetwo,j,noderesult])
                                 #continue
                             end
