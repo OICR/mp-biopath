@@ -95,11 +95,12 @@ function main()
             end
         end
 
-        syntheticallylethalpairs = Array{Any}[]
         pairwisefile = parsed_args["pairwise-interaction-file"]
         sifilename = join([pairwisefile, "si"], ".")
         sioutfile = open(sifilename, "w")
+        write(sioutfile, "count\tnodeone\tnodeone_value\tnode_two\tnoed_two_value\teffected_node\teffected_node_value\n")
 
+        count = 0
         for i in [0,2]
             for j in [0,2]
                 for nodeone in keys(nodes)
@@ -130,22 +131,21 @@ function main()
                                                     parsed_args["upregulated-cutoff"],
                                                     parsed_args["verbose"])
 
-                        for noderesult in values(sampleresults)
-                            state = NLmodel.valueToState(noderesult,
+                        for resultnode in keys(sampleresults)
+                            value = sampleresults[resultnode]
+                            state = NLmodel.valueToState(value,
                                                          parsed_args["downregulated-cutoff"],
                                                          parsed_args["upregulated-cutoff"])
                             if state == "Down Regulated"
                                 #pair = Dict{Any,Any}(nodeone => i, nodetwo => j)
-                                write(sioutfile, "$nodeone\t$i\t$nodetwo\t$j\t$noderesult\n")
-                                push!(syntheticallylethalpairs, [nodeone,i,nodetwo,j,noderesult])
-                                #continue
+                                count = count ++
+                                write(sioutfile, "$count\t$nodeone\t$i\t$nodetwo\t$j\t$resultnode\t$value\n")
                             end
                         end
                     end
                 end
             end
         end
-        println(syntheticallylethalpair)
     else
         if parsed_args["observation-file"] != nothing
             observations = Observations.copynumberIdxs(parsed_args["observation-file"])
