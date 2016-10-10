@@ -99,6 +99,7 @@ function main()
         sifilename = join([pairwisefile, "si"], ".")
         sioutfile = open(sifilename, "w")
         write(sioutfile, "count\tnodeone\tnodeone_value\tnode_two\tnoed_two_value\teffected_node\teffected_node_value\n")
+        flush(sioutfile)
 
         count = 0
         for i in [0,2]
@@ -137,15 +138,16 @@ function main()
                                                          parsed_args["downregulated-cutoff"],
                                                          parsed_args["upregulated-cutoff"])
                             if state == "Down Regulated"
-                                #pair = Dict{Any,Any}(nodeone => i, nodetwo => j)
                                 count = count + 1
                                 write(sioutfile, "$count\t$nodeone\t$i\t$nodetwo\t$j\t$resultnode\t$value\n")
+                                flush(sioutfile)
                             end
                         end
                     end
                 end
             end
         end
+        close(sioutfile)
     else
         if parsed_args["observation-file"] != nothing
             observations = Observations.copynumberIdxs(parsed_args["observation-file"])
