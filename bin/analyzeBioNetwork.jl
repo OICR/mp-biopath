@@ -138,7 +138,7 @@ function main()
                                                          parsed_args["upregulated-cutoff"])
                             if state == "Down Regulated"
                                 #pair = Dict{Any,Any}(nodeone => i, nodetwo => j)
-                                count = count ++
+                                count = count + 1
                                 write(sioutfile, "$count\t$nodeone\t$i\t$nodetwo\t$j\t$resultnode\t$value\n")
                             end
                         end
