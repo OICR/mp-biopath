@@ -1,15 +1,15 @@
 module NLmodel
 
-using JuMP, AmplNLWriter
+using JuMP
+using AmplNLWriter
 
-#using JuMP
 #using Gurobi
 
 function run(nodes, measurednodestate, keyoutputs, LB, UB, downregulatedCutoff, upregulatedCutoff, verbose)
     #model = Model(solver=CouenneNLSolver())
-    model = Model(solver=BonminNLSolver(["bonmin.nlp_log_level=0"; "bonmin.bb_log_level=0"]))
+    #model = Model(solver=BonminNLSolver(["bonmin.nlp_log_level=0"; "bonmin.bb_log_level=0"]))
 
-    #model = Model(solver=GurobiSolver())
+    model = Model(solver=GurobiSolver())
 
     weightRoot = 5
     weightMeasured = 10000
