@@ -74,6 +74,7 @@ function main()
                 if contains(node, "PSEUDONODE")
                     continue
                 end
+                continue
                 if in(node, Set(essentialgenes)) == false || i == 2
                     sampleresults = NLmodel.run(nodes,
                                                 Dict(node => i),
@@ -103,11 +104,16 @@ function main()
         flush(sioutfile)
 
         count = 0
+        candidates = 0
         for i in [0,2]
             for j in [0,2]
+                if i == 2 && j == 0 #skip them because they would be done when the opposite combination is true
+                    continue
+                end
+
                 for nodeone in keys(nodes)
                     for nodetwo in keys(nodes)
-                        if in(nodeone, allGenesSet) == false || in(nodetwo, allGenesSet) == false
+                        if in(nodeone, allGenesSet) == false in(nodetwo, allGenesSet) == false
                             continue
                         end
 
@@ -122,6 +128,7 @@ function main()
                         if (haskey(quasiessentialnodestates, nodetwo) && (quasiessentialnodestates[nodetwo] == j))
                             continue
                         end
+                        candidates = candidates + 1
 
                         sampleresults = NLmodel.run(nodes,
                                                     Dict(nodeone => i,
@@ -148,6 +155,7 @@ function main()
                 end
             end
         end
+        println("number of candidate SL $candidates\n")
         close(sioutfile)
     else
         if parsed_args["observation-file"] != nothing

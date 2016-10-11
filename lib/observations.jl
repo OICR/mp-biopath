@@ -35,7 +35,7 @@ function allGeneReferenceProduct()
     for line in readlines("data/db_id_to_name_mapping.txt")
         lineparts = split(chomp(line), "\t")
         node = ASCIIString(lineparts[1])
-        if lineparts[3] == "ReferenceGeneProduct"
+        if contains(lineparts[3], "Reference") == true
             push!(genes, node)
         end
     end
