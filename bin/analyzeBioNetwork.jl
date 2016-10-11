@@ -107,11 +107,11 @@ function main()
             for j in [0,2]
                 for nodeone in keys(nodes)
                     for nodetwo in keys(nodes)
-                        if in(nodeone, allGenesSet) && in(nodetwo, allGenesSet)
+                        if in(nodeone, allGenesSet) == false || in(nodetwo, allGenesSet) == false
                             continue
                         end
 
-                        if (nodeone == nodetwo && i == j) || in(nodeone, Set(essentialgenes)) || in(nodetwo, Set(essentialgenes))
+                        if (nodeone == nodetwo) || in(nodeone, Set(essentialgenes)) || in(nodetwo, Set(essentialgenes))
                             continue
                         end
 
