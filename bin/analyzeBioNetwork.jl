@@ -151,7 +151,6 @@ function main()
     else
         if parsed_args["observation-file"] != nothing
             observations = Observations.copynumberIdxs(parsed_args["observation-file"])
-
             keyoutputs = parsed_args["key-outputs"]? Keyoutputs.getNodes(): Set()
 
             nodesampleresults = Dict()
@@ -183,7 +182,9 @@ function main()
                     nodesampleresults[nodeName][sample] = sampleresults[nodeName]
                 end
             end
-            Results.createcsv(nodesampleresults, observations["columns"], parsed_args["observation-file"])
+            Results.createcsv(nodesampleresults,
+                              observations["columns"],
+                              parsed_args["observation-file"])
         end
     end
 end

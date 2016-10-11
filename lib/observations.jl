@@ -30,26 +30,28 @@ function testIdxs(fname, nodes)
     return measuredIdxs
 end
 
-function geneToNode()
-    genetonode = Dict()
-
+function geneToNodes()
+    genetonodes = Dict()
     for line in readlines("data/db_id_to_name_mapping.txt")
         lineparts = split(chomp(line), "\t")
+        node = ASCIIString(lineparts[1])
+        gene = ASCIIString(lineparts[2])
         if match(r"Reference", lineparts[3]) != nothing
-            if in(genetonode, lineparts[2])
-                push(genetonode[lineparts[2]], lineparts[1])
+            if haskey(genetonodes, gene)
+                nodes = genetonodes[gene]
+                push!(nodes, node)
             else
-                genetonode[lineparts[2]] = [lineparts[1]]
+                genetonodes[gene] = [node]
             end
         end
     end
 
-    return genetonode
+    return genetonodes
 end
 
 function copynumberIdxs(fname)
 
-    genetonode = geneToNode()
+    genetonodes = geneToNodes()
 
     data = readlines(fname)
 
@@ -75,15 +77,15 @@ function copynumberIdxs(fname)
             if i == 1
                 gene = lineparts[1]
             else
-                for node in genetonode[gene]
-                    samplenodestate[column][node] = parse(Float64,lineparts[i])
+                if haskey(genetonodes, gene)
+                    for node in Array(genetonodes[gene])
+                        #divide by two because it is copy number data
+                       samplenodestate[column][node] = parse(Float64,lineparts[i])/ 2
+                    end
                 end
             end
         end
-
     end
-
-
 
     return Dict("columns" => headerparts, "samplenodestate" => samplenodestate)
 end

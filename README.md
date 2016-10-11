@@ -69,3 +69,8 @@ http://coxpresdb.jp/help/API.shtml
 ```bash
 julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways\ where\ negative\ OR\ is\ AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt ~/git/PGM/InputDataForTesting/Mock_Short_Input_Data_for_PIP3_Activates_AKT_Signaling_Text.txt --key-outputs
 ```bash
+
+##Find SI
+```bash
+julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways\ where\ negative\ OR\ is\ AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt --find-si --key-outputs
+```
