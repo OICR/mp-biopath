@@ -30,6 +30,19 @@ function testIdxs(fname, nodes)
     return measuredIdxs
 end
 
+function allGeneReferenceProduct()
+    genes = []
+    for line in readlines("data/db_id_to_name_mapping.txt")
+        lineparts = split(chomp(line), "\t")
+        node = ASCIIString(lineparts[1])
+        if lineparts[3] == "ReferenceGeneProduct"
+            push!(genes, node)
+        end
+    end
+
+    return genes
+end
+
 function geneToNodes()
     genetonodes = Dict()
     for line in readlines("data/db_id_to_name_mapping.txt")

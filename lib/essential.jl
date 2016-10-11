@@ -21,9 +21,7 @@ function getNodes()
         end
     end
 
-
-
-    genetonode = Observations.geneToNode()
+    genetonode = Observations.geneToNodes()
 
     essentialnodes = ASCIIString[]
 

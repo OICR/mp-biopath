@@ -65,9 +65,10 @@ function main()
 
     if parsed_args["find-si"]
         essentialgenes = Essential.getGenes(collect(keys(nodes)))
+        allGenes = Observations.allGeneReferenceProduct()
+        allGenesSet = Set(allGenes)
 
         quasiessentialnodestates = Dict()
-
         for i in [0,2]
             for node in keys(nodes)
                 if contains(node, "PSEUDONODE")
@@ -106,7 +107,7 @@ function main()
             for j in [0,2]
                 for nodeone in keys(nodes)
                     for nodetwo in keys(nodes)
-                        if contains(nodeone, "PSEUDONODE") || contains(nodetwo, "PSEUDONODE")
+                        if in(nodeone, allGenesSet) && in(nodetwo, allGenesSet)
                             continue
                         end
 
