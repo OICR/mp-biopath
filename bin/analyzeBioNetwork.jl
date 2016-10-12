@@ -259,7 +259,7 @@ function main()
             push!(headercolumns, column)
         end
         header = join(headercolumns, "\t")
-        write(sloutfile, string(header, "\n")
+        write(sloutfile, string(header, "\n"))
 
         count = 0
         for sl in slessential
