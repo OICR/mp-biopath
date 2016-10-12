@@ -1,4 +1,4 @@
-GeneASymbol	GeneAid	GeneBSymbol	GeneBid	PubmedID Evidence Type Species Disease Score
+GeneASymbol	GeneAid	GeneBSymbol	GeneBid	PubmedID	Evidence	Type	Species	DiseaseScore
 BTG2	7832	SESN1	27244	25171417	Daisy	SL	NA	0.14
 EGR1	1958	FOSB	2354	25171417	Daisy	SL	NA	0.14
 MYOF	26509	PINK1	65018	25171417	Daisy	SL	NA	0.14
