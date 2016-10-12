@@ -215,7 +215,7 @@ function main()
                         if sl["GeneANode"] == node
                             sl["GeneANodeValue"] = essentialvalue
                         elseif sl["GeneBNode"] == node
-                            sl["GeneBNode"] = essentialvalue
+                            sl["GeneBNodeValue"] = essentialvalue
                         end
                     end
                 end
@@ -259,13 +259,15 @@ function main()
             push!(headercolumns, column)
         end
         header = join(headercolumns, "\t")
-        write(sloutfile, header)
+        write(sloutfile, string(header, "\n")
+
         count = 0
         for sl in slessential
             count = count + 1
+            columnvalues = ASCIIString[]
             for column in headercolumns
                 if column == "Count"
-                    push!(columnvalues, count)
+                    push!(columnvalues, string(count))
                 else
                     push!(columnvalues, string(sl[column]))
                 end
