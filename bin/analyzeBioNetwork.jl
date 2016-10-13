@@ -175,7 +175,7 @@ function main()
         for sl in slnodes
             for nodea in sl["GeneANodes"]
                 for nodeb in sl["GeneBNodes"]
-                    if in(nodea, pinodesSet) && in(nodeb, pinodesSet)
+                    if in(nodea, pinodesSet) && in(nodeb, pinodesSet) && pinodes[nodea].relation == "ROOT" && pinodes[nodeb].relation == "ROOT"
                         if in(nodeb, slpinodes) == false
                             push!(slpinodes, nodeb)
                         end
@@ -278,7 +278,7 @@ function main()
         close(sloutfile)
     else
         if parsed_args["observation-file"] != nothing
-            observations = Observations.copynumberIdxs(parsed_args["observation-file"])
+            observations = Observations.copynumberIdxs(parsed_args["observation-file"], pinodes)
             keyoutputs = parsed_args["key-outputs"]? Keyoutputs.getNodes(): Set()
 
             nodesampleresults = Dict()
@@ -294,7 +294,7 @@ function main()
                 samplenodestate = observations["samplenodestate"]
                 nodestate = samplenodestate[sample]
 
-                sampleresults = NLmodel.run(nodes,
+                sampleresults = NLmodel.run(pinodes,
                                             nodestate,
                                             keyoutputs,
                                             parsed_args["lowerbound"],

@@ -46,7 +46,7 @@ Used biomart central to download a list of HUGO gene symbols to match the ensemb
 #Got list of unique genes with following command
 
 ```bash
-cut -f 3 essential_9606_all.txt | sort | uniq > essential_9606_all_gene_ids.txt
+grep -v "TextMining" essential_9606_all.txt | awk -F"\t" '$4 == "E" { print $3 }' | sort | uniq > essential_9606_all_gene_ids.txt
 ```
 ##Synthetically lethal 
 

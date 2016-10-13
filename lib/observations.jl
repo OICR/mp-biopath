@@ -62,9 +62,28 @@ function geneToNodes()
     return genetonodes
 end
 
-function copynumberIdxs(fname)
+function geneToRootNodes(pinodes)
+    genetonodes = Dict()
+    for line in readlines("data/db_id_to_name_mapping.txt")
+        lineparts = split(chomp(line), "\t")
+        node = ASCIIString(lineparts[1])
+        gene = ASCIIString(lineparts[2])
+        if match(r"Reference", lineparts[3]) != nothing && haskey(pinodes, node) && pinodes[node].relation == "ROOT"
+            if haskey(genetonodes, gene)
+                nodes = genetonodes[gene]
+                push!(nodes, node)
+            else
+                genetonodes[gene] = [node]
+            end
+        end
+    end
 
-    genetonodes = geneToNodes()
+    return genetonodes
+end
+
+function copynumberIdxs(fname, pinodes)
+
+    genetonodes = geneToRootNodes(pinodes)
 
     data = readlines(fname)
 
