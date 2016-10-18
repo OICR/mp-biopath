@@ -62,6 +62,20 @@ function geneToNodes()
     return genetonodes
 end
 
+
+function nodeToGene()
+   genetonodes = geneToNodes()
+
+   nodetogene = Dict()
+   for (gene, nodes) in genetonodes
+       for node in nodes
+           nodetogene[node] = gene
+       end
+   end
+
+   return nodetogene
+end
+
 function geneToRootNodes(pinodes)
     genetonodes = Dict()
     for line in readlines("data/db_id_to_name_mapping.txt")

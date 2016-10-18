@@ -76,7 +76,7 @@ function main()
         quasiessentialnodestates = Dict()
         for i in [0,2]
             for node in keys(pinodes)
-                if contains(pinode, "PSEUDONODE")
+                if contains(node, "PSEUDONODE")
                     continue
                 end
 
@@ -168,6 +168,7 @@ function main()
         pinodesSet = Set(keys(pinodes))
 
         essentialgenes = Essential.getGenes(collect(keys(pinodes)))
+        nodetogene     = Observations.nodeToGene()
 
         slessential = Dict{ASCIIString,Any}[]
         slpinodes = ASCIIString[]
@@ -184,6 +185,10 @@ function main()
                         end
                         push!(slpinodesPairs, [nodea, nodeb])
                         for essentialgene in essentialgenes
+                            if nodetogene[essentialgene] == nodetogene[nodea] || nodetogene[essentialgene] == nodetogene[nodeb]
+                                continue
+                            end
+
                             slcopy = copy(sl)
                             delete!(slcopy, "GeneANodes")
                             delete!(slcopy, "GeneBNodes")
