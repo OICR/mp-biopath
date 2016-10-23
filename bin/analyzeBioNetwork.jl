@@ -20,11 +20,11 @@ function parse_commandline()
         "--downregulated-cutoff"
             help = "This determines at which level the node is determined to be down regulated."
             arg_type = Float64
-            default = 0.5
+            default = 0.9
         "--upregulated-cutoff"
             help = "This determines at which level the node is determined to be upregulated."
             arg_type = Float64
-            default = 1.5
+            default = 1.1
         "--upperbound", "-u"
             arg_type = Int
             default = 10
@@ -73,13 +73,16 @@ function main()
         allGenes = Observations.allGeneReferenceProduct()
         allGenesSet = Set(allGenes)
 
-        quasiessentialnodestates = Dict()
-        for i in [0,2]
-            for node in keys(pinodes)
-                if contains(node, "PSEUDONODE")
-                    continue
-                end
+        downregulatednodestates = []
+        for node in keys(pinodes)
+            if in(node, allGenesSet) == false
+                continue
+            end
+            if contains(node, "PSEUDONODE") || in(node, Set(essentialgenes))
+                continue
+            end
 
+            for i in [0,2]
                 if in(node, Set(essentialgenes)) == false || i == 2
                     sampleresults = NLmodel.run(pinodes,
                                                 Dict(node => i),
@@ -90,13 +93,23 @@ function main()
                                                 parsed_args["upregulated-cutoff"],
                                                 parsed_args["verbose"])
 
-                    for noderesult in values(sampleresults)
-                        state = NLmodel.valueToState(noderesult,
+                    essentialnodes = []
+                    for resultnode in keys(sampleresults)
+                        value = sampleresults[resultnode]
+                        state = NLmodel.valueToState(value,
                                                      parsed_args["downregulated-cutoff"],
                                                      parsed_args["upregulated-cutoff"])
+
                         if state == "Down Regulated"
-                            quasiessentialnodestates[node] = i
+                            push!(essentialnodes, Dict("value" => value,
+                                                       "name" => resultnode ))
                         end
+                    end
+                    if length(essentialnodes) != 0
+                        nodestate = Dict("name" => node,
+                                         "state" => i,
+                                         "essentialNodes" => essentialnodes)
+                        push!(downregulatednodestates, nodestate)
                     end
                 end
             end
@@ -110,51 +123,59 @@ function main()
 
         count = 0
         candidates = 0
-        for i in [0,2]
-            for j in [0,2]
-                if i == 2 && j == 0 #skip them because they would be done when the opposite combination is true
+        index = 0
+        indextwo = 0
+        for nodeone in downregulatednodestates
+            index = index + 1
+            for nodetwo in downregulatednodestates
+                indextwo = indextwo + 1
+                if indextwo <= index
                     continue
                 end
+                candidates = candidates + 1
 
-                for nodeone in keys(pinodes)
-                    for nodetwo in keys(pinodes)
-                        if in(nodeone, allGenesSet) == false in(nodetwo, allGenesSet) == false
-                            continue
-                        end
+                sampleresults = NLmodel.run(pinodes,
+                                            Dict(nodeone["name"] => nodeone["state"],
+                                                 nodetwo["name"] => nodetwo["state"]),
+                                                 essentialgenes,
+                                                 parsed_args["lowerbound"],
+                                                 parsed_args["upperbound"],
+                                                 parsed_args["downregulated-cutoff"],
+                                                 parsed_args["upregulated-cutoff"],
+                                                 parsed_args["verbose"])
 
-                        if (nodeone == nodetwo) || in(nodeone, Set(essentialgenes)) || in(nodetwo, Set(essentialgenes))
-                            continue
-                        end
+                for resultnode in keys(sampleresults)
+                   value = sampleresults[resultnode]
+                   state = NLmodel.valueToState(value,
+                                                parsed_args["downregulated-cutoff"],
+                                                parsed_args["upregulated-cutoff"])
 
-                        if (haskey(quasiessentialnodestates, nodeone) && (quasiessentialnodestates[nodeone] == i))
-                            continue
-                        end
-
-                        if (haskey(quasiessentialnodestates, nodetwo) && (quasiessentialnodestates[nodetwo] == j))
-                            continue
-                        end
-                        candidates = candidates + 1
-
-                        sampleresults = NLmodel.run(pinodes,
-                                                    Dict(nodeone => i,
-                                                         nodetwo => j),
-                                                    essentialgenes,
-                                                    parsed_args["lowerbound"],
-                                                    parsed_args["upperbound"],
-                                                    parsed_args["downregulated-cutoff"],
-                                                    parsed_args["upregulated-cutoff"],
-                                                    parsed_args["verbose"])
-
-                        for resultnode in keys(sampleresults)
-                            value = sampleresults[resultnode]
-                            state = NLmodel.valueToState(value,
-                                                         parsed_args["downregulated-cutoff"],
-                                                         parsed_args["upregulated-cutoff"])
-                            if state == "Down Regulated"
-                                count = count + 1
-                                write(sloutfile, "$count\t$nodeone\t$i\t$nodetwo\t$j\t$resultnode\t$value\n")
-                                flush(sloutfile)
+                   if state == "Down Regulated"
+                       for essentialnodeone in nodeone["essentialNodes"]
+                            if essentialnodeone["name"] != resultnode
+                                continue
                             end
+                            for essentialnodetwo in nodetwo["essentialNodes"]
+                                if essentialnodetwo["name"] != resultnode
+                                    continue
+                                end
+
+                                count = count + 1
+                                write(sloutfile, "$count\t")
+                                write(sloutfile, nodeone["name"])
+                                write(sloutfile, "\t")
+                                write(sloutfile, essentialnodeone["value"])
+                                write(sloutfile, "\t")
+                                write(sloutfile, nodetwo["name"])
+                                write(sloutfile, "\t")
+                                write(sloutfile, essentialnodetwo["value"])
+                                write(sloutfile, "\t")
+                                write(sloutfile, "$resultnode\t$value\n")
+                                flush(sloutfile)
+
+                                break
+                            end
+                            break
                         end
                     end
                 end

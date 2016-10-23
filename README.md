@@ -74,3 +74,8 @@ julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways\ where\ negative\ OR\ is\ AND/
 ```bash
 julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways\ where\ negative\ OR\ is\ AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt --find-si --key-outputs
 ```
+
+##Get unique SI Pairs
+```bash
+cut -f2,4 PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt.si | sort | uniq  > PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt.si.uniq
+```
