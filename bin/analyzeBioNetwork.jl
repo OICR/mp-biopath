@@ -78,6 +78,10 @@ function main()
             if in(node, allGenesSet) == false
                 continue
             end
+
+            if pinodes[node].relation != "ROOT"
+                continue
+            end
             if contains(node, "PSEUDONODE") || in(node, Set(essentialgenes))
                 continue
             end
@@ -110,6 +114,7 @@ function main()
                                          "state" => i,
                                          "essentialNodes" => essentialnodes)
                         push!(downregulatednodestates, nodestate)
+                        count = count + 1
                     end
                 end
             end
@@ -118,10 +123,10 @@ function main()
         pairwisefile = parsed_args["pairwise-interaction-file"]
         sifilename = join([pairwisefile, "si"], ".")
         sloutfile = open(sifilename, "w")
-        write(sloutfile, "count\tnodeone\tnodeone_value\tnodetwo\tnodetwo_value\teffected_node\teffected_node_value\n")
+        write(sloutfile, "count\tnode_one\tnode_one_value\tnode_two\tnode_two_value\teffected_node\teffected_node_value\n")
         flush(sloutfile)
 
-        count = 0
+        count = 1
         candidates = 0
         index = 0
         indextwo = 0
@@ -145,38 +150,50 @@ function main()
                                                  parsed_args["verbose"])
 
                 for resultnode in keys(sampleresults)
+                   found = false
                    value = sampleresults[resultnode]
                    state = NLmodel.valueToState(value,
                                                 parsed_args["downregulated-cutoff"],
                                                 parsed_args["upregulated-cutoff"])
 
                    if state == "Down Regulated"
-                       for essentialnodeone in nodeone["essentialNodes"]
+                       essentialnodesone = nodeone["essentialNodes"]
+                       for essentialnodeone in essentialnodesone
                             if essentialnodeone["name"] != resultnode
                                 continue
                             end
-                            for essentialnodetwo in nodetwo["essentialNodes"]
+                            essentialnodestwo = nodetwo["essentialNodes"]
+                            for essentialnodetwo in essentialnodestwo
                                 if essentialnodetwo["name"] != resultnode
                                     continue
                                 end
 
-                                count = count + 1
-                                write(sloutfile, "$count\t")
-                                write(sloutfile, nodeone["name"])
-                                write(sloutfile, "\t")
-                                write(sloutfile, essentialnodeone["value"])
-                                write(sloutfile, "\t")
-                                write(sloutfile, nodetwo["name"])
-                                write(sloutfile, "\t")
-                                write(sloutfile, essentialnodetwo["value"])
-                                write(sloutfile, "\t")
-                                write(sloutfile, "$resultnode\t$value\n")
-                                flush(sloutfile)
+                                nameone = essentialnodeone["name"]
+                                valueone = essentialnodeone["value"]
+                                nametwo = essentialnodetwo["name"]
+                                valuetwo = essentialnodetwo["value"]
 
-                                break
+                                if (value < valueone) && (value < valuetwo)
+                                    found = true
+                                    write(sloutfile, "$count\t")
+                                    write(sloutfile, nameone)
+                                    write(sloutfile, "\t")
+                                    write(sloutfile, string(valueone))
+                                    write(sloutfile, "\t")
+                                    write(sloutfile, nametwo)
+                                    write(sloutfile, "\t")
+                                    write(sloutfile, string(valuetwo))
+                                    write(sloutfile, "\t")
+                                    write(sloutfile, "$resultnode\t$value\n")
+                                    flush(sloutfile)
+                                end
                             end
-                            break
+
                         end
+                    end
+                    if found
+                        count = count + 1
+                        break
                     end
                 end
             end
