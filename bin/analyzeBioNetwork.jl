@@ -132,6 +132,7 @@ function main()
         for nodeone in downregulatednodestates
             index = index + 1
             for nodetwo in downregulatednodestates
+                found = false
                 indextwo = indextwo + 1
                 if indextwo <= index
                     continue
@@ -149,7 +150,6 @@ function main()
                                                  parsed_args["verbose"])
 
                 for resultnode in keys(sampleresults)
-                   found = false
                    value = sampleresults[resultnode]
                    state = NLmodel.valueToState(value,
                                                 parsed_args["downregulated-cutoff"],
@@ -173,26 +173,24 @@ function main()
                                 valuetwo = essentialnodetwo["value"]
 
                                 if (value < valueone) && (value < valuetwo)
-                                    found = true
                                     write(sloutfile, "$count\t")
-                                    write(sloutfile, nameone)
+                                    write(sloutfile, nodeone["name"])
                                     write(sloutfile, "\t")
                                     write(sloutfile, string(valueone))
                                     write(sloutfile, "\t")
-                                    write(sloutfile, nametwo)
+                                    write(sloutfile, nodetwo["name"])
                                     write(sloutfile, "\t")
                                     write(sloutfile, string(valuetwo))
                                     write(sloutfile, "\t")
                                     write(sloutfile, "$resultnode\t$value\n")
                                     flush(sloutfile)
+
                                 end
+                                count = count + 1
+                                break
                             end
 
                         end
-                    end
-                    if found
-                        count = count + 1
-                        break
                     end
                 end
             end
