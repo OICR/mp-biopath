@@ -114,7 +114,6 @@ function main()
                                          "state" => i,
                                          "essentialNodes" => essentialnodes)
                         push!(downregulatednodestates, nodestate)
-                        count = count + 1
                     end
                 end
             end
