@@ -1,11 +1,12 @@
 module SL
 
+include("dbidnamemapping.jl")
 include("observations.jl")
 
 function getNodes()
-    genetonodes = Observations.geneToNodes()
+    genetonodes = DbIdNameMapping.geneToNodes()
 
-    genenodes = genes()
+    genenodes = getGenes()
     for gene in genenodes
         geneasymbolnodes = haskey(genetonodes, gene["GeneASymbol"])? genetonodes[gene["GeneASymbol"]]: []
         genebsymbolnodes = haskey(genetonodes, gene["GeneBSymbol"])? genetonodes[gene["GeneBSymbol"]]: []
@@ -16,7 +17,7 @@ function getNodes()
     return genenodes
 end
 
-function genes()
+function getGenes()
     genes = []
     header = true
     columns = Array{Dict{ASCIIString,Any}}[]

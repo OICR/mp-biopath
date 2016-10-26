@@ -140,14 +140,4 @@ function run(nodes, measurednodestate, keyoutputs, LB, UB, downregulatedCutoff, 
     return keyresults
 end
 
-function valueToState(value, downregulatedCutoff, upregulatedCutoff)
-    if upregulatedCutoff < value
-        return "Up Regulated"
-    elseif downregulatedCutoff > value
-        return "Down Regulated"
-    else
-        return "Normal"
-    end
-end
-
 end

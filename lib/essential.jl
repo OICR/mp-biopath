@@ -1,22 +1,10 @@
 module Essential
 
-include("observations.jl")
-
-function ensembleToHugo()
-    ensembletohugo = Dict{}()
-
-    for line in readlines("./data/mart_export2.txt")
-        linefields = split(chomp(line), '\t')
-        if linefields[2] != ""
-            ensembletohugo[linefields[1]] = linefields[2]
-        end
-    end
-
-    return ensembletohugo
-end
+include("ensemblegenemap.jl")
+include("dbidnamemapping.jl")
 
 function essentialGenesHugo()
-    ensembletohugo = ensembleToHugo()
+    ensembletohugo = ensembleGeneMap.ensembleToHugo()
     essentialgenesHugo = ASCIIString[]
 
     for line in readlines("./data/essential_9606_all_gene_status.txt")
@@ -34,7 +22,7 @@ end
 
 function getNodes()
     essentialgenesHugo = essentialGenesHugo()
-    genetonode = Observations.geneToNodes()
+    genetonode = DbIdNameMapping.geneToNodes()
 
     essentialnodes = ASCIIString[]
 
