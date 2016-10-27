@@ -1,5 +1,7 @@
 module AnalyzeObs
 
+using ExcelReaders
+
 include("observations.jl")
 include("nlmodel.jl")
 include("results.jl")
@@ -40,6 +42,18 @@ function run(pinodes, observationfile, keyoutputsfile, lowerbound, upperbound, d
     Results.createcsv(nodesampleresults,
                       observations["columns"],
                       observationfile)
+end
+
+
+function inspect(observationfile, expectedfile, downregulatedcutoff, upregulatedcutoff, verbose)
+
+    expected = Results.getExpected(expectedfile)
+
+    results = Results.getResults(observationfile, downregulatedcutoff, upregulatedcutoff)
+
+
+    println(results)
+
 end
 
 end

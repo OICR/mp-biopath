@@ -47,7 +47,10 @@ function parse_commandline()
         "observation-file"
             help = "This is the full path to the observation file."
             required = false
-    end
+        "expected-file"
+            help = "this is the corresponding expected state file to the observation file. Used when analyzing results"
+            required = false
+   end
 
     return parse_args(s)
 end
@@ -81,14 +84,22 @@ function main()
                                parsed_args["pairwise-interaction-file"],
                                parsed_args["verbose"])
     else
-        AnalyzeObs.run(pinodes,
-                       parsed_args["observation-file"],
-                       parsed_args["key-outputs"],
-                       parsed_args["lowerbound"],
-                       parsed_args["upperbound"],
-                       parsed_args["downregulated-cutoff"],
-                       parsed_args["upregulated-cutoff"],
-                       parsed_args["verbose"])
+        if parsed_args["expected-file"] != ""
+            AnalyzeObs.inspect(parsed_args["observation-file"],
+                               parsed_args["expected-file"],
+                               parsed_args["downregulated-cutoff"],
+                               parsed_args["upregulated-cutoff"],
+                               parsed_args["verbose"])
+        else
+            AnalyzeObs.run(pinodes,
+                           parsed_args["observation-file"],
+                           parsed_args["key-outputs"],
+                           parsed_args["lowerbound"],
+                           parsed_args["upperbound"],
+                           parsed_args["downregulated-cutoff"],
+                           parsed_args["upregulated-cutoff"],
+                           parsed_args["verbose"])
+        end
     end
 end
 
