@@ -34,7 +34,7 @@ end
 
 function copynumberIdxs(fname, pinodes)
 
-    genetonodes = dBiDNameMapping.geneToRootNodes(pinodes)
+    genetonodes = DbIdNameMapping.geneToRootNodes(pinodes)
 
     data = readlines(fname)
 

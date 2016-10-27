@@ -1,4 +1,4 @@
-module analyzeKnownSI
+module AnalyzeKnownSiList
 
 include("../lib/pi.jl")
 include("../lib/observations.jl")
@@ -7,13 +7,14 @@ include("../lib/keyoutputs.jl")
 include("../lib/essential.jl")
 include("../lib/results.jl")
 include("../lib/sl.jl")
+include("../lib/dbidnamemapping.jl")
 
-function run(pinodes)
+function run(pinodes, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, pairwisefile, verbose)
     slnodes = SL.getNodes()
     pinodesSet = Set(keys(pinodes))
 
     essentialgenes = Essential.getGenes(collect(keys(pinodes)))
-    nodetogene     = Observations.nodeToGene()
+    nodetogene     = DbIdNameMapping.nodeToGene()
 
     slessential = Dict{ASCIIString,Any}[]
     slpinodes = ASCIIString[]
@@ -47,17 +48,17 @@ function run(pinodes)
             end
         end
     end
-    allGenes = Observations.allGeneReferenceProduct()
+    allGenes = DbIdNameMapping.allGeneReferenceProduct()
     allGenesSet = Set(allGenes)
     for node in slpinodes
         sampleresults = NLmodel.run(pinodes,
                                     Dict(node => 0),
                                     essentialgenes,
-                                    parsed_args["lowerbound"],
-                                    parsed_args["upperbound"],
-                                    parsed_args["downregulated-cutoff"],
-                                    parsed_args["upregulated-cutoff"],
-                                    parsed_args["verbose"])
+                                    lowerbound,
+                                    upperbound,
+                                    downregulatedcutoff,
+                                    upregulatedcutoff,
+                                    verbose)
 
         for (essentialnode, essentialvalue) in sampleresults
             for sl in slessential
@@ -72,7 +73,6 @@ function run(pinodes)
         end
     end
 
-    pairwisefile = parsed_args["pairwise-interaction-file"]
     slfilename = join([pairwisefile, "si.analysis"], ".")
     sloutfile = open(slfilename, "w")
     headercolumns = ["Count"]
@@ -88,11 +88,11 @@ function run(pinodes)
                                     Dict(slnodespair[1] => 0,
                                          slnodespair[2] => 0),
                                     essentialgenes,
-                                    parsed_args["lowerbound"],
-                                    parsed_args["upperbound"],
-                                    parsed_args["downregulated-cutoff"],
-                                    parsed_args["upregulated-cutoff"],
-                                    parsed_args["verbose"])
+                                    lowerbound,
+                                    upperbound,
+                                    downregulatedcutoff,
+                                    upregulatedcutoff,
+                                    verbose)
 
          for (essentialnode, essentialvalue) in sampleresults
              for sl in slessential

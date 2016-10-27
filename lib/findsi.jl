@@ -1,10 +1,13 @@
-module findSI
+module FindSI
 
 include("valuetostate.jl")
+include("dbidnamemapping.jl")
+include("essential.jl")
+include("nlmodel.jl")
 
-function run(pinodes)
+function run(pinodes, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, pairwisefile, verbose)
     essentialgenes = Essential.getGenes(collect(keys(pinodes)))
-    allGenes = Observations.allGeneReferenceProduct()
+    allGenes = DbIdNameMapping.allGeneReferenceProduct()
     allGenesSet = Set(allGenes)
 
     downregulatednodestates = []
@@ -25,18 +28,18 @@ function run(pinodes)
                 sampleresults = NLmodel.run(pinodes,
                                             Dict(node => i),
                                             essentialgenes,
-                                            parsed_args["lowerbound"],
-                                            parsed_args["upperbound"],
-                                            parsed_args["downregulated-cutoff"],
-                                            parsed_args["upregulated-cutoff"],
-                                            parsed_args["verbose"])
+                                            lowerbound,
+                                            upperbound,
+                                            downregulatedcutoff,
+                                            upregulatedcutoff,
+                                            verbose)
 
                 essentialnodes = []
                 for resultnode in keys(sampleresults)
                     value = sampleresults[resultnode]
-                    state = valueToState.get(value,
-                                             parsed_args["downregulated-cutoff"],
-                                             parsed_args["upregulated-cutoff"])
+                    state = ValueToState.getState(value,
+                                                  downregulatedcutoff,
+                                                  upregulatedcutoff)
 
                     if state == "Down Regulated"
                         push!(essentialnodes, Dict("value" => value,
@@ -53,7 +56,6 @@ function run(pinodes)
         end
     end
 
-    pairwisefile = parsed_args["pairwise-interaction-file"]
     sifilename = join([pairwisefile, "si"], ".")
     sloutfile = open(sifilename, "w")
     write(sloutfile, "count\tnode_one\tnode_one_value\tnode_two\tnode_two_value\teffected_node\teffected_node_value\n")
@@ -77,17 +79,17 @@ function run(pinodes)
                                         Dict(nodeone["name"] => nodeone["state"],
                                              nodetwo["name"] => nodetwo["state"]),
                                              essentialgenes,
-                                             parsed_args["lowerbound"],
-                                             parsed_args["upperbound"],
-                                             parsed_args["downregulated-cutoff"],
-                                             parsed_args["upregulated-cutoff"],
-                                             parsed_args["verbose"])
+                                             lowerbound,
+                                             upperbound,
+                                             downregulatedcutoff,
+                                             upregulatedcutoff,
+                                             verbose)
 
             for resultnode in keys(sampleresults)
                value = sampleresults[resultnode]
-               state = valueToState.get(value,
-                                        parsed_args["downregulated-cutoff"],
-                                        parsed_args["upregulated-cutoff"])
+               state = ValueToState.getState(value,
+                                        downregulatedcutoff,
+                                        upregulatedcutoff)
 
                if state == "Down Regulated"
                    essentialnodesone = nodeone["essentialNodes"]

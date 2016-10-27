@@ -1,4 +1,4 @@
-module valueToState
+module ValueToState
 
 function getState(value, downregulatedCutoff, upregulatedCutoff)
     if upregulatedCutoff < value

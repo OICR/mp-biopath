@@ -4,7 +4,7 @@ include("ensemblegenemap.jl")
 include("dbidnamemapping.jl")
 
 function essentialGenesHugo()
-    ensembletohugo = ensembleGeneMap.ensembleToHugo()
+    ensembletohugo = EnsembleGeneMap.ensembleToHugo()
     essentialgenesHugo = ASCIIString[]
 
     for line in readlines("./data/essential_9606_all_gene_status.txt")

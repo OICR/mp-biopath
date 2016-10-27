@@ -65,11 +65,30 @@ function main()
     pinodes = Pi.readFile(parsed_args["pairwise-interaction-file"])
 
     if parsed_args["find-si"]
-        findSI.run(pinodes)
+        FindSI.run(pinodes,
+                   parsed_args["lowerbound"],
+                   parsed_args["upperbound"],
+                   parsed_args["downregulated-cutoff"],
+                   parsed_args["upregulated-cutoff"],
+                   parsed_args["pairwise-interaction-file"],
+                   parsed_args["verbose"])
     elseif parsed_args["analyze-known-si-list"]
-        analyzeKnownSiList.run(pinodes)
+        AnalyzeKnownSiList.run(pinodes,
+                               parsed_args["lowerbound"],
+                               parsed_args["upperbound"],
+                               parsed_args["downregulated-cutoff"],
+                               parsed_args["upregulated-cutoff"],
+                               parsed_args["pairwise-interaction-file"],
+                               parsed_args["verbose"])
     else
-        anayzeObs.run(pinodes)
+        AnalyzeObs.run(pinodes,
+                       parsed_args["observation-file"],
+                       parsed_args["key-outputs"],
+                       parsed_args["lowerbound"],
+                       parsed_args["upperbound"],
+                       parsed_args["downregulated-cutoff"],
+                       parsed_args["upregulated-cutoff"],
+                       parsed_args["verbose"])
     end
 end
 
