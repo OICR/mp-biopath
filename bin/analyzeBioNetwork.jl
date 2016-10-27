@@ -84,7 +84,7 @@ function main()
                                parsed_args["pairwise-interaction-file"],
                                parsed_args["verbose"])
     else
-        if parsed_args["expected-file"] != ""
+        if parsed_args["expected-file"] != nothing
             AnalyzeObs.inspect(parsed_args["observation-file"],
                                parsed_args["expected-file"],
                                parsed_args["downregulated-cutoff"],

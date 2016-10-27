@@ -11,7 +11,6 @@ function getNodes()
          keyoutputs[linefields[4]] = 1
     end
 
-
     return Set(collect(keys(keyoutputs)))
 end
 

@@ -5,6 +5,7 @@ using ExcelReaders
 include("observations.jl")
 include("nlmodel.jl")
 include("results.jl")
+include("keyoutputs.jl")
 
 function run(pinodes, observationfile, keyoutputsfile, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, verbose)
     observations = Observations.copynumberIdxs(observationfile, pinodes)
@@ -47,13 +48,30 @@ end
 
 function inspect(observationfile, expectedfile, downregulatedcutoff, upregulatedcutoff, verbose)
 
-    expected = Results.getExpected(expectedfile)
-
-    results = Results.getResults(observationfile, downregulatedcutoff, upregulatedcutoff)
+    expected_data = Results.getExpected(expectedfile)
 
 
-    println(results)
+    expected = expected_data["samplenodestate"]
+    expected_counts = expected_data["counts"]
 
+    results_data = Results.getResults(observationfile, downregulatedcutoff, upregulatedcutoff)
+    results = results_data["samplenodestate"]
+    results_counts = results_data["counts"]
+    probability = 1;
+    correct_counts = Dict("1" => 0, "2" => 0, "3" => 0)
+    for patientname in keys(expected)
+        expected_patient_nodes = expected[patientname]
+        results_patient_nodes = results[patientname]
+        for nodename in keys(expected_patient_nodes)
+            expectedvalue = expected_patient_nodes[nodename]
+            resultvalue = results_patient_nodes[nodename]
+            if expectedvalue == resultvalue
+                correct_counts[expectedvalue] = correct_counts[expectedvalue] + 1
+            end
+        end
+    end
+    println(correct_counts)
+    println("done")
 end
 
 end

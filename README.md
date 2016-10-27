@@ -91,7 +91,7 @@ julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/PIP3_
 ```
 
 ```bash
-julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt ~/git/PGM/InputDataForTesting/Mock_Short_Input_Data_for_PIP3_Activates_AKT_Signaling_Text_6_16.txt
+julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt ~/git/PGM/InputDataForTesting/Mock_Short_Input_Data_for_PIP3_Activates_AKT_Signaling_Text.txt
 ```
 
 ###inspecting results from obaservation file
