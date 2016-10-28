@@ -2,6 +2,7 @@ module AnalyzeObs
 
 using ExcelReaders
 
+include("probability.jl")
 include("observations.jl")
 include("nlmodel.jl")
 include("results.jl")
@@ -50,7 +51,6 @@ function inspect(observationfile, expectedfile, downregulatedcutoff, upregulated
 
     expected_data = Results.getExpected(expectedfile)
 
-
     expected = expected_data["samplenodestate"]
     expected_counts = expected_data["counts"]
 
@@ -70,8 +70,36 @@ function inspect(observationfile, expectedfile, downregulatedcutoff, upregulated
             end
         end
     end
+    println("expected")
+    println(expected_counts)
+    println("results")
+    println(results_counts)
+    println("correct counts")
     println(correct_counts)
-    println("done")
+
+    total = 0
+    for (state, value) in expected_counts
+        total += value
+    end
+
+    total_correct = 0
+    for (state, value) in correct_counts
+        total_correct += value
+    end
+
+    percent_correct = total_correct/total * 100
+    println("percent correct: $percent_correct")
+
+
+
+
+    total_prob = Float64(1.0)
+    for (state, value) in correct_counts
+        new_prob = Probability.KorMoreSuccess(expected_counts[state], value, expected_counts[state]/total)
+        total_prob *= new_prob
+    end
+
+    println("Probability: $total_prob")
 end
 
 end

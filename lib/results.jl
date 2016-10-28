@@ -80,7 +80,7 @@ function getExpected(expectedfile)
     i = 0
     for column in headerparts
         i = i + 1
-        if i != 1
+        if i > 2
             samplenodestate[column] = Dict()
         end
     end
@@ -94,9 +94,8 @@ function getExpected(expectedfile)
         for column in headerparts
             i = i + 1
             if i == 1
-                node = lineparts[1]
             elseif i == 2
-
+                node = lineparts[2]
             else
                 state = lineparts[i]
                 counts[state] = counts[state] + 1

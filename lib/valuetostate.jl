@@ -14,9 +14,9 @@ end
 function getStateNumber(value_str, downregulatedCutoff, upregulatedCutoff)
     value = parse(Float64, value_str)
     if upregulatedCutoff < value
-        return "1"
-    elseif downregulatedCutoff > value
         return "3"
+    elseif downregulatedCutoff > value
+        return "1"
     else
         return "2"
     end
