@@ -1,8 +1,5 @@
 module Results
 
-using ExcelReaders
-#using DataFrames;
-
 include("valuetostate.jl")
 
 function createcsv(nodesampleresults, columns, observationfile)

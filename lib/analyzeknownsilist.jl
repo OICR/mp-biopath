@@ -8,10 +8,16 @@ include("../lib/essential.jl")
 include("../lib/results.jl")
 include("../lib/sl.jl")
 include("../lib/dbidnamemapping.jl")
+include("../lib/coexpress.jl")
+
 
 function run(pinodes, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, pairwisefile, verbose)
     slnodes = SL.getNodes()
     pinodesSet = Set(keys(pinodes))
+
+    coexpress = CoExpress.getForPiNodes(pinodesSet)
+    println(coexpress)
+    exit()
 
     essentialgenes = Essential.getGenes(collect(keys(pinodes)))
     nodetogene     = DbIdNameMapping.nodeToGene()

@@ -1,7 +1,5 @@
 module AnalyzeObs
 
-using ExcelReaders
-
 include("probability.jl")
 include("observations.jl")
 include("nlmodel.jl")
