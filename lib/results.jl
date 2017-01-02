@@ -2,8 +2,8 @@ module Results
 
 include("valuetostate.jl")
 
-function createcsv(nodesampleresults, columns, observationfile)
-    resultfilename = join([observationfile, "results"], ".")
+function createcsv(nodesampleresults, columns, resultfilename)
+    #resultfilename = join([observationfile, "results"], ".")
 
     outfile = open(resultfilename, "w")
 
@@ -13,7 +13,7 @@ function createcsv(nodesampleresults, columns, observationfile)
     for node in keys(nodesampleresults)
         write(outfile, "$node\t")
         for column in columns
-            if column == "Gene"
+            if column == "gene"
                 continue
             end
             value = round(nodesampleresults[node][column], 2)

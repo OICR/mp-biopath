@@ -6,13 +6,13 @@ include("nlmodel.jl")
 include("results.jl")
 include("keyoutputs.jl")
 
-function run(pinodes, observationfile, keyoutputsfile, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, verbose)
+function run(pinodes, observationfile, resultsfile, keyoutputsfile, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, verbose)
     observations = Observations.copynumberIdxs(observationfile, pinodes)
     keyoutputs = keyoutputsfile? Keyoutputs.getNodes(): Set()
 
     nodesampleresults = Dict()
     for sample in observations["columns"]
-        if sample == "Gene"
+        if sample == "gene"
             continue
         end
 
@@ -41,7 +41,7 @@ function run(pinodes, observationfile, keyoutputsfile, lowerbound, upperbound, d
     end
     Results.createcsv(nodesampleresults,
                       observations["columns"],
-                      observationfile)
+                      resultsfile)
 end
 
 

@@ -46,7 +46,7 @@ function copynumberIdxs(fname, pinodes)
     i = 0
     for column in headerparts
         i = i + 1
-        if i != 1
+        if i > 1
             samplenodestate[column] = Dict()
         end
     end

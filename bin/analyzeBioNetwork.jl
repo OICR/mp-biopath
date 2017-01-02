@@ -47,6 +47,9 @@ function parse_commandline()
         "observation-file"
             help = "This is the full path to the observation file."
             required = false
+        "results-file"
+        help = "This is the full path to the results file. (required if providing observation file)"
+            required = false
         "expected-file"
             help = "this is the corresponding expected state file to the observation file. Used when analyzing results"
             required = false
@@ -94,6 +97,7 @@ function main()
         else
             AnalyzeObs.run(pinodes,
                            parsed_args["observation-file"],
+                           parsed_args["results-file"],
                            parsed_args["key-outputs"],
                            parsed_args["lowerbound"],
                            parsed_args["upperbound"],
