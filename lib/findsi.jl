@@ -5,9 +5,9 @@ include("dbidnamemapping.jl")
 include("essential.jl")
 include("nlmodel.jl")
 
-function run(pinodes, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, pairwisefile, verbose)
-    essentialgenes = Essential.getGenes(collect(keys(pinodes)))
-    allGenes = DbIdNameMapping.allGeneReferenceProduct()
+function run(pinodes, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, pairwisefile, dbidfile, verbose)
+    essentialgenes = Essential.getGenes(collect(keys(pinodes)), dbidfile)
+    allGenes = DbIdNameMapping.allGeneReferenceProduct(dbidfile)
     allGenesSet = Set(allGenes)
 
     downregulatednodestates = []

@@ -6,10 +6,9 @@ include("nlmodel.jl")
 include("results.jl")
 include("keyoutputs.jl")
 
-function run(pinodes, observationfile, resultsfile, keyoutputsfile, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, verbose)
-    observations = Observations.copynumberIdxs(observationfile, pinodes)
-    keyoutputs = keyoutputsfile? Keyoutputs.getNodes(): Set()
-
+function run(pinodes, observationfile, resultsfile, keyoutputsfile, dbidfile, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, verbose)
+    observations = Observations.copynumberIdxs(observationfile, pinodes, dbidfile)
+    keyoutputs = Keyoutputs.getNodes(keyoutputsfile)
     nodesampleresults = Dict()
     for sample in observations["columns"]
         if sample == "gene"

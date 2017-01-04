@@ -32,9 +32,8 @@ function testIdxs(fname, nodes)
     return measuredIdxs
 end
 
-function copynumberIdxs(fname, pinodes)
-
-    genetonodes = DbIdNameMapping.geneToRootNodes(pinodes)
+function copynumberIdxs(fname, pinodes, dbidfile)
+    genetonodes = DbIdNameMapping.geneToRootNodes(pinodes, dbidfile)
 
     data = readlines(fname)
 

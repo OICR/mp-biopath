@@ -3,8 +3,8 @@ module SL
 include("dbidnamemapping.jl")
 include("observations.jl")
 
-function getNodes()
-    genetonodes = DbIdNameMapping.geneToNodes()
+function getNodes(dbidfile)
+    genetonodes = DbIdNameMapping.geneToNodes(dbidfile)
 
     genenodes = getGenes()
     for gene in genenodes

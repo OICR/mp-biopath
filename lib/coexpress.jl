@@ -6,10 +6,10 @@ using Requests
 
 import Requests: get
 
-function getForPiNodes(pinodes)
+function getForPiNodes(pinodes, dbidfile)
 
     #This returns Hugo Gene ids (what we mainly go by)
-    nodetogene = DbIdNameMapping.nodeToGene()
+    nodetogene = DbIdNameMapping.nodeToGene(dbidfile)
 
     #responses use entrez gene id
     hugotoentrezid = Dict()

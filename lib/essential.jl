@@ -20,9 +20,9 @@ function essentialGenesHugo()
 end
 
 
-function getNodes()
+function getNodes(dbidfile)
     essentialgenesHugo = essentialGenesHugo()
-    genetonode = DbIdNameMapping.geneToNodes()
+    genetonode = DbIdNameMapping.geneToNodes(dbidfile)
 
     essentialnodes = ASCIIString[]
 
@@ -37,8 +37,8 @@ function getNodes()
     return essentialnodes
 end
 
-function getGenes(nodes)
-    return collect(intersect(Set(nodes), Set(getNodes())))
+function getGenes(nodes, dbidfile)
+    return collect(intersect(Set(nodes), Set(getNodes(dbidfile))))
 end
 
 end

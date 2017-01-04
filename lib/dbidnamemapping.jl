@@ -1,8 +1,8 @@
 module DbIdNameMapping
 
-function allGeneReferenceProduct()
+function allGeneReferenceProduct(dbidfile)
     genes = []
-    for line in readlines("data/db_id_to_name_mapping.txt")
+    for line in readlines(dbidfile)
         lineparts = split(chomp(line), "\t")
         node = ASCIIString(lineparts[1])
         if contains(lineparts[3], "Reference") == true
@@ -13,9 +13,9 @@ function allGeneReferenceProduct()
     return genes
 end
 
-function geneToNodes()
+function geneToNodes(dbidfile)
     genetonodes = Dict()
-    for line in readlines("data/db_id_to_name_mapping.txt")
+    for line in readlines(dbidfile)
         lineparts = split(chomp(line), "\t")
         node = ASCIIString(lineparts[1])
         gene = ASCIIString(lineparts[2])
@@ -32,8 +32,8 @@ function geneToNodes()
     return genetonodes
 end
 
-function nodeToGene()
-   genetonodes = geneToNodes()
+function nodeToGene(dbidfile)
+   genetonodes = geneToNodes(dbidfile)
 
    nodetogene = Dict()
    for (gene, nodes) in genetonodes
@@ -45,9 +45,9 @@ function nodeToGene()
    return nodetogene
 end
 
-function geneToRootNodes(pinodes)
+function geneToRootNodes(pinodes, dbidfile)
     genetonodes = Dict()
-    for line in readlines("data/db_id_to_name_mapping.txt")
+    for line in readlines(dbidfile)
         lineparts = split(chomp(line), "\t")
         node = ASCIIString(lineparts[1])
         gene = ASCIIString(lineparts[2])

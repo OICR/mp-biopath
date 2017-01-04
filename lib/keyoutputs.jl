@@ -1,14 +1,14 @@
 module Keyoutputs
 
-function getNodes()
-    data = readlines("./data/keyoutputs.tsv")
+function getNodes(keyoutputsfile)
+    data = readlines(keyoutputsfile)
     shift!(data)
 
     keyoutputs = Dict{AbstractString,Any}()
 
     for line in data
          linefields = split(chomp(line), '\t')
-         keyoutputs[linefields[4]] = 1
+         keyoutputs[linefields[5]] = 1
     end
 
     return Set(collect(keys(keyoutputs)))

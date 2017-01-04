@@ -30,9 +30,6 @@ function parse_commandline()
         "--find-si"
             help = "When this option is set do not provide any observations. This will systemattically analyze the network and find all synthetically lethal pairs."
             action = :store_true
-        "--key-outputs"
-            help = "If this is set it will prepare output based on ./data/keyoutputs.tsv"
-            action = :store_true
         "--essential-genes"
             help = "If this is specified a report will be made with regards to essential genes"
         "--analyze-known-si-list"
@@ -49,6 +46,12 @@ function parse_commandline()
             required = false
         "results-file"
         help = "This is the full path to the results file. (required if providing observation file)"
+            required = false
+        "db-id-file"
+        help = "This is the full path to the db_id_to_name_mapping file. (required if providing observation file)"
+            required = false
+        "key-outputs-file"
+        help = "This is the full path to the db_id_to_name_mapping file. (required if providing observation file)"
             required = false
         "expected-file"
             help = "this is the corresponding expected state file to the observation file. Used when analyzing results"
@@ -77,6 +80,7 @@ function main()
                    parsed_args["downregulated-cutoff"],
                    parsed_args["upregulated-cutoff"],
                    parsed_args["pairwise-interaction-file"],
+                   parsed_args["db-id-file"],
                    parsed_args["verbose"])
     elseif parsed_args["analyze-known-si-list"]
         AnalyzeKnownSiList.run(pinodes,
@@ -85,6 +89,7 @@ function main()
                                parsed_args["downregulated-cutoff"],
                                parsed_args["upregulated-cutoff"],
                                parsed_args["pairwise-interaction-file"],
+                               parsed_args["db-id-file"],
                                parsed_args["verbose"])
     else
         if parsed_args["expected-file"] != nothing
@@ -93,12 +98,12 @@ function main()
                                parsed_args["downregulated-cutoff"],
                                parsed_args["upregulated-cutoff"],
                                parsed_args["verbose"])
-            println("after inspect")
         else
             AnalyzeObs.run(pinodes,
                            parsed_args["observation-file"],
                            parsed_args["results-file"],
-                           parsed_args["key-outputs"],
+                           parsed_args["key-outputs-file"],
+                           parsed_args["db-id-file"],
                            parsed_args["lowerbound"],
                            parsed_args["upperbound"],
                            parsed_args["downregulated-cutoff"],
