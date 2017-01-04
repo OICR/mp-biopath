@@ -5,7 +5,7 @@ using ArgParse
 include("../lib/findsi.jl")
 
 function parse_commandline()
-    s = ArgParseSettings("This program infers the value of nodes in Reactome pathways from observation data.",
+     s = ArgParseSettings("This program finds Synthetic Lethal pairs that knock out one or more genes from the essential gene database",
                          version = "0.0.1",
                          add_version = true)
 
@@ -31,8 +31,8 @@ function parse_commandline()
             help = "This is the full path to the pairwise interaction file."
             required = true
         "db-id-file"
-        help = "This is the full path to the db_id_to_name_mapping file. (required if providing observation file)"
-            required = false
+        help = "This is the full path to the db_id_to_name_mapping file."
+            required = true
     end
 
     return parse_args(s)
@@ -48,16 +48,15 @@ function main()
         end
     end
 
-    pinodes = Pi.readFile(:q
 
-        FindSI.run(parsed_args["pairwise-interaction-file"],
-                   parsed_args["lowerbound"],
-                   parsed_args["upperbound"],
-                   parsed_args["downregulated-cutoff"],
-                   parsed_args["upregulated-cutoff"],
-                   parsed_args["pairwise-interaction-file"],
-                   parsed_args["db-id-file"],
-                   parsed_args["verbose"])
+    FindSI.run(parsed_args["pairwise-interaction-file"],
+               parsed_args["lowerbound"],
+               parsed_args["upperbound"],
+               parsed_args["downregulated-cutoff"],
+               parsed_args["upregulated-cutoff"],
+               parsed_args["pairwise-interaction-file"],
+               parsed_args["db-id-file"],
+               parsed_args["verbose"])
 end
 
 main()

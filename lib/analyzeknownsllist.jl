@@ -11,7 +11,7 @@ include("../lib/dbidnamemapping.jl")
 include("../lib/coexpress.jl")
 
 
-function run(pifile, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, dbidfile, verbose)
+function run(pifile, slfile, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, dbidfile, verbose)
     pinodes = Pi.readFile(pifile)
     slnodes = SL.getNodes(dbidfile)
     pinodesSet = Set(keys(pinodes))
@@ -80,7 +80,6 @@ function run(pifile, lowerbound, upperbound, downregulatedcutoff, upregulatedcut
         end
     end
 
-    slfilename = join([pifile, "si.analysis"], ".")
     sloutfile = open(slfilename, "w")
     headercolumns = ["Count"]
     for column in keys(slessential[1])

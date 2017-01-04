@@ -5,7 +5,7 @@ using ArgParse
 include("../lib/inference.jl")
 
 function parse_commandline()
-    s = ArgParseSettings("This program infers the value of nodes in Reactome pathways from observation data.",
+    s = ArgParseSettings("This interface is for analyzing the results files produced by running inference with respect to a expected results file.",
                          version = "0.0.1",
                          add_version = true)
 
@@ -28,10 +28,10 @@ function parse_commandline()
             help = "This will cause output to be printed to standard out."
             action = :store_true
         "results-file"
-            help = "This is the full path to the results file. (required if providing observation file)"
+            help = "This file will be generated and contain the resulting inferred data."
             required = true
         "expected-file"
-            help = "this is the corresponding expected state file to the observation file. Used when analyzing results"
+            help = "This is the corresponding expected state file to the observation file."
             required = true
    end
 
