@@ -91,25 +91,12 @@ function main()
                                parsed_args["pairwise-interaction-file"],
                                parsed_args["db-id-file"],
                                parsed_args["verbose"])
-    else
-        if parsed_args["expected-file"] != nothing
-            AnalyzeObs.inspect(parsed_args["observation-file"],
+    elseif parsed_args["expected-file"] != nothing
+            AnalyzeObs.inspect(parsed_args["results-file"],
                                parsed_args["expected-file"],
                                parsed_args["downregulated-cutoff"],
                                parsed_args["upregulated-cutoff"],
                                parsed_args["verbose"])
-        else
-            AnalyzeObs.run(pinodes,
-                           parsed_args["observation-file"],
-                           parsed_args["results-file"],
-                           parsed_args["key-outputs-file"],
-                           parsed_args["db-id-file"],
-                           parsed_args["lowerbound"],
-                           parsed_args["upperbound"],
-                           parsed_args["downregulated-cutoff"],
-                           parsed_args["upregulated-cutoff"],
-                           parsed_args["verbose"])
-        end
     end
 end
 

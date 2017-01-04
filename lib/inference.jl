@@ -1,12 +1,14 @@
-module AnalyzeObs
+module Inference
 
 include("probability.jl")
 include("observations.jl")
 include("nlmodel.jl")
 include("results.jl")
 include("keyoutputs.jl")
+include("pi.jl")
 
-function run(pinodes, observationfile, resultsfile, keyoutputsfile, dbidfile, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, verbose)
+function run(pifile, observationfile, resultsfile, keyoutputsfile, dbidfile, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, verbose)
+    pinodes = Pi.readFile(pifile)
     observations = Observations.copynumberIdxs(observationfile, pinodes, dbidfile)
     keyoutputs = Keyoutputs.getNodes(keyoutputsfile)
     nodesampleresults = Dict()
@@ -43,8 +45,7 @@ function run(pinodes, observationfile, resultsfile, keyoutputsfile, dbidfile, lo
                       resultsfile)
 end
 
-
-function inspect(observationfile, expectedfile, downregulatedcutoff, upregulatedcutoff, verbose)
+function analyzeResults(observationfile, expectedfile, downregulatedcutoff, upregulatedcutoff, verbose)
 
     expected_data = Results.getExpected(expectedfile)
 
@@ -86,9 +87,6 @@ function inspect(observationfile, expectedfile, downregulatedcutoff, upregulated
 
     percent_correct = total_correct/total * 100
     println("percent correct: $percent_correct")
-
-
-
 
     total_prob = Float64(1.0)
     for (state, value) in correct_counts

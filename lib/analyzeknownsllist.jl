@@ -1,4 +1,4 @@
-module AnalyzeKnownSiList
+module AnalyzeKnownSLList
 
 include("../lib/pi.jl")
 include("../lib/observations.jl")
@@ -11,7 +11,8 @@ include("../lib/dbidnamemapping.jl")
 include("../lib/coexpress.jl")
 
 
-function run(pinodes, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, pairwisefile, dbidfile, verbose)
+function run(pifile, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, dbidfile, verbose)
+    pinodes = Pi.readFile(pifile)
     slnodes = SL.getNodes(dbidfile)
     pinodesSet = Set(keys(pinodes))
 
@@ -79,7 +80,7 @@ function run(pinodes, lowerbound, upperbound, downregulatedcutoff, upregulatedcu
         end
     end
 
-    slfilename = join([pairwisefile, "si.analysis"], ".")
+    slfilename = join([pifile, "si.analysis"], ".")
     sloutfile = open(slfilename, "w")
     headercolumns = ["Count"]
     for column in keys(slessential[1])
