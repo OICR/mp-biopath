@@ -11,7 +11,7 @@ end
 
 function KorMoreSuccess(n, k, pSuccess)
     totalProb = Float64(0)
-    for i in [k:n]
+    for i in [k:n;]
         prob = KSuccess(n, i, pSuccess)
         totalProb = totalProb + prob
     end

@@ -3,8 +3,6 @@ module Results
 include("valuetostate.jl")
 
 function createcsv(nodesampleresults, columns, resultfilename)
-    #resultfilename = join([observationfile, "results"], ".")
-
     outfile = open(resultfilename, "w")
 
     write(outfile, join(columns, "\t"))
@@ -25,9 +23,7 @@ function createcsv(nodesampleresults, columns, resultfilename)
     close(outfile)
 end
 
-function getResults(observationfile, downregulatedcutoff, upregulatedcutoff)
-    resultfilename = join([observationfile, "results"], ".")
-
+function getResults(resultfilename, downregulatedcutoff, upregulatedcutoff)
     result_data = readlines(resultfilename)
 
     header = shift!(result_data)
@@ -77,7 +73,7 @@ function getExpected(expectedfile)
     i = 0
     for column in headerparts
         i = i + 1
-        if i > 2
+        if i > 1
             samplenodestate[column] = Dict()
         end
     end
@@ -91,10 +87,13 @@ function getExpected(expectedfile)
         for column in headerparts
             i = i + 1
             if i == 1
-            elseif i == 2
-                node = lineparts[2]
+                node = lineparts[1]
             else
-                state = lineparts[i]
+                statename = lineparts[i]
+                state = statename == "UP" ? "3":
+                            statename == "DOWN"? "1":
+                                statename == "NC"? "2": statename
+                statename = "fixed"
                 counts[state] = counts[state] + 1
                 samplenodestate[column][node] = state
             end
