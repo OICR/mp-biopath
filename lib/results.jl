@@ -50,11 +50,7 @@ function getResults(resultfilename, downregulatedcutoff, upregulatedcutoff, pgml
             if i == 1
                 node = lineparts[1]
             else
-                state = ValueToState.getStateNumber(lineparts[i], downregulatedcutoff, upregulatedcutoff)
-                if pgmlab
-                    state = state == "0"? "1":
-                            state == "1"? "2": "3"
-                end
+                state = pgmlab? lineparts[i]: ValueToState.getStateNumber(lineparts[i], downregulatedcutoff, upregulatedcutoff)
                 counts[state] = counts[state] + 1
                 samplenodestate[column][node] = state
             end
