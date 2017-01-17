@@ -23,7 +23,7 @@ function createcsv(nodesampleresults, columns, resultfilename)
     close(outfile)
 end
 
-function getResults(resultfilename, downregulatedcutoff, upregulatedcutoff)
+function getResults(resultfilename, downregulatedcutoff, upregulatedcutoff, pgmlab)
     result_data = readlines(resultfilename)
 
     header = shift!(result_data)
@@ -51,6 +51,10 @@ function getResults(resultfilename, downregulatedcutoff, upregulatedcutoff)
                 node = lineparts[1]
             else
                 state = ValueToState.getStateNumber(lineparts[i], downregulatedcutoff, upregulatedcutoff)
+                if pgmlab
+                    state = state == "0"? "1":
+                            state == "1"? "2": "3"
+                end
                 counts[state] = counts[state] + 1
                 samplenodestate[column][node] = state
             end

@@ -24,6 +24,9 @@ function parse_commandline()
         "--lowerbound", "-l"
             arg_type = Float64
             default = 0.001
+        "--pgmlab"
+            help = "This is for makeing it so the numbers for the states are converted to 1,2,3 for down nc and up"
+            action = :store_true
         "--verbose", "-v"
             help = "This will cause output to be printed to standard out."
             action = :store_true
@@ -52,6 +55,7 @@ function main()
                              parsed_args["expected-file"],
                              parsed_args["downregulated-cutoff"],
                              parsed_args["upregulated-cutoff"],
+                             parsed_args["pgmlab"],
                              parsed_args["verbose"])
 end
 

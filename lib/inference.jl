@@ -45,12 +45,12 @@ function run(pifile, observationfile, resultsfile, keyoutputsfile, dbidfile, low
                       resultsfile)
 end
 
-function analyzeResults(resultsfile, expectedfile, downregulatedcutoff, upregulatedcutoff, verbose)
+function analyzeResults(resultsfile, expectedfile, downregulatedcutoff, upregulatedcutoff, pgmlab, verbose)
     expected_data = Results.getExpected(expectedfile)
     expected = expected_data["samplenodestate"]
     expected_counts = expected_data["counts"]
 
-    results_data = Results.getResults(resultsfile, downregulatedcutoff, upregulatedcutoff)
+    results_data = Results.getResults(resultsfile, downregulatedcutoff, upregulatedcutoff, pgmlab)
     results = results_data["samplenodestate"]
     results_counts = results_data["counts"]
     probability = 1;
