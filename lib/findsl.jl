@@ -58,7 +58,7 @@ function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, up
         end
     end
 
-    sloutfile = open(sifilename, "w")
+    sloutfile = open(slfilename, "w")
     write(sloutfile, "count\tnode_one\tnode_one_value\tnode_two\tnode_two_value\teffected_node\teffected_node_value\n")
     flush(sloutfile)
 
