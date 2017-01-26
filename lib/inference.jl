@@ -9,8 +9,9 @@ include("pi.jl")
 
 function run(pifile, observationfile, resultsfile, keyoutputsfile, dbidfile, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, verbose)
     pinodes = Pi.readFile(pifile)
-    observations = Observations.copynumberIdxs(observationfile, pinodes, dbidfile)
+    observations = Observations.get(observationfile, pinodes, dbidfile, false)
     keyoutputs = Keyoutputs.getNodes(keyoutputsfile)
+    keyoutputs = ()
     nodesampleresults = Dict()
     for sample in observations["columns"]
         if sample == "gene"

@@ -32,9 +32,10 @@ function testIdxs(fname, nodes)
     return measuredIdxs
 end
 
-function copynumberIdxs(fname, pinodes, dbidfile)
+function get(fname, pinodes, dbidfile, copynumber)
     genetonodes = DbIdNameMapping.geneToRootNodes(pinodes, dbidfile)
 
+    divideby = copynumber? 2:1
     data = readlines(fname)
 
     header = shift!(data)
@@ -61,8 +62,7 @@ function copynumberIdxs(fname, pinodes, dbidfile)
             else
                 if haskey(genetonodes, gene)
                     for node in Array(genetonodes[gene])
-                        #divide by two because it is copy number data
-                       samplenodestate[column][node] = parse(Float64,lineparts[i])/ 2
+                        samplenodestate[column][node] = copynumber? parse(Float64,lineparts[i])/2 : parse(Float64,lineparts[i]) -1
                     end
                 end
             end
