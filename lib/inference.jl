@@ -101,6 +101,7 @@ function analyzeResults(resultsfile, expectedfile, downregulatedcutoff, upregula
 
     println("Probability: $total_prob\n")
 
+    println("Patient\tNode\tExpected\tActual\n")
     for patientname in keys(errors)
         patient = errors[patientname]
         for genename in keys(patient)
