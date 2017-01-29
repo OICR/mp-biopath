@@ -56,6 +56,7 @@ function analyzeResults(resultsfile, expectedfile, downregulatedcutoff, upregula
     results_counts = results_data["counts"]
     probability = 1;
     correct_counts = Dict("1" => 0, "2" => 0, "3" => 0)
+    errors = Dict()
     for patientname in keys(expected)
         expected_patient_nodes = expected[patientname]
         results_patient_nodes = results[patientname]
@@ -64,6 +65,11 @@ function analyzeResults(resultsfile, expectedfile, downregulatedcutoff, upregula
             resultvalue = results_patient_nodes[nodename]
             if expectedvalue == resultvalue
                 correct_counts[expectedvalue] = correct_counts[expectedvalue] + 1
+            else
+                if haskey(errors, patientname) == false
+                    errors[patientname] = Dict()
+                end
+                errors[patientname][nodename] = [expectedvalue, resultvalue];
             end
         end
     end
@@ -93,7 +99,15 @@ function analyzeResults(resultsfile, expectedfile, downregulatedcutoff, upregula
         total_prob *= new_prob
     end
 
-    println("Probability: $total_prob")
+    println("Probability: $total_prob\n")
+
+    for patientname in keys(errors)
+        patient = errors[patientname]
+        for genename in keys(patient)
+            values = errors[patientname][genename]
+            println("$patientname\t$genename\t", values[1], "\t", values[2])
+        end
+    end
 end
 
 end
