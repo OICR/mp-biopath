@@ -24,6 +24,9 @@ function parse_commandline()
         "--lowerbound", "-l"
         arg_type = Float64
         default = 0.001
+        "--copynumber"
+        help = "This flag will make it so the values of the nodes are divided by two"
+        action = :store_true
         "--verbose", "-v"
         help = "This will cause output to be printed to standard out."
         action = :store_true
@@ -66,6 +69,7 @@ function main()
                   parsed_args["upperbound"],
                   parsed_args["downregulated-cutoff"],
                   parsed_args["upregulated-cutoff"],
+                  parsed_args["copynumber"],
                   parsed_args["verbose"])
 end
 

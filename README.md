@@ -18,9 +18,11 @@ apt-get install julia
 
 
 
-##Julia dependencies 
+##Instalattion
 
-use the Julia console to install Julia external modules
+```bash
+make install
+```
 
 ###Gurobi
 
