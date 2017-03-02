@@ -43,6 +43,7 @@ function getResults(resultfilename, downregulatedcutoff, upregulatedcutoff, pgml
 
     node = ""
     for line in result_data
+
         lineparts = split(chomp(line), "\t")
         i = 0
         for column in headerparts
@@ -58,8 +59,6 @@ function getResults(resultfilename, downregulatedcutoff, upregulatedcutoff, pgml
     end
 
     return Dict("counts" => counts, "samplenodestate" => samplenodestate)
-e
-
 end
 
 function getExpected(expectedfile)
