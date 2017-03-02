@@ -43,7 +43,6 @@ function getResults(resultfilename, downregulatedcutoff, upregulatedcutoff, pgml
 
     node = ""
     for line in result_data
-
         lineparts = split(chomp(line), "\t")
         i = 0
         for column in headerparts
