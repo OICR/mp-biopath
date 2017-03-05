@@ -18,9 +18,11 @@ apt-get install julia
 
 
 
-##Julia dependencies 
+##Instalattion
 
-use the Julia console to install Julia external modules
+```bash
+make install
+```
 
 ###Gurobi
 
@@ -94,7 +96,7 @@ julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/PIP3_
 julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt ~/git/PGM/InputDataForTesting/Mock_Short_Input_Data_for_PIP3_Activates_AKT_Signaling_Text.txt
 ```
 
-###inspecting results from obaservation file
+###inspecting results from observation file
 ```bash
-julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt ~/git/PGM/InputDataForTesting/Mock_Short_Input_Data_for_PIP3_Activates_AKT_Signaling_Text.txt ~/git/PGM/Expected_results_for_mock_input_data/PIP3_activates_AKT_signaling_Expected_Results_for_Mock_input_Data.csv
+julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt ~/git/PGM/InputDataForTesting/Mock_Short_Input_Data_for_PIP3_Activates_AKT_Signaling_Text.txt <results-file> ~/git/PGM/Expected_results_for_mock_input_data/PIP3_activates_AKT_signaling_Expected_Results_for_Mock_input_Data.csv
 ```

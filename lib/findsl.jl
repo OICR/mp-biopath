@@ -1,13 +1,15 @@
-module FindSI
+module FindSL
 
 include("valuetostate.jl")
 include("dbidnamemapping.jl")
 include("essential.jl")
 include("nlmodel.jl")
+include("pi.jl")
 
-function run(pinodes, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, pairwisefile, verbose)
-    essentialgenes = Essential.getGenes(collect(keys(pinodes)))
-    allGenes = DbIdNameMapping.allGeneReferenceProduct()
+function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, pairwisefile, dbidfile, verbose)
+    pinodes = Pi.readFile(pifile)
+    essentialgenes = Essential.getGenes(collect(keys(pinodes)), dbidfile)
+    allGenes = DbIdNameMapping.allGeneReferenceProduct(dbidfile)
     allGenesSet = Set(allGenes)
 
     downregulatednodestates = []
@@ -56,8 +58,7 @@ function run(pinodes, lowerbound, upperbound, downregulatedcutoff, upregulatedcu
         end
     end
 
-    sifilename = join([pairwisefile, "si"], ".")
-    sloutfile = open(sifilename, "w")
+    sloutfile = open(slfilename, "w")
     write(sloutfile, "count\tnode_one\tnode_one_value\tnode_two\tnode_two_value\teffected_node\teffected_node_value\n")
     flush(sloutfile)
 

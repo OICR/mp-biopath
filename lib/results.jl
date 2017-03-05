@@ -2,9 +2,7 @@ module Results
 
 include("valuetostate.jl")
 
-function createcsv(nodesampleresults, columns, observationfile)
-    resultfilename = join([observationfile, "results"], ".")
-
+function createcsv(nodesampleresults, columns, resultfilename)
     outfile = open(resultfilename, "w")
 
     write(outfile, join(columns, "\t"))
@@ -13,7 +11,7 @@ function createcsv(nodesampleresults, columns, observationfile)
     for node in keys(nodesampleresults)
         write(outfile, "$node\t")
         for column in columns
-            if column == "Gene"
+            if column == "gene"
                 continue
             end
             value = round(nodesampleresults[node][column], 2)
@@ -25,9 +23,7 @@ function createcsv(nodesampleresults, columns, observationfile)
     close(outfile)
 end
 
-function getResults(observationfile, downregulatedcutoff, upregulatedcutoff)
-    resultfilename = join([observationfile, "results"], ".")
-
+function getResults(resultfilename, downregulatedcutoff, upregulatedcutoff, pgmlab)
     result_data = readlines(resultfilename)
 
     header = shift!(result_data)
@@ -54,7 +50,7 @@ function getResults(observationfile, downregulatedcutoff, upregulatedcutoff)
             if i == 1
                 node = lineparts[1]
             else
-                state = ValueToState.getStateNumber(lineparts[i], downregulatedcutoff, upregulatedcutoff)
+                state = pgmlab? lineparts[i]: ValueToState.getStateNumber(lineparts[i], downregulatedcutoff, upregulatedcutoff)
                 counts[state] = counts[state] + 1
                 samplenodestate[column][node] = state
             end
@@ -62,8 +58,6 @@ function getResults(observationfile, downregulatedcutoff, upregulatedcutoff)
     end
 
     return Dict("counts" => counts, "samplenodestate" => samplenodestate)
-e
-
 end
 
 function getExpected(expectedfile)
@@ -77,7 +71,7 @@ function getExpected(expectedfile)
     i = 0
     for column in headerparts
         i = i + 1
-        if i > 2
+        if i > 1
             samplenodestate[column] = Dict()
         end
     end
@@ -91,10 +85,13 @@ function getExpected(expectedfile)
         for column in headerparts
             i = i + 1
             if i == 1
-            elseif i == 2
-                node = lineparts[2]
+                node = lineparts[1]
             else
-                state = lineparts[i]
+                statename = lineparts[i]
+                state = statename == "UP" ? "3":
+                            statename == "DOWN"? "1":
+                                statename == "NC"? "2": statename
+                statename = "fixed"
                 counts[state] = counts[state] + 1
                 samplenodestate[column][node] = state
             end

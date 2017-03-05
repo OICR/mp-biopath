@@ -27,8 +27,6 @@ end
 function readFile(fname)
     f1 = open(fname)
     data = readlines(f1)
-    shift!(data)
-    shift!(data)
 
     PIs = Dict{AbstractString,Any}()
 

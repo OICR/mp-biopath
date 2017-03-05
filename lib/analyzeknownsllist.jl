@@ -1,4 +1,4 @@
-module AnalyzeKnownSiList
+module AnalyzeKnownSLList
 
 include("../lib/pi.jl")
 include("../lib/observations.jl")
@@ -8,19 +8,20 @@ include("../lib/essential.jl")
 include("../lib/results.jl")
 include("../lib/sl.jl")
 include("../lib/dbidnamemapping.jl")
-include("../lib/coexpress.jl")
+#include("../lib/coexpress.jl")
 
 
-function run(pinodes, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, pairwisefile, verbose)
-    slnodes = SL.getNodes()
+function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, dbidfile, verbose)
+    pinodes = Pi.readFile(pifile)
+    slnodes = SL.getNodes(dbidfile)
     pinodesSet = Set(keys(pinodes))
 
-    coexpress = CoExpress.getForPiNodes(pinodesSet)
-    println(coexpress)
-    exit()
+#    coexpress = CoExpress.getForPiNodes(pinodesSet, dbidfile)
+#    println(coexpress)
+#    exit()
 
-    essentialgenes = Essential.getGenes(collect(keys(pinodes)))
-    nodetogene     = DbIdNameMapping.nodeToGene()
+    essentialgenes = Essential.getGenes(collect(keys(pinodes)), dbidfile)
+    nodetogene     = DbIdNameMapping.nodeToGene(dbidfile)
 
     slessential = Dict{ASCIIString,Any}[]
     slpinodes = ASCIIString[]
@@ -54,7 +55,7 @@ function run(pinodes, lowerbound, upperbound, downregulatedcutoff, upregulatedcu
             end
         end
     end
-    allGenes = DbIdNameMapping.allGeneReferenceProduct()
+    allGenes = DbIdNameMapping.allGeneReferenceProduct(dbidfile)
     allGenesSet = Set(allGenes)
     for node in slpinodes
         sampleresults = NLmodel.run(pinodes,
@@ -79,7 +80,6 @@ function run(pinodes, lowerbound, upperbound, downregulatedcutoff, upregulatedcu
         end
     end
 
-    slfilename = join([pairwisefile, "si.analysis"], ".")
     sloutfile = open(slfilename, "w")
     headercolumns = ["Count"]
     for column in keys(slessential[1])
