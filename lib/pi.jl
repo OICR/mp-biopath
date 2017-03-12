@@ -111,7 +111,7 @@ function readFile(fname)
                end
 
                for i = 1:length(negParents)
-                   parenti = parents[i]
+                   parenti = negParents[i]
                    if i == length(negParents)
                        nodes[nodeName]= ModelANDParents("AND", AbstractString[childNodeName, parenti])
                    else
