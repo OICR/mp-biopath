@@ -7,7 +7,7 @@ include("results.jl")
 include("keyoutputs.jl")
 include("pi.jl")
 
-function run(pifile, observationfile, resultsfile, keyoutputsfile, dbidfile, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, copynumberflag, verbose)
+function run(pifile, observationfile, resultsfile, keyoutputsfile, dbidfile, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, copynumberflag, expressionFile, verbose)
     pinodes = Pi.readFile(pifile)
     observations = Observations.get(observationfile, pinodes, dbidfile, copynumberflag)
     keyoutputs = Keyoutputs.getNodes(keyoutputsfile)

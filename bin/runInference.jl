@@ -45,6 +45,9 @@ function parse_commandline()
         "key-outputs-file"
         help = "This is the full path of the keyoutputs file."
         required = true
+        "expression-file"
+        help = "This file contains expression information for OR nodes"
+        required = false
     end
 
     return parse_args(s)
@@ -70,6 +73,7 @@ function main()
                   parsed_args["downregulated-cutoff"],
                   parsed_args["upregulated-cutoff"],
                   parsed_args["copynumber"],
+                  parsed_args["expression-file"],
                   parsed_args["verbose"])
 end
 
