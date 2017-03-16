@@ -4,7 +4,7 @@ using JuMP
 using AmplNLWriter
 #using Gurobi
 
-function run(nodes, measurednodestate, keyoutputs, LB, UB, downregulatedCutoff, upregulatedCutoff, verbose)
+function run(nodes, measurednodestate, keyoutputs, LB, UB, downregulatedCutoff, upregulatedCutoff, expression, verbose)
     model = Model(solver=CouenneNLSolver(["bonmin.nlp_log_level=0"; "bonmin.bb_log_level=0"]))
  #   model = Model(solver=BonminNLSolver(["bonmin.nlp_log_level=2"; "bonmin.bb_log_level=4"]))
 
@@ -100,13 +100,33 @@ function run(nodes, measurednodestate, keyoutputs, LB, UB, downregulatedCutoff, 
                             x[parentIndexes[1]] / x[parentIndexes[2]] == x_bar[nodeIndex])
             elseif nodes[nodeName].relation == "OR"
                 posParentIdxs = indexin(nodes[nodeName].posParents, nodesList)
-                @constraint(model,
-                    orposparentbelow[nodeIndex],
-                    sum{x[posParentIdxs[a]], a = 1:length(posParentIdxs)} / length(posParentIdxs) ==  x_bar[nodeIndex])
-            end
+                count_expression = 0
+                total_expression = 0
+                for parent in nodes[nodeName].posParents
+                    if haskey(expression, parent) && expression[parent] != ""
+                        total_expression += parse(Float64, expression[parent])
+                        count_expression += 1
+                        ev = expression[parent]
+                    end
+                end
+
+                if count_expression == 0
+                    @constraint(model,
+                       orposparentbelow[nodeIndex],
+                        sum{x[posParentIdxs[a]], a = 1:length(posParentIdxs)} / length(posParentIdxs) ==  x_bar[nodeIndex])
+                else
+                    println("start else")
+                    average_expression = total_expression / count_expression
+                    println(total_expression)
+                    println(count_expression)
+                    println(length(posParentIdxs))
+                    println(average_expression)
+                    println("end else")
+                end
+           end
         end
     end
-
+    exit()
     @NLobjective(model,
                  Min,
                  weightHard * sum{p[variableIdxs[i]] + n[variableIdxs[i]], i = 1:length(variableIdxs)}
@@ -117,7 +137,7 @@ function run(nodes, measurednodestate, keyoutputs, LB, UB, downregulatedCutoff, 
         println("Solving Model")
         print(model)
     end
-
+    exit()
     solve(model)
 
     keyresults = Dict()

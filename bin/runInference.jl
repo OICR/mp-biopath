@@ -27,6 +27,10 @@ function parse_commandline()
         "--copynumber"
         help = "This flag will make it so the values of the nodes are divided by two"
         action = :store_true
+        "--tissue-type"
+        help = "This will correspond to a tissue type in the file data/expression-data.tsv"
+        arg_type = AbstractString
+        default = "esophagus"
         "--verbose", "-v"
         help = "This will cause output to be printed to standard out."
         action = :store_true
@@ -45,9 +49,6 @@ function parse_commandline()
         "key-outputs-file"
         help = "This is the full path of the keyoutputs file."
         required = true
-        "expression-file"
-        help = "This file contains expression information for OR nodes"
-        required = false
     end
 
     return parse_args(s)
@@ -73,7 +74,7 @@ function main()
                   parsed_args["downregulated-cutoff"],
                   parsed_args["upregulated-cutoff"],
                   parsed_args["copynumber"],
-                  parsed_args["expression-file"],
+                  parsed_args["tissue-type"],
                   parsed_args["verbose"])
 end
 

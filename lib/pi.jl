@@ -76,7 +76,6 @@ function readFile(fname)
     nodes = Dict{AbstractString,Any}()
     for nodeName in keys(PIs)
         parents = PIs[nodeName].andPosParents
-
         if (length(PIs[nodeName].andPosParents) + length(PIs[nodeName].andNegParents)) == 0
             if (length(PIs[nodeName].orPosParents) + length(PIs[nodeName].orNegParents)) > 0
                 nodes[nodeName] = ModelORParents("OR", PIs[nodeName].orPosParents, PIs[nodeName].orNegParents)

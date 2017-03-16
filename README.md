@@ -16,8 +16,6 @@ on Linux type
 apt-get install julia
 ```
 
-
-
 ##Instalattion
 
 ```bash
@@ -35,6 +33,19 @@ Pkg.add("Gurobi")
 ```bash
 julia bin/analyzeBioNetwork.jl --help
 ```
+
+##Expression Data resource
+
+```bash
+curl -o data/expression-data.tsv https://www.ebi.ac.uk/gxa/experiments/E-MTAB-2836.tsv?geneQuery=%5B%7B%22value%22%3A%22protein_coding%22%2C%22category%22%3A%22gene_biotype%22%7D%5D
+```
+
+## Gene to uniprot mapping
+
+This was created through the uniprot user interfaces. A list of Ensemble IDs, from the expression data, were provided and mapped to UniProt ids (http://www.uniprot.org/)
+
+Results were saved to data/Expression_Atlas_ENSEMBL_gene_to_UniProt_mapping.txt
+
 
 ##Essential Genes source
 http://ogee.medgenius.info/browse/
