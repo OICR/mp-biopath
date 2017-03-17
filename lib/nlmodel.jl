@@ -141,7 +141,7 @@ function run(nodes, measurednodestate, keyoutputs, LB, UB, downregulatedCutoff, 
 
                     @constraint(model,
                         orposparentbelow[nodeIndex],
-                        sum{evs[a] * x[posParentIdxs[a]], a = 1:length(posParentIdxs)} / (total_expression * length(posParentIdxs)) ==  x_bar[nodeIndex])
+                        sum{evs[a] * x[posParentIdxs[a]], a = 1:length(posParentIdxs)} / total_expression ==  x_bar[nodeIndex])
                 end
            end
         end
