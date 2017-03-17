@@ -99,6 +99,9 @@ function run(nodes, measurednodestate, keyoutputs, LB, UB, downregulatedCutoff, 
                             and[nodeIndex],
                             x[parentIndexes[1]] / x[parentIndexes[2]] == x_bar[nodeIndex])
             elseif nodes[nodeName].relation == "OR"
+                if verbose
+                    println("Child node: $nodeName")
+                end
                 posParentIdxs = indexin(nodes[nodeName].posParents, nodesList)
                 count_expression = 0
                 total_expression = 0
@@ -107,7 +110,15 @@ function run(nodes, measurednodestate, keyoutputs, LB, UB, downregulatedCutoff, 
                         total_expression += parse(Float64, expression[parent])
                         count_expression += 1
                         ev = expression[parent]
+                        if verbose
+                            println("Parent node: $parent\tExpression value: $ev")
+                        else
+                            println("Parent node: $parent")
+                        end
                     end
+                end
+                if verbose
+                    println("")
                 end
 
                 if count_expression == 0
@@ -115,18 +126,27 @@ function run(nodes, measurednodestate, keyoutputs, LB, UB, downregulatedCutoff, 
                        orposparentbelow[nodeIndex],
                         sum{x[posParentIdxs[a]], a = 1:length(posParentIdxs)} / length(posParentIdxs) ==  x_bar[nodeIndex])
                 else
-                    println("start else")
                     average_expression = total_expression / count_expression
-                    println(total_expression)
-                    println(count_expression)
-                    println(length(posParentIdxs))
-                    println(average_expression)
-                    println("end else")
+
+                    evs = []
+                    for parent in nodes[nodeName].posParents
+                        if haskey(expression, parent) && expression[parent] != ""
+                            push!(evs, parse(Float64, expression[parent]))
+                        else
+                            push!(evs, average_expression);
+                        end
+                    end
+
+                    total_expression = sum(evs)
+
+                    @constraint(model,
+                        orposparentbelow[nodeIndex],
+                        sum{evs[a] * x[posParentIdxs[a]], a = 1:length(posParentIdxs)} / (total_expression * length(posParentIdxs)) ==  x_bar[nodeIndex])
                 end
            end
         end
     end
-    exit()
+
     @NLobjective(model,
                  Min,
                  weightHard * sum{p[variableIdxs[i]] + n[variableIdxs[i]], i = 1:length(variableIdxs)}
@@ -137,7 +157,7 @@ function run(nodes, measurednodestate, keyoutputs, LB, UB, downregulatedCutoff, 
         println("Solving Model")
         print(model)
     end
-    exit()
+
     solve(model)
 
     keyresults = Dict()
