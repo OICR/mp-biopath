@@ -19,14 +19,15 @@ function geneToNodes(dbidfile)
         lineparts = split(chomp(line), "\t")
         node = ASCIIString(lineparts[1])
         gene = ASCIIString(lineparts[2])
-        if match(r"Reference", lineparts[3]) != nothing
+#        if match(r"Reference", lineparts[3]) != nothing
             if haskey(genetonodes, gene)
                 nodes = genetonodes[gene]
                 push!(nodes, node)
             else
                 genetonodes[gene] = [node]
             end
-        end
+
+#        end
     end
 
     return genetonodes
@@ -51,7 +52,8 @@ function geneToRootNodes(pinodes, dbidfile)
         lineparts = split(chomp(line), "\t")
         node = ASCIIString(lineparts[1])
         gene = ASCIIString(lineparts[2])
-        if match(r"Reference", lineparts[3]) != nothing && haskey(pinodes, node) && pinodes[node].relation == "ROOT"
+        if haskey(pinodes, node) && pinodes[node].relation == "ROOT"
+#        if match(r"Reference", lineparts[3]) != nothing && haskey(pinodes, node) && pinodes[node].relation == "ROOT"
             if haskey(genetonodes, gene)
                 nodes = genetonodes[gene]
                 push!(nodes, node)
