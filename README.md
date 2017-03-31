@@ -1,4 +1,4 @@
-# MP program for performing inference on Reactome Pathways
+# MP-BioPath program for performing inference on Reactome Pathways
 
 #Installation
 
