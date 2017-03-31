@@ -2,12 +2,6 @@
 
 #Installation
 
-##Gurobi
-
-Got to http://www.gurobi.com/ for instructions on installing Gurobi
-
-http://www.gurobi.com/documentation/6.5/quickstart_linux.pdf
-
 ##Julia (http://julialang.org/)
 
 on Linux type
@@ -16,25 +10,21 @@ on Linux type
 apt-get install julia
 ```
 
-##Instalattion
+##Dependencies 
+
+This will install all the Julia modules that the tool relies on
 
 ```bash
 make install
 ```
 
-###Gurobi
-
-```julia
-Pkg.add("Gurobi")
-```
-
-##Running the package
+##Running Inference
 
 ```bash
-julia bin/analyzeBioNetwork.jl --help
+julia bin/runInference.jl --help
 ```
 
-##Expression Data resource
+#Downloading Expression Data
 
 ```bash
 curl -o data/expression-data.tsv https://www.ebi.ac.uk/gxa/experiments/E-MTAB-2836.tsv?geneQuery=%5B%7B%22value%22%3A%22protein_coding%22%2C%22category%22%3A%22gene_biotype%22%7D%5D
