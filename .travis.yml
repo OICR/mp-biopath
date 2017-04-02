@@ -4,4 +4,7 @@ julia:
     - 0.4.7
 
 install:
-    - julia test.jl
+    - make install
+
+script:
+    - julia test/run.jl
