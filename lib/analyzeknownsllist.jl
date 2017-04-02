@@ -11,7 +11,7 @@ include("../lib/dbidnamemapping.jl")
 #include("../lib/coexpress.jl")
 
 
-function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, dbidfile, verbose)
+function run(pifile, slfilename, lowerbound, upperbound, dbidfile, verbose)
     pinodes = Pi.readFile(pifile)
     slnodes = SL.getNodes(dbidfile)
     pinodesSet = Set(keys(pinodes))
@@ -63,8 +63,6 @@ function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, up
                                     essentialgenes,
                                     lowerbound,
                                     upperbound,
-                                    downregulatedcutoff,
-                                    upregulatedcutoff,
                                     verbose)
 
         for (essentialnode, essentialvalue) in sampleresults
@@ -96,8 +94,6 @@ function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, up
                                     essentialgenes,
                                     lowerbound,
                                     upperbound,
-                                    downregulatedcutoff,
-                                    upregulatedcutoff,
                                     verbose)
 
          for (essentialnode, essentialvalue) in sampleresults

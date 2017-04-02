@@ -10,14 +10,6 @@ function parse_commandline()
                          add_version = true)
 
     @add_arg_table s begin
-        "--downregulated-cutoff"
-        help = "This determines at which level the node is determined to be down regulated."
-        arg_type = Float64
-        default = 0.90
-        "--upregulated-cutoff"
-        help = "This determines at which level the node is determined to be upregulated."
-        arg_type = Float64
-        default = 1.10
         "--upperbound", "-u"
         arg_type = Int
         default = 10
@@ -71,8 +63,6 @@ function main()
                   parsed_args["db-id-file"],
                   parsed_args["lowerbound"],
                   parsed_args["upperbound"],
-                  parsed_args["downregulated-cutoff"],
-                  parsed_args["upregulated-cutoff"],
                   parsed_args["copynumber"],
                   parsed_args["tissue-type"],
                   parsed_args["verbose"])

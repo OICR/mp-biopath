@@ -32,8 +32,6 @@ function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, up
                                             essentialgenes,
                                             lowerbound,
                                             upperbound,
-                                            downregulatedcutoff,
-                                            upregulatedcutoff,
                                             verbose)
 
                 essentialnodes = []
@@ -82,8 +80,6 @@ function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, up
                                              essentialgenes,
                                              lowerbound,
                                              upperbound,
-                                             downregulatedcutoff,
-                                             upregulatedcutoff,
                                              verbose)
 
             for resultnode in keys(sampleresults)

@@ -8,7 +8,7 @@ include("keyoutputs.jl")
 include("expression.jl")
 include("pi.jl")
 
-function run(pifile, observationfile, resultsfile, keyoutputsfile, dbidfile, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, copynumberflag, tissueType, verbose)
+function run(pifile, observationfile, resultsfile, keyoutputsfile, dbidfile, lowerbound, upperbound, copynumberflag, tissueType, verbose)
     pinodes = Pi.readFile(pifile)
     expression = Expression.get(dbidfile, tissueType)
     observations = Observations.get(observationfile, pinodes, dbidfile, copynumberflag)
@@ -33,8 +33,6 @@ function run(pifile, observationfile, resultsfile, keyoutputsfile, dbidfile, low
                                     keyoutputs,
                                     lowerbound,
                                     upperbound,
-                                    downregulatedcutoff,
-                                    upregulatedcutoff,
                                     expression,
                                     verbose)
 
