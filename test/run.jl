@@ -2,20 +2,14 @@ using FactCheck
 
 facts("Interacion Types") do
 
-    @fact 1 --> 1
+    tests = ["and", "andneg", "or"]
 
-    context("AND") do
-        @fact 1 --> 1
-    end
+    for (index, value) in enumerate(tests)
+        a=readall(`julia bin/runInference.jl --onenormal ./test/files/networks/$value.tsv ./test/files/observations/$value.tsv ./test/files/results/$value.tsv ./data/db_id_to_name_mapping.txt ./data/key_outputs.tsv -v`)
+        std_out=readall(`diff ./test/files/expected_results/$value.tsv ./test/files/results/$value.tsv`)
 
-    context("OR") do
-        @fact 1 --> not(2)
-        @fact 2 --> not(isodd)
-    end
-
-    context("AND with Negative interaction") do
-        for i=1:5
-            @fact i --> i
+        context("$value") do
+            @fact std_out --> ""
         end
     end
 end

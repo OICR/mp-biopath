@@ -16,6 +16,9 @@ function parse_commandline()
         "--lowerbound", "-l"
         arg_type = Float64
         default = 0.001
+        "--onenormal"
+        help = "This flag will make it so the values of the nodes are set so that one is normal"
+        action = :store_true
         "--copynumber"
         help = "This flag will make it so the values of the nodes are divided by two"
         action = :store_true
@@ -64,6 +67,7 @@ function main()
                   parsed_args["lowerbound"],
                   parsed_args["upperbound"],
                   parsed_args["copynumber"],
+                  parsed_args["onenormal"],
                   parsed_args["tissue-type"],
                   parsed_args["verbose"])
 end
