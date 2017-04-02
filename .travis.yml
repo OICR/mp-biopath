@@ -1,0 +1,7 @@
+language: julia
+
+julia:
+    - 0.4.7
+
+install:
+    - make install
