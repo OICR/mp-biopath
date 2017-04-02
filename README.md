@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/OICR/mp-biopath.svg?branch=develop)](https://travis-ci.org/OICR/mp-biopath)
+
 # MP-BioPath 
 
 A command line tool for modelling the effects of perterbations on biological pathways.
