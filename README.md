@@ -8,7 +8,7 @@ A command line tool for modelling the effects of perterbations on biological pat
 
 ## Julia (http://julialang.org/)
 
-on Linux type
+### Linux
 
 ```bash
 apt-get install julia
