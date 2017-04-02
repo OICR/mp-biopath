@@ -1,6 +1,6 @@
 # MP-BioPath 
 
-A command line tool for performing inference on biological pathways.
+A command line tool for modelling the effects of perterbations on biological pathways.
 
 # Installation
 
