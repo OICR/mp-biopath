@@ -23,7 +23,7 @@ function hugoGeneExpression(tissueType)
                 if column_index == -1
                     exit()
                 else
-                    hugoGene = convert(ASCIIString, line_parts[2])
+                    hugoGene = convert(String, line_parts[2])
                     expression_value = line_parts[column_index]
                     hugoGeneExpressionValues[hugoGene] = expression_value
                 end

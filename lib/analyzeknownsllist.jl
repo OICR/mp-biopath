@@ -23,8 +23,8 @@ function run(pifile, slfilename, lowerbound, upperbound, dbidfile, verbose)
     essentialgenes = Essential.getGenes(collect(keys(pinodes)), dbidfile)
     nodetogene     = DbIdNameMapping.nodeToGene(dbidfile)
 
-    slessential = Dict{ASCIIString,Any}[]
-    slpinodes = ASCIIString[]
+    slessential = Dict{String,Any}[]
+    slpinodes = String[]
     slpinodesPairs = []
     for sl in slnodes
         for nodea in sl["GeneANodes"]
@@ -116,7 +116,7 @@ function run(pifile, slfilename, lowerbound, upperbound, dbidfile, verbose)
     count = 0
     for sl in slessential
         count = count + 1
-        columnvalues = ASCIIString[]
+        columnvalues = String[]
         for column in headercolumns
             if column == "Count"
                 push!(columnvalues, string(count))

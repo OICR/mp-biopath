@@ -1,18 +1,11 @@
-dist: trusty
+sudo: required
 
-language: julia
-
-julia:
-    - 0.4.7
-
-addons:
-    apt:
-        packages:
-            - gfortran
-
+services:
+      - docker
 
 install:
-    - make install
+      - docker pull ubuntu:16.04
 
 script:
-    - julia test/run.jl
+    - docker build -t mpbiopath .
+    - docker run mpbiopath julia test/run.jl

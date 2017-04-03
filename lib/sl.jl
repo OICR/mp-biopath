@@ -20,16 +20,16 @@ end
 function getGenes()
     genes = []
     header = true
-    columns = Array{Dict{ASCIIString,Any}}[]
+    columns = Array{Dict{String,Any}}[]
     for line in readlines("data/sl_human")
         if header
             columns = split(chomp(line), "\t")
             header = false
         else
             lineparts = split(chomp(line), "\t")
-            nodeone = ASCIIString(lineparts[1])
-            nodetwo = ASCIIString(lineparts[3])
-            push!(genes, Dict{ASCIIString,Any}(zip(columns, lineparts)))
+            nodeone = String(lineparts[1])
+            nodetwo = String(lineparts[3])
+            push!(genes, Dict{String,Any}(zip(columns, lineparts)))
         end
     end
 
