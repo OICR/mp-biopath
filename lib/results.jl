@@ -10,14 +10,22 @@ function createcsv(nodesampleresults, columns, resultfilename)
 
     for node in keys(nodesampleresults)
         write(outfile, "$node\t")
+
+        index = 0
+        lengthColumns = length(columns)
         for column in columns
+            index += 1
             if column == "gene"
                 continue
             end
             value = round(nodesampleresults[node][column], 2)
-            write(outfile, "$value\t")
+            write(outfile, "$value")
+            if lengthColumns == index
+                write(outfile, "\n")
+            else
+                write(outfile, "\t")
+            end
         end
-        write(outfile, "\n")
     end
 
     close(outfile)

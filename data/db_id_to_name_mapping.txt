@@ -25690,7 +25690,7 @@ CDKAL1_[endoplasmic_reticulum_membrane]_222583	CDKAL1	ReferenceGeneProduct
 6786606	CDKAL1:4Fe-4S	Complex
 CDKN1A_[cytosol]_87048	CDKN1A	ReferenceGeneProduct
 CDKN1A_[nucleoplasm]_87048	CDKN1A	ReferenceGeneProduct
-CDKN1A_Gene_[nucleoplasm]_3786255	CDKN1A	ReferenceDNASequence
+CDKN1A_gene_[nucleoplasm]_3786255	CDKN1A	ReferenceDNASequence
 CDKN1A_mRNA_[cytosol]_6803385	CDKN1A	ReferenceRNASequence
 182504	CDKN1A_CDKN1B	DefinedSet
 182558	CDKN1A_CDKN1B	DefinedSet
@@ -58018,7 +58018,7 @@ SCN5A_[plasma_membrane]_52106	SCN5A	ReferenceGeneProduct
 SCN7A_[plasma_membrane]_52108	SCN7A	ReferenceGeneProduct
 SCN8A_[plasma_membrane]_87370	SCN8A	ReferenceGeneProduct
 SCN9A_[plasma_membrane]_247665	SCN9A	ReferenceGeneProduct
-SCN9ACORRUPT_[extracellular_region]_8855486	thiocyanate	ReferenceMolecule
+SCN-_[extracellular_region]_8855486	thiocyanate	ReferenceMolecule
 443637	SCNAs	CandidateSet
 443632	SCNAs:SCNBs	Complex
 443638	SCNBs	CandidateSet
@@ -66872,3 +66872,6 @@ zymosterol_[cytoplasm]_37329	zymosterol	ReferenceMolecule
 ZYMSTNL_[endoplasmic_reticulum_membrane]_35211	5alpha-cholest-8-en-3beta-ol	ReferenceMolecule
 ZYX_[cytosol]_68318	ZYX	ReferenceGeneProduct
 ZZZ3_[nucleoplasm]_258112	ZZZ3	ReferenceGeneProduct
+8848723	8848723	ReferenceGeneProduct
+447095	IL8_[extracellular_region]_402743	ReferenceGeneProduct
+Ca2__[cytosol]_114768	74016	ReferenceGeneProduct

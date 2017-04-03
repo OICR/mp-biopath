@@ -1,0 +1,11 @@
+sudo: required
+
+services:
+      - docker
+
+install:
+      - docker pull ubuntu:16.04
+
+script:
+    - docker build -t mpbiopath .
+    - docker run mpbiopath julia test/run.jl

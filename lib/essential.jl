@@ -5,7 +5,7 @@ include("dbidnamemapping.jl")
 
 function essentialGenesHugo()
     ensembletohugo = EnsembleGeneMap.ensembleToHugo()
-    essentialgenesHugo = ASCIIString[]
+    essentialgenesHugo = String[]
 
     for line in readlines("./data/essential_9606_all_gene_status.txt")
         fields = chomp(line)
@@ -24,7 +24,7 @@ function getNodes(dbidfile)
     essentialgenesHugo = essentialGenesHugo()
     genetonode = DbIdNameMapping.geneToNodes(dbidfile)
 
-    essentialnodes = ASCIIString[]
+    essentialnodes = String[]
 
     for hugogene in essentialgenesHugo
         if haskey(genetonode, hugogene)

@@ -14,13 +14,6 @@ function parse_commandline()
             help = "This determines at which level the node is determined to be down regulated."
             arg_type = Float64
             default = 0.99
-        "--upregulated-cutoff"
-            help = "This determines at which level the node is determined to be upregulated."
-            arg_type = Float64
-            default = 1.02
-        "--upperbound", "-u"
-            arg_type = Int
-            default = 10
         "--lowerbound", "-l"
             arg_type = Float64
             default = 0.001
@@ -55,8 +48,6 @@ function main()
                            parsed_args["sl-results-file"],
                            parsed_args["lowerbound"],
                            parsed_args["upperbound"],
-                           parsed_args["downregulated-cutoff"],
-                           parsed_args["upregulated-cutoff"],
                            parsed_args["db-id-file"],
                            parsed_args["verbose"])
 end

@@ -1,0 +1,519 @@
+parent_pathway_id	pathway_id	pathway_name	output_reactome_dbid	mapping_id	description	specific	direct_measurement	dm_method	indirect_measurement	im_method
+5673001	5673001	RAF/MAPK Cascade	5672718	5672718	p21 RAS:GTP:activated RAF homo/heterodimer complexes	YES				
+5673001	5673001	RAF/MAPK Cascade	5674340	5674340	p-T,Y MAPK monomers and dimers	YES				
+5673001	5673001	RAF/MAPK Cascade	5674341	5674341	p-T,Y MAPK monomers and dimers	YES				
+5673001	5673000	RAF activation	5672718	5672718		YES				
+5673001	5674135	MAP2K and MAPK activation	1268261	1268261	p-T,Y MAPK dimers	YES				
+5673001	5674135	MAP2K and MAPK activation	5674362	5674362	IL17RD:p-2S MAP2Ks:p-T,Y MAPKs	YES				
+5673001	5658442	Regulation of RAS by GAPs	5658231	5658231_RLE	RAS GAPs stimulate RAS GTPase activity	YES				
+5673001	5658442	Regulation of RAS by GAPs	109783	109783	p21 RAS:GTP	YES				
+1257604	1257604	PIP3 Activates AKT Signaling	202074	202074		YES				
+1257604	1257604	PIP3 Activates AKT Signaling	202072	202072		YES				
+1257604	1257604	PIP3 Activates AKT Signaling	198638	p-S166_S188-MDM2_[cytosol]_95018		NO				
+1257604	1257604	PIP3 Activates AKT Signaling	199484	p-S939_T1462-TSC2_[cytosol]_404219		YES				
+1257604	1257604	PIP3 Activates AKT Signaling	198615	p-T23-CHUK_[cytosol]_57214		NO				
+1257604	1257604	PIP3 Activates AKT Signaling	198636	p-S196-CASP9(1-416)_[cytosol]_57034		YES				
+1257604	1257604	PIP3 Activates AKT Signaling	200163	p-S183_T246-AKT1S1_[cytosol]_200146		YES				
+1257604	1257604	PIP3 Activates AKT Signaling	198373	198373		NO				
+1257604	1257604	PIP3 Activates AKT Signaling	198335	p-S99-BAD_[cytosol]_50663		NO				
+1257604	1257604	PIP3 Activates AKT Signaling	198605	198605		NO				
+1257604	1257604	PIP3 Activates AKT Signaling	111910	p-S133-CREB1_[nucleoplasm]_52778		NO				
+1257604	1257604	PIP3 Activates AKT Signaling	199269	199269		YES				
+1257604	1257604	PIP3 Activates AKT Signaling	199844	p-S15_S356-RPS6KB2_[nucleoplasm]_57805		NO				
+1257604	1257604	PIP3 Activates AKT Signaling	199846	p-S351-NR4A1_[nucleoplasm]_60434		NO				
+1227986	1227986	Signaling by ERBB2	1963588	1963588		YES	ERBB2 Tyr phosphorylation	Proteomic	ERBB2 overexpression	mRNA, genomic copy number
+1227986	1227986	Signaling by ERBB2	109783	109783		NO	GTP-bound RAS			
+1227986	1227986	Signaling by ERBB2	179838	PI(3_4_5)P3_[plasma_membrane]_188411		NO				
+1227986	1227986	Signaling by ERBB2	167679	p-4Y-PLCG1_[plasma_membrane]_61708		NO				
+1227986	1227986	Signaling by ERBB2	1306951	1306951		YES				
+1227986	1227986	Signaling by ERBB2	6785647	6785647		YES				
+1227986	1227986	Signaling by ERBB2	8848007	p-Y342-PTK6_[cytosol]_62419		YES				
+1227986	1227986	Signaling by ERBB2	1963585	1963585						
+1227986	1227986	Signaling by ERBB2	1963580	1963580						
+5693532	5693567	HDR_through_Homologous_Recombination_HR_or_Single_Strand_Annealing_SSA_	5686469	5686469_RLE		YES				
+5693532	5693567	HDR_through_Homologous_Recombination_HR_or_Single_Strand_Annealing_SSA_	5686410	5686410_RLE		YES				
+5693532	5693567	HDR_through_Homologous_Recombination_HR_or_Single_Strand_Annealing_SSA_	5686483	5686483_RLE		YES				
+5693532	5693567	HDR_through_Homologous_Recombination_HR_or_Single_Strand_Annealing_SSA_	5693589	5693589_RLE		YES				
+5693532	5693567	HDR_through_Homologous_Recombination_HR_or_Single_Strand_Annealing_SSA_	5686657	5686663_RLE		YES				
+5693532	5685939	HDR_through_MMEJ_alt-NHEJ_	5687675	5687675_RLE		YES				
+5693532	5693571	Nonhomologous_End-Joining_NHEJ_	5693604	5693604_RLE		YES				
+5693532	5693606	DNA_Double_Strand_Break_Response	5683784	p-S_3T-CHEK2_[nucleoplasm]_402205		YES				
+5693532	5693606	DNA_Double_Strand_Break_Response	5683808	5683808		YES				
+5693532	5693606	DNA_Double_Strand_Break_Response	5693527	p-S1981_Ac-K3016-ATM_[nucleoplasm]_85553		YES				
+5693532	5693606	DNA_Double_Strand_Break_Response	3785763	3785763		YES				
+5693532	5693606	DNA_Double_Strand_Break_Response	5682162	5682162		YES				
+5693532	5693567	HDR_through_Homologous_Recombination_HR_or_Single_Strand_Annealing_SSA_	5685162	5685162		YES				
+5693532	5693567	HDR_through_Homologous_Recombination_HR_or_Single_Strand_Annealing_SSA_	113838	p-S317_S345-CHEK1_[nucleoplasm]_87284		NO				
+5693532	5693567	HDR_through_Homologous_Recombination_HR_or_Single_Strand_Annealing_SSA_	5685826	5685826		YES				
+5693532	5693567	HDR_through_Homologous_Recombination_HR_or_Single_Strand_Annealing_SSA_	5685343	5685343		YES				
+5693532	5693567	HDR_through_Homologous_Recombination_HR_or_Single_Strand_Annealing_SSA_	5685317	5685317		YES				
+194315	194315	Signaling by RHO GTPases	194890	194890		YES				
+194315	194315	Signaling by RHO GTPases	422483	422483		YES				
+194315	194315	Signaling by RHO GTPases	399836	399836		YES				
+194315	194315	Signaling by RHO GTPases	5623659	5623659		YES				
+194315	194315	Signaling by RHO GTPases	5671987	5671987		YES				
+194315	194315	Signaling by RHO GTPases	5625955	5625955		YES				
+194315	194315	Signaling by RHO GTPases	5626465	5626465		YES				
+194315	194315	Signaling by RHO GTPases	5627084	5627084		YES				
+194315	194315	Signaling by RHO GTPases	2029147	2029147		NO				
+194315	194315	Signaling by RHO GTPases	442584	442584		NO				
+194315	194315	Signaling by RHO GTPases	5663231	5663231		YES				
+194315	194315	Signaling by RHO GTPases	5665688	5665688		YES				
+194315	194315	Signaling by RHO GTPases	5665742	5665742		YES				
+194315	194315	Signaling by RHO GTPases	5665759	5665759		YES				
+194315	194315	Signaling by RHO GTPases	5665988	5665988		YES				
+194315	194315	Signaling by RHO GTPases	5665735	5665735		YES				
+194315	194315	Signaling by RHO GTPases	5666074	5666074		YES				
+194315	194315	Signaling by RHO GTPases	5666096	5666096		YES				
+194315	194315	Signaling by RHO GTPases	3858474	3858474		YES				
+194315	194315	Signaling by RHO GTPases	5666161	5666161		YES				
+194315	194315	Signaling by RHO GTPases	5666177	5666177		YES				
+194315	194315	Signaling by RHO GTPases	5667010	5667010		YES				
+194315	194315	Signaling by RHO GTPases	5667059	5667059		YES				
+194315	194315	Signaling by RHO GTPases	5667030	5667030		YES				
+194315	194315	Signaling by RHO GTPases	5218841	5218841_RLE		NO				
+194315	194315	Signaling by RHO GTPases	5668629	5668629_RLE		YES				
+194315	194315	Signaling by RHO GTPases	5668718	5668718_RLE		YES				
+194315	194315	Signaling by RHO GTPases	5668731	5668731_RLE		YES				
+194315	194840	Rho GTPase cycle	194890	194890		YES				
+194315	194840	Rho GTPase cycle	194900	194900		YES				
+194315	195258	RHO GTPase Effectors	422483	422483		YES				
+194315	195258	RHO GTPase Effectors	399836	399836		YES				
+194315	195258	RHO GTPase Effectors	5623659	5623659		YES				
+194315	195258	RHO GTPase Effectors	5671987	5671987		YES				
+194315	195258	RHO GTPase Effectors	5625955	5625955		YES				
+194315	195258	RHO GTPase Effectors	5626465	5626465		YES				
+194315	195258	RHO GTPase Effectors	5627084	5627084		YES				
+194315	195258	RHO GTPase Effectors	2029147	2029147		NO				
+194315	195258	RHO GTPase Effectors	442584	442584		NO				
+194315	195258	RHO GTPase Effectors	5663231	5663231		YES				
+194315	195258	RHO GTPase Effectors	5665688	5665688		YES				
+194315	195258	RHO GTPase Effectors	5665742	5665742		YES				
+194315	195258	RHO GTPase Effectors	5665759	5665759		YES				
+194315	195258	RHO GTPase Effectors	5665988	5665988		YES				
+194315	195258	RHO GTPase Effectors	5665735	5665735		YES				
+194315	195258	RHO GTPase Effectors	5666074	5666074		YES				
+194315	195258	RHO GTPase Effectors	5666096	5666096		YES				
+194315	195258	RHO GTPase Effectors	3858474	3858474		YES				
+194315	195258	RHO GTPase Effectors	5666161	5666161		YES				
+194315	195258	RHO GTPase Effectors	5666177	5666177		YES				
+194315	195258	RHO GTPase Effectors	5667010	5667010		YES				
+194315	195258	RHO GTPase Effectors	5667059	5667059		YES				
+194315	195258	RHO GTPase Effectors	5667030	5667030		YES				
+194315	195258	RHO GTPase Effectors	5218841	5218841_RLE		NO				
+194315	195258	RHO GTPase Effectors	5668629	5668629_RLE		YES				
+194315	195258	RHO GTPase Effectors	5668718	5668718_RLE		YES				
+194315	195258	RHO GTPase Effectors	5668731	5668731_RLE		YES				
+194315	5627117	RHO GTPases Activate ROCKs	422483	422483		YES				
+194315	5627117	RHO GTPases Activate ROCKs	419709	419709		NO				
+194315	5627117	RHO GTPases Activate ROCKs	419195	419195		NO				
+194315	5627117	RHO GTPases Activate ROCKs	419085	419085		YES				
+194315	5627123	RHO GTPases activate PAKs	399836	399836		YES				
+194315	5627123	RHO GTPases activate PAKs	442842	p-S113-CTTN_[cytosol]_201900		YES				
+194315	5627123	RHO GTPases activate PAKs	399816	p-T508-LIMK1_[cytosol]_58571		NO				
+194315	5627123	RHO GTPases activate PAKs	5669251	5669251		YES				
+194315	5627123	RHO GTPases activate PAKs	5668948	5668948		YES				
+194315	5627123	RHO GTPases activate PAKs	5668934	5668934		YES				
+194315	5627123	RHO GTPases activate PAKs	5668975	p-S1208_S1759-MYLK(1-1914)_[cytosol]_405886		YES				
+194315	5625740	RHO GTPases activate PKNs	5623659	5623659		YES				
+194315	5625740	RHO GTPases activate PKNs	75003	p-S216-CDC25C_[cytosol]_95494		NO				
+194315	5625740	RHO GTPases activate PKNs	5671764	p-T38-PPP1R14A_[cytosol]_151594		NO				
+194315	5625740	RHO GTPases activate PKNs	5625734	5625734		YES				
+194315	5625740	RHO GTPases activate PKNs	5625882	5625882		NO				
+5625740	5625886	Activated PKN1 stimulates transcription of AR (androgen receptor) regulated genes KLK2 and KLK3	5625882	5625882		NO				
+194315	5625900	RHO GTPases activate CIT	5671987	5671987		YES				
+194315	5625900	RHO GTPases activate CIT	419195	419195		NO				
+194315	5625900	RHO GTPases activate CIT	5671969	5671969		YES				
+194315	5625900	RHO GTPases activate CIT	5672002	5672002		YES				
+194315	5625970	RHO GTPases activate KTN1	5625955	5625955		YES				
+194315	5625970	RHO GTPases activate KTN1	5672087	5672087		YES				
+194315	5626467	RHO GTPases activate IQGAPs	5626465	5626465		YES				
+194315	5626467	RHO GTPases activate IQGAPs	5626510	5626510		YES				
+194315	5626467	RHO GTPases activate IQGAPs	5672333	5672333		YES				
+194315	5627083	RHO GTPases regulate CFTR trafficking	5627084	5627084		YES				
+194315	5663213	RHO GTPases Activate WASPs and WAVEs	442584	442584		NO				
+194315	5663213	RHO GTPases Activate WASPs and WAVEs	2197680	2197680		NO				
+194315	5663213	RHO GTPases Activate WASPs and WAVEs	2029147	2029147		NO				
+194315	5663213	RHO GTPases Activate WASPs and WAVEs	2197675	2197675		NO				
+194315	5663213	RHO GTPases Activate WASPs and WAVEs	2029140	2029140		NO				
+194315	5663220	RHO GTPases Activate Formins	5663231	5663231		YES				
+194315	5663220	RHO GTPases Activate Formins	5665660	5665660		YES				
+194315	5663220	RHO GTPases Activate Formins	5665688	5665688		YES				
+194315	5663220	RHO GTPases Activate Formins	5665752	5665752		YES				
+194315	5663220	RHO GTPases Activate Formins	5665742	5665742		YES				
+194315	5663220	RHO GTPases Activate Formins	5665759	5665759		YES				
+194315	5663220	RHO GTPases Activate Formins	5665773	5665773		YES				
+194315	5663220	RHO GTPases Activate Formins	5665988	5665988		YES				
+194315	5663220	RHO GTPases Activate Formins	5665977	5665977		YES				
+194315	5663220	RHO GTPases Activate Formins	5666002	5666002		YES				
+194315	5663220	RHO GTPases Activate Formins	57596	ITGB1_[plasma_membrane]_57597		NO				
+194315	5663220	RHO GTPases Activate Formins	5666074	5666074		YES				
+194315	5663220	RHO GTPases Activate Formins	5666096	5666096		YES				
+194315	5663220	RHO GTPases Activate Formins	5666105	5666105		YES				
+194315	5663220	RHO GTPases Activate Formins	3858474	3858474		YES				
+194315	5663220	RHO GTPases Activate Formins	5666161	5666161		YES				
+194315	5663220	RHO GTPases Activate Formins	5665735	5665735		YES				
+194315	5666185	RHO GTPases Activate Rhotekin and Rhophilins	5666177	5666177		YES				
+194315	5666185	RHO GTPases Activate Rhotekin and Rhophilins	5666198	5666198		YES				
+194315	5666185	RHO GTPases Activate Rhotekin and Rhophilins	5666210	5666210		YES				
+194315	5666185	RHO GTPases Activate Rhotekin and Rhophilins	5667010	5667010		YES				
+194315	5666185	RHO GTPases Activate Rhotekin and Rhophilins	5667059	5667059		YES				
+194315	5666185	RHO GTPases Activate Rhotekin and Rhophilins	5667030	5667030		YES				
+194315	5668599	RHO GTPases Activate NADPH Oxidases	5218841	5218841_RLE		NO				
+194315	5668599	RHO GTPases Activate NADPH Oxidases	5668629	5668629_RLE		YES				
+194315	5668599	RHO GTPases Activate NADPH Oxidases	5668718	5668718_RLE		YES				
+194315	5668599	RHO GTPases Activate NADPH Oxidases	5668731	5668731_RLE		YES				
+2559583	2559583	Cellular Senescence	3209105	p16-INK4A_mRNA_[cytosol]_3209100						
+2559583	2559583	Cellular Senescence	3209107	p14-ARF_mRNA_[cytosol]_3209113						
+2559583	2559583	Cellular Senescence	182578	p16-INK4a_[cytosol]_87039						
+2559583	2559583	Cellular Senescence	1629813	p14-ARF_[nucleoplasm]_222420						
+2559583	2559583	Cellular Senescence	182585	CDKN1A_[nucleoplasm]_87048						
+2559583	2559583	Cellular Senescence	4647600	4647600						
+2559583	2559583	Cellular Senescence	447100	IL6_[extracellular_region]_57279						
+2559583	2559583	Cellular Senescence	447095	IL8_[extracellular_region]_402743						
+2559583	2559583	Cellular Senescence	182586	CDKN2B_[cytosol]_87041						
+2559583	2559583	Cellular Senescence	3214900	IGFBP7_[extracellular_region]_57000						
+2559583	2559583	Cellular Senescence	445746	2xMyri-IL1A_[extracellular_region]_57236						
+2871796	2871796	FCERI mediated MAPK activation	109783	109783		NO				
+2871796	2871796	FCERI mediated MAPK activation	2685607	p-Y1400_Y1412-MAP3K1_[cytosol]_58885		NO				
+2871796	2871796	FCERI mediated MAPK activation	168170	p-S257_T261-MAP2K4_[cytosol]_59509		NO				
+2871796	2871796	FCERI mediated MAPK activation	450353	p-S271_T275-MAP2K7_[cytosol]_59515		NO				
+2871796	2871796	FCERI mediated MAPK activation	450226	450226		NO				
+2871796	2871796	FCERI mediated MAPK activation	450327	450327		NO				
+1236394	1236394	Signaling by ERBB4	1977956	1977956		YES				
+1236394	1236394	Signaling by ERBB4	1250341	1250341		YES				
+1236394	1236394	Signaling by ERBB4	109783	109783		NO				
+1236394	1236394	Signaling by ERBB4	179838	PI(3_4_5)P3_[plasma_membrane]_188411		NO				
+1236394	1236394	Signaling by ERBB4	1251980	1251980		YES				
+1236394	1236394	Signaling by ERBB4	3008952	PGR_[nucleoplasm]_402504		NO				
+1236394	1236394	Signaling by ERBB4	1254293	CSN2_[extracellular_region]_51408		NO				
+1236394	1236394	Signaling by ERBB4	1253311	GFAP_[cytosol]_55580		NO				
+1236394	1236394	Signaling by ERBB4	879433	S100B_[extracellular_region]_63920		NO				
+1236394	1236394	Signaling by ERBB4	2980693	CXCL12(22-93)_[extracellular_region]_404128		NO				
+1236394	1236394	Signaling by ERBB4	1253347	1253347		YES				
+1236394	1236394	Signaling by ERBB4	1253344	1253344						
+450531	450531	Regulation of mRNA stability by proteins that bind AU-rich elements	450466	450466_RLE		YES				
+450531	450531	Regulation of mRNA stability by proteins that bind AU-rich elements	450430	450430		YES				
+450531	450531	Regulation of mRNA stability by proteins that bind AU-rich elements	450436	450436		YES				
+450531	450531	Regulation of mRNA stability by proteins that bind AU-rich elements	450479	450479		YES				
+450531	450531	Regulation of mRNA stability by proteins that bind AU-rich elements	517713	517713		YES				
+450531	450408	AUF1 (hnRNP D0) binds and destabilizes mRNA	450466	450466_RLE		YES				
+450531	450385	Butyrate Response Factor 1 (BRF1) binds and destabilizes mRNA	450430	450430		YES				
+450531	450513	Tristetraprolin (TTP, ZFP36) binds and destabilizes mRNA	450436	450436		YES				
+450531	450604	KSRP (KHSRP) binds and destabilizes mRNA	450479	450479		YES				
+450531	450520	HuR (ELAVL1) binds and stabilizes mRNA	517713	517713		YES				
+195721	3238698	WNT ligand biogenesis and trafficking	3247835	3247835	extracellular WNTs	YES				
+195721	3238698	WNT ligand biogenesis and trafficking	3781975	3781975	exosomal WNTs	YES				
+195721	195253	Degradation of beta-catenin by the destruction complex	2130284	2130284	ub'd Bcat complex					
+195721	4641265	Repression of WNT target genes	4411358	4411358	canonical WNT target gene transcripts	YES				
+195721	201681	TCF dependent signaling in response to WNT	5323537	5323537	RYK:WNTs					
+195721	201681	TCF dependent signaling in response to WNT	3451168	CTNNB1_[nucleoplasm]_403799	nuclear CTNNB1					
+195721	4641262	Disassembly of the destruction complex and recruitment of AXIN to the membrane	448839	CTNNB1_[cytosol]_403799	cytosolic CTNNB1					
+195721	201722	Formation of the beta-catenin:TCF transactivating complex	3361369	3361369	TCF/LEF:CTNNB1:BCL9:PYGO:SET1 complex					
+195721	201722	Formation of the beta-catenin:TCF transactivating complex	3364034	3364034	myc gene methlyated nucleosome					
+195721	201722	Formation of the beta-catenin:TCF transactivating complex	3322393	3322393	TCF/LEF:CTNNB1:PAF1 complex					
+195721	201722	Formation of the beta-catenin:TCF transactivating complex	3322396	3322396	TCF/LEF:CTNNB1:CBP/300					
+195721	201722	Formation of the beta-catenin:TCF transactivating complex	3451129	3451129	TCF/LEF:CTNNB1:RUVBL1:TRAAP:KAT5					
+195721	20722	Formation of the beta-catenin:TCF transactivating complex	3451134	3451134	TCF4 gene, acetylated nucleosome					
+195721	4411346	Binding of TCF/LEF:CTNNB1 to target gene promoters	4411387	4411387	TCF/LEF:CTNNB1:myc gene	YES				
+195721	4411346	Binding of TCF/LEF:CTNNB1 to target gene promoters	4411391	4411391	TCF/LEF:CTNNB1:AXIN2 gene	YES				
+195721	3769402	Deactivation of the beta-catenin transactivating complex	3322385	3322385	ub-TLE					
+195721	3769402	Deactivation of the beta-catenin transactivating complex	3769387	3769387	XPO1:YWHAZ:p-20 CBY:CTNNB1					
+195721	3769402	Deactivation of the beta-catenin transactivating complex	3772415	3772415	CTNNB1:CTNNBIP					
+195721	3769402	Deactivation of the beta-catenin transactivating complex	5626915	5626915	CTNNB1:SRY, SOXs					
+195721	3769402	Deactivation of the beta-catenin transactivating complex	5665607	5665607	TCF/LEF:CTNNB1:SOX4, 13, 17					
+195721	3772470	Negative regulation of TCF-dependent signaling by WNT ligand antagonists	3769337	3769337	WIF1:WNT					
+195721	3858494	Beta-catenin independent signaling	74016	Ca2__[cytosol]_114768						
+195721	4086400	PCP/CE pathway	3858474	3858474	pp-DVL:DAAM1:RHO:GTP					
+195721	4086400	PCP/CE pathway	3965386	3965386	pp-DVL:DAAM1:PFN1					
+195721	4086400	PCP/CE pathway	3858469	3858469	ppDVL:RAC:GTP					
+195721	4086400	PCP/CE pathway	4551548	4551548	WNT5A:RYK:VANGL2					
+195721	4086400	PCP/CE pathway	4551546	4551546	WNT5A:ROR2:p-VANGL2					
+195721	4608870	Asymmetric localization of PCP proteins	4608811	4608811	PARD6A:ppDVL2:SMURF					
+195721	4608870	Asymmetric localization of PCP proteins	4608820	ub-PRICKLE1_[cytosol]_243899						
+195721	5099900	WNT5A-dependent internalization of FZD4	5138458	5138458	WNT5A:FZD4:p-DVL:AP-2:clathrin					
+195721	5140745	WNT5A-dependent internalization of FZD2, FZD5 and ROR2	5140748	5140748	WNT5A:FZDs:ROR					
+195721	4086398	Ca2+ pathway	4420052	4420052_RLE	decreasing cGMP conc promotes Ca release					
+195721	4086398	Ca2+ pathway	4086392	4086392_RLE	PDE6 hydrolyzes cGMP to GMP					
+195721	4086398	Ca2+ pathway	206014	p-T187-MAP3K7_[cytosol]_168070						
+195721	4086398	Ca2+ pathway	4411401	4411401	pT298 NLK dimer (nucleoplasm)					
+195721	4086398	Ca2+ pathway	4411380	4411380	p-TCF/LEF:CTNNB1					
+195721	4086398	Ca2+ pathway	4551463	4551463	NFATC1:CaN:CaM					
+8848021	8848021	Signaling by PTK6	914048	p-Y705-STAT3_[cytosol]_403956		NO				
+8848021	8848021	Signaling by PTK6	8848441	8848441		YES				
+8848021	8848021	Signaling by PTK6	442641	442641		NO				
+8848021	8848021	Signaling by PTK6	5665993	5665993		NO				
+8848021	8848021	Signaling by PTK6	109796	109796		YES				
+8848021	8848021	Signaling by PTK6	8848723	p-Y165_Y664-BCAR1_[cytosol]_50744		YES				
+8848021	8848021	Signaling by PTK6	8848995	p-Y435_Y440_Y443-KHDRBS1_[cytosol]_234319		YES				
+8848021	8848021	Signaling by PTK6	8849031	p-Y-KHDRBS2_[nucleoplasm]_234324		YES				
+8848021	8848021	Signaling by PTK6	8849035	p-Y-KHDRSB3_[nucleoplasm]_234328		YES				
+8848021	8848021	Signaling by PTK6	8849461	p-Y-SFPQ_[nucleoplasm]_72320		YES				
+8848021	8848021	Signaling by PTK6	912656	p-Y700_Y731_Y774-CBL_[cytosol]_51488		NO				
+8848021	8848021	Signaling by PTK6	8848869	p-Y231-ARAP1_[cytosol]_412998		YES				
+8848021	8848021	Signaling by PTK6	8848769	8848769		YES				
+8848021	8848021	Signaling by PTK6	8848784	p-Y362-DOK1_[cytosol]_53802		YES				
+8848021	8848021	Signaling by PTK6	8857584	p-Y565_S797-HIF1A_[cytosol]_56516		YES				
+69620	69620	Cell Cycle Checkpoints	3222171	3222171		NO				
+69620	69620	Cell Cycle Checkpoints	6804954	p-5S_T-MDM2_[nucleoplasm]_95018		YES				
+69620	69620	Cell Cycle Checkpoints	6804937	6804937		YES				
+69620	69620	Cell Cycle Checkpoints	69589	69589		YES				
+69620	69620	Cell Cycle Checkpoints	182585	CDKN1A_[nucleoplasm]_87048						
+69620	69620	Cell Cycle Checkpoints	68376	68376						
+69620	69620	Cell Cycle Checkpoints	187926	187926						
+69620	69620	Cell Cycle Checkpoints	143488	p-S123-CDC25A_[nucleoplasm]_95488						
+69620	69615	G1/S DNA Damage Checkpoints	3222171	3222171						
+69620	69615	G1/S DNA Damage Checkpoints	6804954	p-5S_T-MDM2_[nucleoplasm]_95018						
+69620	69615	G1/S DNA Damage Checkpoints	6804937	6804937						
+69620	69615	G1/S DNA Damage Checkpoints	69589	69589						
+69620	69615	G1/S DNA Damage Checkpoints	182585	CDKN1A_[nucleoplasm]_87048						
+69620	69615	G1/S DNA Damage Checkpoints	68376	68376						
+69620	69615	G1/S DNA Damage Checkpoints	187926	187926						
+69620	69615	G1/S DNA Damage Checkpoints	143488	p-S123-CDC25A_[nucleoplasm]_95488		NO				
+69620	69580	p53-Dependent G1/S DNA damage checkpoint	3222171	3222171						
+69620	69580	p53-Dependent G1/S DNA damage checkpoint	6804954	p-5S_T-MDM2_[nucleoplasm]_95018						
+69620	69580	p53-Dependent G1/S DNA damage checkpoint	6804937	6804937						
+69620	69580	p53-Dependent G1/S DNA damage checkpoint	69589	69589						
+69620	69580	p53-Dependent G1/S DNA damage checkpoint	182585	CDKN1A_[nucleoplasm]_87048						
+69620	69580	p53-Dependent G1/S DNA damage checkpoint	68376	68376						
+69620	69580	p53-Dependent G1/S DNA damage checkpoint	187926	187926						
+69620	69563	p53-Dependent G1 DNA Damage Response	3222171	3222171						
+69620	69563	p53-Dependent G1 DNA Damage Response	6804954	p-5S_T-MDM2_[nucleoplasm]_95018						
+69620	69563	p53-Dependent G1 DNA Damage Response	6804937	6804937						
+69620	69563	p53-Dependent G1 DNA Damage Response	69589	69589						
+69620	69563	p53-Dependent G1 DNA Damage Response	182585	CDKN1A_[nucleoplasm]_87048						
+69620	69563	p53-Dependent G1 DNA Damage Response	68376	68376						
+69620	69563	p53-Dependent G1 DNA Damage Response	187926	187926						
+69620	69541	Stabilization of p53	3222171	3222171		NO				
+69620	69541	Stabilization of p53	6804954	p-5S_T-MDM2_[nucleoplasm]_95018		YES				
+69620	69541	Stabilization of p53	6804937	6804937		YES				
+69620	69541	Stabilization of p53	69589	69589		YES				
+69620	349425	Autodegradation of the E3 ubiquitin ligase COP1	69589	69589		YES				
+69620	69560	Transcriptional activation of p53 responsive genes	182585	CDKN1A_[nucleoplasm]_87048		YES				
+69620	69895	Transcriptional activation of cell cycle inhibitor p21	182585	CDKN1A_[nucleoplasm]_87048		YES				
+69620	69613	p53-Independent G1/S DNA damage checkpoint	143488	p-S123-CDC25A_[nucleoplasm]_95488		NO				
+69620	69610	p53-Independent DNA Damage Response	143488	p-S123-CDC25A_[nucleoplasm]_95488		NO				
+69620	69601	Ubiquitin Mediated Degradation of Phosphorylated Cdc25A	143488	p-S123-CDC25A_[nucleoplasm]_95488		NO				
+69620	69481	G2/M Checkpoints	113838	p-S317_S345-CHEK1_[nucleoplasm]_87284						
+69620	69481	G2/M Checkpoints	5683784	p-S_3T-CHEK2_[nucleoplasm]_402205						
+69620	69481	G2/M Checkpoints	156496	p-S216-CDC25C_[nucleoplasm]_95494						
+69620	69481	G2/M Checkpoints	156491	p-WEE1_[nucleoplasm]_104871						
+69620	69481	G2/M Checkpoints	170065	170065						
+69620	69481	G2/M Checkpoints	176116	176116_RLE						
+69620	69481	G2/M Checkpoints	3222171	3222171						
+69620	69473	G2/M DNA damage checkpoint	113838	p-S317_S345-CHEK1_[nucleoplasm]_87284						
+69620	69473	G2/M DNA damage checkpoint	5683784	p-S_3T-CHEK2_[nucleoplasm]_402205						
+69620	69473	G2/M DNA damage checkpoint	3222171	3222171						
+69620	75035	Chk1/Chk2(Cds1) mediated inactivation of Cyclin B:Cdk1 complex	156496	p-S216-CDC25C_[nucleoplasm]_95494						
+69620	75035	Chk1/Chk2(Cds1) mediated inactivation of Cyclin B:Cdk1 complex	156491	p-WEE1_[nucleoplasm]_104871						
+69620	75035	Chk1/Chk2(Cds1) mediated inactivation of Cyclin B:Cdk1 complex	170065	170065						
+69620	69478	G2/M DNA replication checkpoint	170065	170065						
+69620	176187	Activation of ATR in response to replication stress	176116	176116_RLE						
+453279	453279	Mitotic G1-G1/S phases	68891	CCNA1_[nucleoplasm]_87205						
+453279	453279	Mitotic G1-G1/S phases	73500	TK1_[cytosol]_69804						
+453279	453279	Mitotic G1-G1/S phases	69226	p-S795-RB1_[nucleoplasm]_62886						
+453279	453279	Mitotic G1-G1/S phases	1226085	p-T369_S640_S964_S975-RBL1_[nucleoplasm]_62848						
+453279	453279	Mitotic G1-G1/S phases	1226084	p-T401_S672_S1035-RBL2_[nucleoplasm]_62850						
+453279	453279	Mitotic G1-G1/S phases	1363324	1363324						
+453279	453279	Mitotic G1-G1/S phases	68374	68374						
+453279	453279	Mitotic G1-G1/S phases	187568	187568						
+453279	453279	Mitotic G1-G1/S phases	188391	188391						
+453279	453279	Mitotic G1-G1/S phases	68487	POLA1_[nucleoplasm]_89346						
+453279	453279	Mitotic G1-G1/S phases	68889	CDK1_[nucleoplasm]_86981						
+453279	453279	Mitotic G1-G1/S phases	68542	CDC6_[nucleoplasm]_68541						
+453279	453279	Mitotic G1-G1/S phases	1227905	1227905						
+453279	453279	Mitotic G1-G1/S phases	68439	PCNA_[nucleoplasm]_97870						
+453279	453279	Mitotic G1-G1/S phases	68510	68510						
+453279	453279	Mitotic G1-G1/S phases	68536	CDT1_[nucleoplasm]_68535						
+453279	453279	Mitotic G1-G1/S phases	68563	CDC45_[nucleoplasm]_86785						
+453279	453279	Mitotic G1-G1/S phases	157443	CCNE1_[nucleoplasm]_87225						
+453279	453279	Mitotic G1-G1/S phases	143487	CDC25A_[nucleoplasm]_95488						
+453274	453274	Mitotic G2-G2/M phases	170146	170146						
+453274	453274	Mitotic G2-G2/M phases	157456	157456						
+453274	453274	Mitotic G2-G2/M phases	68898	68898						
+453274	453274	Mitotic G2-G2/M phases	4088133	p-T611_S730_S739-FOXM1_[nucleoplasm]_55120						
+453274	453274	Mitotic G2-G2/M phases	3000318	p-T210-PLK1_[cytosol]_69858						
+453274	453274	Mitotic G2-G2/M phases	3002800	p-T210-PLK1_[nucleoplasm]_69858						
+453274	453274	Mitotic G2-G2/M phases	2562525	p-S177-OPTN_[cytosol]_241119						
+453274	453274	Mitotic G2-G2/M phases	156694	p-S53-WEE1_[nucleoplasm]_104871						
+453274	453274	Mitotic G2-G2/M phases	156668	p-S198-CDC25C_[nucleoplasm]_95494						
+453274	453274	Mitotic G2-G2/M phases	162650	p-PKMYT1_[nucleoplasm]_74385						
+453274	453274	Mitotic G2-G2/M phases	380455	380455_RLE						
+453274	453274	Mitotic G2-G2/M phases	380288	380288						
+453274	453274	Mitotic G2-G2/M phases	380440	380440						
+453274	453274	Mitotic G2-G2/M phases	380473	p-NUMA1_[nucleoplasm]_151408						
+453274	453274	Mitotic G2-G2/M phases	380503	380503						
+453274	453274	Mitotic G2-G2/M phases	380495	380495						
+453274	453274	Mitotic G2-G2/M phases	380294	380294_RLE						
+453274	453274	Mitotic G2-G2/M phases	380303	380303_RLE						
+453274	453274	Mitotic G2-G2/M phases	8853422	8853422						
+453274	453274	Mitotic G2-G2/M phases	8852349	8852349						
+453274	453274	Mitotic G2-G2/M phases	8852380	8852380						
+453274	453274	Mitotic G2-G2/M phases	8853443	p-S95-PHLDA1_[cytosol]_242653						
+3700989	3700989	Transcriptional Regulation by TP53	5628829	TIGAR_[cytosol]_224056						
+3700989	3700989	Transcriptional Regulation by TP53	2318746	PTEN_mRNA_[cytosol]_2318745						
+3700989	3700989	Transcriptional Regulation by TP53	5629191	5629191						
+3700989	3700989	Transcriptional Regulation by TP53	5632374	DDIT4_[cytosol]_226674						
+3700989	3700989	Transcriptional Regulation by TP53	5336150	SCO2_[mitochondrial_matrix]_64212						
+3700989	3700989	Transcriptional Regulation by TP53	119792	RRM2B_[cytosol]_245787						
+3700989	3700989	Transcriptional Regulation by TP53	507858	507858						
+3700989	3700989	Transcriptional Regulation by TP53	5357525	MSH2_[nucleoplasm]_59583						
+3700989	3700989	Transcriptional Regulation by TP53	69741	CDC25C_[nucleoplasm]_95494						
+3700989	3700989	Transcriptional Regulation by TP53	139916	BAX_[cytosol]_50715						
+3700989	3700989	Transcriptional Regulation by TP53	448692	CASP1(1-404)_[cytosol]_56948						
+3700989	3700989	Transcriptional Regulation by TP53	66248	FAS_[plasma_membrane]_66249						
+3700989	3700989	Transcriptional Regulation by TP53	3215139	GADD45A_[nucleoplasm]_55240						
+3700989	3700989	Transcriptional Regulation by TP53	4655344	BIRC5_[nucleoplasm]_50852						
+3700989	3700989	Transcriptional Regulation by TP53	6800837	PERP_[plasma_membrane]_242420						
+3700989	3700989	Transcriptional Regulation by TP53	5689128	AIFM2_[mitochondrial_outer_membrane]_218252						
+3700989	3700989	Transcriptional Regulation by TP53	50099	APAF1_[cytosol]_50100						
+3700989	3700989	Transcriptional Regulation by TP53	3782552	ARID3A_[nucleoplasm]_53892						
+3700989	3700989	Transcriptional Regulation by TP53	140220	BBC3_[cytosol]_140219						
+3700989	3700989	Transcriptional Regulation by TP53	6791317	BCL2L14_[cytosol]_219757						
+3700989	3700989	Transcriptional Regulation by TP53	5223066	BCL6_[nucleoplasm]_50762						
+3700989	3700989	Transcriptional Regulation by TP53	50825	BID(1-195)_[cytosol]_50826						
+3700989	3700989	Transcriptional Regulation by TP53	6798001	BNIP3L_[mitochondrial_outer_membrane]_60225						
+3700989	3700989	Transcriptional Regulation by TP53	6798008	BTG2_[cytosol]_51014						
+3700989	3700989	Transcriptional Regulation by TP53	933453	CASP10(1-521)_[cytosol]_57036						
+3700989	3700989	Transcriptional Regulation by TP53	6798132	CASP6_(1-293)_[cytosol]_57028						
+3700989	3700989	Transcriptional Regulation by TP53	6796619	CCNK_[nucleoplasm]_69888						
+3700989	3700989	Transcriptional Regulation by TP53	6803386	CDKN1A_mRNA_[cytosol]_6803385						
+3700989	3700989	Transcriptional Regulation by TP53	53491	DDB2_[nucleoplasm]_53492						
+3700989	3700989	Transcriptional Regulation by TP53	6798305	E2F7_[nucleoplasm]_227804						
+3700989	3700989	Transcriptional Regulation by TP53	419530	FANCC_[nucleoplasm]_54634						
+3700989	3700989	Transcriptional Regulation by TP53	381512	IGFBP3_[extracellular_region]_381525						
+3700989	3700989	Transcriptional Regulation by TP53	5628834	NDRG1_[cytosol]_60031						
+3700989	3700989	Transcriptional Regulation by TP53	561198	NLRC4_[cytosol]_51396						
+3700989	3700989	Transcriptional Regulation by TP53	6800483	PIDD1_[nucleoplasm]_242783						
+3700989	3700989	Transcriptional Regulation by TP53	6803945	PLAGL1_[nucleoplasm]_61288						
+3700989	3700989	Transcriptional Regulation by TP53	6801636	PLK2_[cytosol]_64744						
+3700989	3700989	Transcriptional Regulation by TP53	3222161	PLK3_[nucleoplasm]_69653						
+3700989	3700989	Transcriptional Regulation by TP53	140215	PMAIP1_[cytosol]_50170						
+3700989	3700989	Transcriptional Regulation by TP53	5357527	PMS2_[nucleoplasm]_61906						
+3700989	3700989	Transcriptional Regulation by TP53	6801086	RABGGTA_[plasma_membrane]_61634						
+3700989	3700989	Transcriptional Regulation by TP53	6803902	RGCC_[cytosol]_245440						
+3700989	3700989	Transcriptional Regulation by TP53	1445105	SFN_[cytosol]_48913						
+3700989	3700989	Transcriptional Regulation by TP53	917861	STEAP3_[endosome_membrane]_249692						
+3700989	3700989	Transcriptional Regulation by TP53	1307778	TRIAP1_[mitochondrial_intermembrane_space]_48923						
+3700989	3700989	Transcriptional Regulation by TP53	6798613	TP53AIP1_[mitochondrial_matrix]_252362						
+3700989	3700989	Transcriptional Regulation by TP53	3215226	TP53INP1_[nucleoplasm]_250296						
+3700989	3700989	Transcriptional Regulation by TP53	6799460	TP53I3_[cytosol]_244525						
+3700989	3700989	Transcriptional Regulation by TP53	6801323	6801323						
+3700989	3700989	Transcriptional Regulation by TP53	6797713	6797713						
+3700989	3700989	Transcriptional Regulation by TP53	8856287	8856287						
+109606	109606	Intrinsic pathway for Apoptosis	114266	MYS-BID(62-195)_[mitochondrial_outer_membrane]_50826						
+109606	109606	Intrinsic pathway for Apoptosis	114242	BAD_[mitochondrial_outer_membrane]_50663						
+109606	109606	Intrinsic pathway for Apoptosis	114266	MYS-BID(62-195)_[mitochondrial_outer_membrane]_50826						
+109606	109606	Intrinsic pathway for Apoptosis	140218	PMAIP1_[mitochondrial_outer_membrane]_50170						
+109606	109606	Intrinsic pathway for Apoptosis	140222	BBC3_[mitochondrial_outer_membrane]_140219						
+109606	109606	Intrinsic pathway for Apoptosis	3145027	p-BCL2L11_[mitochondrial_outer_membrane]_401534						
+109606	109606	Intrinsic pathway for Apoptosis	3145026	p-BMF_[mitochondrial_outer_membrane]_140208						
+109606	109606	Intrinsic pathway for Apoptosis	508158	508158						
+109606	109606	Intrinsic pathway for Apoptosis	508159	508159						
+109606	109606	Intrinsic pathway for Apoptosis	114269	114269						
+109606	109606	Intrinsic pathway for Apoptosis	114262	114262						
+109606	109606	Intrinsic pathway for Apoptosis	53259	CYCS_[cytosol]_53260						
+109606	109606	Intrinsic pathway for Apoptosis	114298	DIABLO_[cytosol]_64638						
+109606	109606	Intrinsic pathway for Apoptosis	114258	114258						
+109606	109606	Intrinsic pathway for Apoptosis	350870	350870						
+109606	109606	Intrinsic pathway for Apoptosis	141643	141643						
+109606	109606	Intrinsic pathway for Apoptosis	114305	114305						
+109606	109606	Intrinsic pathway for Apoptosis	114353	114353						
+109606	109606	Intrinsic pathway for Apoptosis	114318	114318						
+109606	75108	Activation, myristolyation of BID and translocation to the mitochondria	114266	MYS-BID(62-195)_[mitochondrial_outer_membrane]_50826						
+109606	114452	Activation of BH3-only proteins	114242	BAD_[mitochondrial_outer_membrane]_50663						
+109606	114452	Activation of BH3-only proteins	114266	MYS-BID(62-195)_[mitochondrial_outer_membrane]_50826						
+109606	114452	Activation of BH3-only proteins	140218	PMAIP1_[mitochondrial_outer_membrane]_50170						
+109606	114452	Activation of BH3-only proteins	140222	BBC3_[mitochondrial_outer_membrane]_140219						
+109606	114452	Activation of BH3-only proteins	3145027	p-BCL2L11_[mitochondrial_outer_membrane]_401534						
+109606	114452	Activation of BH3-only proteins	3145026	p-BMF_[mitochondrial_outer_membrane]_140208						
+109606	111447	Activation of BAD and translocation to mitochondria	114242	BAD_[mitochondrial_outer_membrane]_50663						
+109606	111447	Activation of BAD and translocation to mitochondria	114266	MYS-BID(62-195)_[mitochondrial_outer_membrane]_50826						
+109606	111448	Activation of NOXA and translocation to mitochondria	140218	PMAIP1_[mitochondrial_outer_membrane]_50170						
+109606	139915	Activation of PUMA and translocation to mitochondria	140222	BBC3_[mitochondrial_outer_membrane]_140219						
+109606	111446	Activation of BIM and translocation to mitochondria	3145027	p-BCL2L11_[mitochondrial_outer_membrane]_401534						
+109606	1114452	Activation of BMF and translocation to mitochondria	3145026	p-BMF_[mitochondrial_outer_membrane]_140208						
+109606	111453	BH3-only proteins associate with and inactivate anti-apoptotic BCL-2 members	508158	508158						
+109606	111453	BH3-only proteins associate with and inactivate anti-apoptotic BCL-2 members	508159	508159						
+109606	114294	Activation, translocation and oligomerization of BAX	114269	114269						
+109606	111452	Activation and oligomerization of BAK protein	114262	114262						
+109606	111457	Release of apoptotic factors from the mitochondria	53259	CYCS_[cytosol]_53260						
+109606	111457	Release of apoptotic factors from the mitochondria	114298	DIABLO_[cytosol]_64638						
+109606	111471	Apoptotic factor-mediated response	114258	114258						
+109606	111471	Apoptotic factor-mediated response	350870	350870						
+109606	111471	Apoptotic factor-mediated response	141643	141643						
+109606	111471	Apoptotic factor-mediated response	114305	114305						
+109606	111471	Apoptotic factor-mediated response	114353	114353						
+109606	111471	Apoptotic factor-mediated response	114318	114318						
+109606	111471	Apoptotic factor-mediated response	141640	141640						
+109606	111461	Cytochrome c-mediated apoptotic response	114258	114258						
+109606	111461	Cytochrome c-mediated apoptotic response	350870	350870						
+109606	111461	Cytochrome c-mediated apoptotic response	141643	141643						
+109606	111458	Formation of apoptosome	114258	114258						
+109606	111459	Activation of caspases through apoptosome-mediated cleavage	350870	350870						
+109606	111459	Activation of caspases through apoptosome-mediated cleavage	141643	141643						
+109606	111469	SMAC-mediated apoptotic response	114305	114305						
+109606	111469	SMAC-mediated apoptotic response	114353	114353						
+109606	111469	SMAC-mediated apoptotic response	114318	114318						
+109606	111469	SMAC-mediated apoptotic response	350870	350870						
+109606	111469	SMAC-mediated apoptotic response	141643	141643						
+109606	111469	SMAC-mediated apoptotic response	141640	141640						
+109606	111463	SMAC binds to IAPs	114305	114305						
+109606	111463	SMAC binds to IAPs	114353	114353						
+109606	111463	SMAC binds to IAPs	114318	114318						
+109606	111464	SMAC-mediated dissociation of IAP:caspase complexes	350870	350870						
+109606	111464	SMAC-mediated dissociation of IAP:caspase complexes	141643	141643						
+109606	111464	SMAC-mediated dissociation of IAP:caspase complexes	141640	141640						
+5358351	5358351	Signaling by Hedgehog	5362543	5362543	Hh-Np:SCUBE2					
+5358351	5358351	Signaling by Hedgehog	5362783	5362783	Hh-Npp					
+5358351	5358351	Signaling by Hedgehog	5362546	5362546	Hh-Np:GPC5					
+5358351	5358351	Signaling by Hedgehog	5610371	GLI3R_[nucleoplasm]_55678	GLI3R					
+5358351	5358351	Signaling by Hedgehog	5610608	5610608	Ub-p11S-GLI2:SUFU					
+5358351	5358351	Signaling by Hedgehog	5610612	5610612	Ub-pS-GLI1:SUFU					
+5358351	5358351	Signaling by Hedgehog	5610565	5610565	NUMB:ITCH:Ub-pS:GLI1:SUFU					
+5358351	5358351	Signaling by Hedgehog	5632590	5632590	Hh-Npp:CDON:PTCH					
+5358351	5358351	Signaling by Hedgehog	5632649	5632649	Hh-Npp:GAS1:PTCH					
+5358351	5358351	Signaling by Hedgehog	5632653	5632653	Hh-Npp:BOC1:PTCH					
+5358351	5358351	Signaling by Hedgehog	5632520	ub_PTCH1_[endocytic_vesicle_membrane]_62393	ub-PTCH1					
+5358351	5358351	Signaling by Hedgehog	5632668	5632688_RLE	SMO translocates to the cilium					
+5358351	5358351	Signaling by Hedgehog	5635090	5635090	p-GLI1,2,3_nucleoplasm					
+5654736	5654736	Signaling by FGFR1	190430	190430	Activated FGFR1b homodimer					
+5654736	5654736	Signaling by FGFR1	190425	190425	Activated FGFR1c homodimer					
+5654736	5654736	Signaling by FGFR1	5654170	5654170	Activated FGFR1					
+5654736	5654736	Signaling by FGFR1	167679	p-4Y-PLCG1_[plasma_membrane]_61708						
+5654736	5654736	Signaling by FGFR1	109783	109783	RAS:GTP					
+5654736	5654736	Signaling by FGFR1	1268261	1268261	p-T,Y MAPK dimers					
+5654736	5654736	Signaling by FGFR1	5654205	5654205	Activated FGFR1:p-FRS2:GRB2:GAB1:PI3K					
+5654736	5654736	Signaling by FGFR1	5654188	5654188	Activated FGFR1:p-FRS2:p-PTPN11:GRB2:GAB1:PI3K					
+5654736	5654736	Signaling by FGFR1	5654260	5654260	Activated FGFR1:p-8T-FRS2					
+5654736	5654736	Signaling by FGFR1	1295625	1295625	PPA2A (A:C):Y55/Y227 p-SPRY2:GRB2K					
+5654738	5654738	Signaling by FGFR2	192606	192606	Activated FGFR2b homodimer bound to FGF					
+5654738	5654738	Signaling by FGFR2	192616	192616	Activated FGFR2c homodimer bound to FGF					
+5654738	5654738	Signaling by FGFR2	5654152	5654152	Activated FGFR2					
+5654738	5654738	Signaling by FGFR2	167679	PLCG1_[plasma_membrane]_61708						
+5654738	5654738	Signaling by FGFR2	109783	109783	RAS:GTP					
+5654738	5654738	Signaling by FGFR2	1268261	1268261	p-T,Y MAPK dimers					
+5654738	5654738	Signaling by FGFR2	5654190	5654190	Activated FGFR2:p-FRS2:GRB2:GAB1:PI3K					
+5654738	5654738	Signaling by FGFR2	5654192	5654192	Activated FGFR2:p-FRS2:p-PTPN11:GRB2:GAB1:PI3K					
+5654738	5654738	Signaling by FGFR2	1295625	1295625	PPA2A (A:C):Y55/Y227 p-SPRY2:GRB2					
+5654738	5654738	Signaling by FGFR2	5654281	5654281	Activated FGFR2:p-8T-FRS2					
+5654741	5654741	Signaling by FGFR3	190380	190380	Activated FGFR3b homodimer					
+5654741	5654741	Signaling by FGFR3	190389	190389	Activated FGFR3c homodimer					
+5654741	5654741	Signaling by FGFR3	5654146	5654146	Activated FGFR3					
+5654741	5654741	Signaling by FGFR3	167679	p-4Y-PLCG1_[plasma_membrane]_61708						
+5654741	5654741	Signaling by FGFR3	5654301	5654301	Activated FGFR3:p-8T-FRS2					
+5654741	5654741	Signaling by FGFR3	109783	109783	RAS:GTP					
+5654741	5654741	Signaling by FGFR3	1268261	1268261	p-T,Y MAPK dimers					
+5654741	5654741	Signaling by FGFR3	5654195	5654195	Activated FGFR3:p-FRS2:GRB2:GAB1:PI3K					
+5654741	5654741	Signaling by FGFR3	5654197	5654197	Activated FGFR3:p-FRS2:p-PTPN11:GRB2:GAB1:PI3K					
+5654741	5654741	Signaling by FGFR3	1295625	1295625	PPA2A (A:C):Y55/Y227 p-SPRY2:GRB2					
+5654743	5654743	Signaling by FGFR4	190328	190328	Activated FGFR4 homodimer					
+5654743	5654743	Signaling by FGFR4	1307958	1307958	Activated FGFR4 bound to FGF23:betaKlotho					
+5654743	5654743	Signaling by FGFR4	5654158	5654158	Activated FGFR4					
+5654743	5654743	Signaling by FGFR4	167679	p-4Y-PLCG1_[plasma_membrane]_61708						
+5654743	5654743	Signaling by FGFR4	5654322	5654322	Activated FGFR4:p-8T-FRS2					
+5654743	5654743	Signaling by FGFR4	109783	109783	RAS:GTP					
+5654743	5654743	Signaling by FGFR4	1268261	1268261	p-T,Y MAPK dimers					
+5654743	5654743	Signaling by FGFR4	5654187	5654187	Activated FGFR4:p-FRS2:GRB2:GAB1:PI3K					
+5654743	5654743	Signaling by FGFR4	5654331	5654331	Activated FGFR3:p-FRS2:p-PTPN11:GRB2:GAB1:PI3K					
+5654743	5654743	Signaling by FGFR4	1295625	1295625	PPA2A (A:C):Y55/Y227 p-SPRY2:GRB2					

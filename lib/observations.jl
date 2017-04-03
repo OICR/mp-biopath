@@ -2,7 +2,7 @@ module Observations
 
 include("dbidnamemapping.jl")
 
-function get(fname, pinodes, dbidfile, copynumber)
+function get(fname, pinodes, dbidfile, copynumber, oneNormal)
     genetonodes = DbIdNameMapping.geneToRootNodes(pinodes, dbidfile)
 
     divideby = copynumber? 2:1
@@ -32,7 +32,11 @@ function get(fname, pinodes, dbidfile, copynumber)
             else
                 if haskey(genetonodes, gene)
                     for node in Array(genetonodes[gene])
-                        samplenodestate[column][node] = copynumber? parse(Float64,lineparts[i]) / 2 : parse(Float64,lineparts[i]) - 1
+                        samplenodestate[column][node] = oneNormal?
+                                                            parse(Float64, lineparts[i]) :
+                                                            copynumber?
+                                                               parse(Float64,lineparts[i]) / 2 :
+                                                               parse(Float64,lineparts[i]) - 1
                     end
                 end
             end

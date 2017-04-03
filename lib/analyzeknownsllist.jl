@@ -11,7 +11,7 @@ include("../lib/dbidnamemapping.jl")
 #include("../lib/coexpress.jl")
 
 
-function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, dbidfile, verbose)
+function run(pifile, slfilename, lowerbound, upperbound, dbidfile, verbose)
     pinodes = Pi.readFile(pifile)
     slnodes = SL.getNodes(dbidfile)
     pinodesSet = Set(keys(pinodes))
@@ -23,8 +23,8 @@ function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, up
     essentialgenes = Essential.getGenes(collect(keys(pinodes)), dbidfile)
     nodetogene     = DbIdNameMapping.nodeToGene(dbidfile)
 
-    slessential = Dict{ASCIIString,Any}[]
-    slpinodes = ASCIIString[]
+    slessential = Dict{String,Any}[]
+    slpinodes = String[]
     slpinodesPairs = []
     for sl in slnodes
         for nodea in sl["GeneANodes"]
@@ -63,8 +63,6 @@ function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, up
                                     essentialgenes,
                                     lowerbound,
                                     upperbound,
-                                    downregulatedcutoff,
-                                    upregulatedcutoff,
                                     verbose)
 
         for (essentialnode, essentialvalue) in sampleresults
@@ -96,8 +94,6 @@ function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, up
                                     essentialgenes,
                                     lowerbound,
                                     upperbound,
-                                    downregulatedcutoff,
-                                    upregulatedcutoff,
                                     verbose)
 
          for (essentialnode, essentialvalue) in sampleresults
@@ -120,7 +116,7 @@ function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, up
     count = 0
     for sl in slessential
         count = count + 1
-        columnvalues = ASCIIString[]
+        columnvalues = String[]
         for column in headercolumns
             if column == "Count"
                 push!(columnvalues, string(count))
