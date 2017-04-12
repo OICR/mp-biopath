@@ -2,7 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.0.3] - UNRELEASED
+## [0.0.4] - 2017-04-11
+
+- Bug fixes
+- Changes to CLI
+
+## [0.0.3] - 2017-04-03
 
 - adding tests
 
