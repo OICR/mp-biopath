@@ -5,8 +5,8 @@ Pkg.add("Ipopt")
 Pkg.add("Cbc")
 Pkg.add("NLopt")
 Pkg.add("CoinOptServices")
-#Pkg.build("CoinOptServices", "Ipopt")
 Pkg.add("AmplNLWriter")
 Pkg.add("Requests")
 Pkg.add("FactCheck")
-#Pkg.add("Coverage")
+Pkg.add("DataFrames") # for tsne
+Pkg.add("DocOpt") # for tsne
