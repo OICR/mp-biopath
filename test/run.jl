@@ -1,6 +1,6 @@
 using FactCheck
 
-facts("Interacion Types") do
+facts("Interaction Types") do
 
     tests = ["and", "andneg", "or"]
 
@@ -12,6 +12,9 @@ facts("Interacion Types") do
             @fact std_out --> ""
         end
     end
+end
+
+facts("Loops") do
 
     # negative loop test
     loopTests = ["No_Positive_Feedback_Loop_Prototype", "Positive_Feedback_Loop_Prototype" ]
