@@ -1,0 +1,15 @@
+gene	patient1	patient2
+Output3	0.01	5.0
+4_RLE	0.01	5.0
+Output1_PSEUDONODE_Input2_[cytosol]_2	0.5	1.0
+Input4_[cytosol]_4	1.0	1.0
+Input12_[cytosol]_12	1.0	1.0
+2_RLE	0.0	5.0
+Output2	0.0	5.0
+1_RLE	0.5	1.0
+Input11_[cytosol]_11	0.5	1.0
+Input3_[cytosol]_3	1.0	1.0
+Output1	0.5	1.0
+Input2_[cytosol]_2	1.0	1.0
+Output4	0.01	5.0
+3_RLE	0.0	5.0
