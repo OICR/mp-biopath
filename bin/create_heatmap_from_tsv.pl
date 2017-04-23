@@ -96,8 +96,6 @@ $R->run(q'heatmap.2(log10(y),
                     cexCol=0.05,
                     margins=c(12,15),
                     RowSideColors=c(row_annotation))');
-
-
 $R->run(qq'legend("topright",      # location of the legend on the heatmap plot
            legend = c($pathway_string), # category labels
            col = c($color_string),
