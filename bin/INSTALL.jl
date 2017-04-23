@@ -8,5 +8,10 @@ Pkg.add("CoinOptServices")
 Pkg.add("AmplNLWriter")
 Pkg.add("Requests")
 Pkg.add("FactCheck")
-Pkg.add("DataFrames") # for tsne
-Pkg.add("DocOpt") # for tsne
+
+#for tsne
+Pkg.add("DataFrames")
+Pkg.add("DocOpt")
+Pkg.add("Gadfly")
+Pkg.add("Cairo")
+Pkg.add("Fontconfig")

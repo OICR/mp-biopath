@@ -3,6 +3,8 @@ using DataFrames
 
 # This is from https://github.com/lejon/TSne.jl/blob/35bad1c5cfd78d44e5d89bbca89a85555943b9db/examples/demo-csv.jl
 
+# USAGE: julia bin/create_tsne_plot.jl haveheader --labelcolname=pathway_label /home/awright/git/PGM/gecco/mpbiopath_results.summary.for_tsne.tsv
+
 doc = """Use t-SNE to generate a PDF called myplot.pdf from an input CSV file. Default assumption is to have no header and no labels. If these are available in the CSV these must be given as arguments.
 Usage:
   demo-csv.jl <filename>
