@@ -11,4 +11,3 @@ Output1	Output1	Reaction
 Input2_[cytosol]_2	Input2	ReferenceGeneProduct
 Output4	Output4	ReferenceGeneProduct
 3_RLE	3_RLE	Reaction
-
