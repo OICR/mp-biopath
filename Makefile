@@ -1,8 +1,7 @@
-KEYOUTPUT_FILE=./data/keyoutputs.tsv
+.PHONY: build-env
+build-env:
+	docker build -t oicr/mpbiopath-env:0.0.4-SNAPSHOT -f docker/Dockerfile.env .
 
-.PHONY: install
-install: install-julia-packages
-
-.PHONY: install-julia-packages
-install-julia-packages:
-	julia bin/INSTALL.jl
+.PHONY: build-app
+build-app:
+	docker build -t oicr/mpbiopath:0.0.4-SNAPSHOT -f docker/Dockerfile.app .

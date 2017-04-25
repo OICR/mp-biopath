@@ -110,8 +110,6 @@ function run(nodes, measurednodestate, keyoutputs, LB, UB, expression, verbose)
                         ev = expression[parent]
                         if verbose
                             println("Parent node: $parent\tExpression value: $ev")
-                        else
-                            println("Parent node: $parent")
                         end
                     end
                 end

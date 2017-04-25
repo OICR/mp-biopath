@@ -4,8 +4,8 @@ services:
       - docker
 
 install:
-      - docker pull ubuntu:16.04
+      - docker pull oicr/mpbiopath-env:0.0.4-SNAPSHOT
 
 script:
-    - docker build -t mpbiopath .
+    - docker build -t mpbiopath -f docker/Dockerfile.app .
     - docker run mpbiopath julia test/run.jl
