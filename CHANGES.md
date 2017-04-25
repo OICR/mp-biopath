@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Bug fixes
 - Changes to CLI
+- Added Heatmap script
+- Added T-SNE script
 
 ## [0.0.3] - 2017-04-03
 
