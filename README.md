@@ -28,6 +28,21 @@ make install
 julia bin/runInference.jl --help
 ```
 
+# Install TSNe package
+
+First enter Julia console
+
+```bash
+julia
+```
+
+In Julia console install
+
+``julia
+Pkg.clone("git://github.com/lejon/TSne.jl.git")
+```
+
+
 # Downloading Expression Data
 
 ```bash
