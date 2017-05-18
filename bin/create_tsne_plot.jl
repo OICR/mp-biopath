@@ -51,6 +51,7 @@ if lblcol>0
 end
 
 dataset = df[filter(x -> x!=lblcol,1:ncol(df)),]
+
 data = float(convert(Array,dataset))
 # Normalize the data, this should be done if there are large scale differences in the dataset
 X = normalize(data)
@@ -64,4 +65,4 @@ if lblcol>0
 else
 	theplot = plot(x=Y[:,1], y=Y[:,2])
 end
-draw(PDF("tsne-plot.pdf", 8inch, 6inch), theplot)
+draw(PDF("tsne-plot2.pdf", 8inch, 6inch), theplot)
