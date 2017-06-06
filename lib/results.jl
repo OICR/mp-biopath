@@ -48,7 +48,7 @@ function outputAllResults(nodesampleresults, columns, resultfilename)
                 continue
             end
             (x, x_bar) = nodesampleresults[node][column]
-            write(outfile, "$x:x_bar")
+            write(outfile, "$x:$x_bar")
             if lengthColumns == index
                 write(outfile, "\n")
             else
