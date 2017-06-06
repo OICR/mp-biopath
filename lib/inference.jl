@@ -8,13 +8,14 @@ include("keyoutputs.jl")
 include("expression.jl")
 include("pi.jl")
 
-function run(pifile, observationfile, resultsfile, keyoutputsfile, dbidfile, lowerbound, upperbound, copynumberflag, onenormalflag, tissueType, verbose)
+function run(pifile, observationfile, resultsfile, keyoutputsfile, dbidfile, lowerbound, upperbound, copynumberflag, onenormalflag, tissueType, allOutputsFile, verbose)
     pinodes = Pi.readFile(pifile)
     expression = Expression.get(dbidfile, tissueType)
     observations = Observations.get(observationfile, pinodes, dbidfile, copynumberflag, onenormalflag)
     keyoutputs = Keyoutputs.getNodes(keyoutputsfile)
     keyoutputs = ()
     nodesampleresults = Dict()
+    allNodeResults = Dict()
     for sample in observations["columns"]
         if sample == "gene"
             continue
@@ -27,13 +28,13 @@ function run(pifile, observationfile, resultsfile, keyoutputsfile, dbidfile, low
         samplenodestate = observations["samplenodestate"]
         nodestate = samplenodestate[sample]
 
-        sampleresults = NLmodel.run(pinodes,
-                                    nodestate,
-                                    keyoutputs,
-                                    lowerbound,
-                                    upperbound,
-                                    expression,
-                                    verbose)
+        (sampleresults, x, x_bar) = NLmodel.run(pinodes,
+                                                nodestate,
+                                                keyoutputs,
+                                                lowerbound,
+                                                upperbound,
+                                                expression,
+                                                verbose)
 
         for nodeName in keys(sampleresults)
             if length(keys(nodesampleresults)) == 0 || haskey(nodesampleresults, nodeName) == false
@@ -41,10 +42,25 @@ function run(pifile, observationfile, resultsfile, keyoutputsfile, dbidfile, low
             end
             nodesampleresults[nodeName][sample] = sampleresults[nodeName]
         end
+
+        if allOutputsFile != ""
+           for nodeName in keys(x)
+               if length(keys(allNodeResults)) == 0 || haskey(allNodeResults, nodeName) == false
+                   allNodeResults[nodeName] = Dict()
+               end
+               allNodeResults[nodeName][sample] = [x[nodeName], x_bar[nodeName]]
+           end 
+        end
     end
     Results.createcsv(nodesampleresults,
                       observations["columns"],
                       resultsfile)
+
+    if allOutputsFile != ""
+         Results.outputAllResults(allNodeResults,
+                                  observations["columns"],
+                                  allOutputsFile)
+    end
 end
 
 function analyzeResults(resultsfile, expectedfile, downregulatedcutoff, upregulatedcutoff, pgmlab, verbose)

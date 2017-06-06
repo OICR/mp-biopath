@@ -154,7 +154,11 @@ function run(nodes, measurednodestate, keyoutputs, LB, UB, expression, verbose)
         print(model)
     end
 
-    solve(model)
+    status = solve(model)
+
+    if verbose
+        println("Objective value: ", getobjectivevalue(model))
+    end
 
     keyresults = Dict()
     keyoutputsArray = collect(keyoutputs)
@@ -171,7 +175,16 @@ function run(nodes, measurednodestate, keyoutputs, LB, UB, expression, verbose)
         end
     end
 
-    return keyresults
+    x_values = Dict()
+    x_bar_values = Dict()
+    for i in eachindex(nodesList)
+        x_values[nodesList[i]] = getvalue(x[i])
+        x_bar_values[nodesList[i]] = getvalue(x_bar[i])
+    end
+ 
+
+
+    return [keyresults, x_values, x_bar_values]
 end
 
 end

@@ -27,12 +27,12 @@ function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, up
 
         for i in [0,2]
             if in(node, Set(essentialgenes)) == false || i == 2
-                sampleresults = NLmodel.run(pinodes,
-                                            Dict(node => i),
-                                            essentialgenes,
-                                            lowerbound,
-                                            upperbound,
-                                            verbose)
+                (sampleresults, x, x_bar) = NLmodel.run(pinodes,
+                                                        Dict(node => i),
+                                                        essentialgenes,
+                                                        lowerbound,
+                                                        upperbound,
+                                                        verbose)
 
                 essentialnodes = []
                 for resultnode in keys(sampleresults)

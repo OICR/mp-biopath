@@ -31,6 +31,36 @@ function createcsv(nodesampleresults, columns, resultfilename)
     close(outfile)
 end
 
+function outputAllResults(nodesampleresults, columns, resultfilename)
+    outfile = open(resultfilename, "w")
+
+    write(outfile, join(columns, "\t"))
+    write(outfile, "\n")
+
+    for node in keys(nodesampleresults)
+        write(outfile, "$node\t")
+
+        index = 0
+        lengthColumns = length(columns)
+        for column in columns
+            index += 1
+            if column == "gene"
+                continue
+            end
+            (x, x_bar) = nodesampleresults[node][column]
+            write(outfile, "$x:x_bar")
+            if lengthColumns == index
+                write(outfile, "\n")
+            else
+                write(outfile, "\t")
+            end
+        end
+    end
+
+    close(outfile)
+end
+
+
 function getResults(resultfilename, downregulatedcutoff, upregulatedcutoff, pgmlab)
     result_data = readlines(resultfilename)
 

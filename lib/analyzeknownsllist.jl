@@ -58,12 +58,12 @@ function run(pifile, slfilename, lowerbound, upperbound, dbidfile, verbose)
     allGenes = DbIdNameMapping.allGeneReferenceProduct(dbidfile)
     allGenesSet = Set(allGenes)
     for node in slpinodes
-        sampleresults = NLmodel.run(pinodes,
-                                    Dict(node => 0),
-                                    essentialgenes,
-                                    lowerbound,
-                                    upperbound,
-                                    verbose)
+        (sampleresults, x, x_bar) = NLmodel.run(pinodes,
+                                                Dict(node => 0),
+                                                essentialgenes,
+                                                lowerbound,
+                                                upperbound,
+                                                verbose)
 
         for (essentialnode, essentialvalue) in sampleresults
             for sl in slessential
@@ -88,13 +88,13 @@ function run(pifile, slfilename, lowerbound, upperbound, dbidfile, verbose)
     flush(sloutfile)
 
     for slnodespair in slpinodesPairs
-        sampleresults = NLmodel.run(pinodes,
-                                    Dict(slnodespair[1] => 0,
-                                         slnodespair[2] => 0),
-                                    essentialgenes,
-                                    lowerbound,
-                                    upperbound,
-                                    verbose)
+        (sampleresults, x, x_bar) = NLmodel.run(pinodes,
+                                                Dict(slnodespair[1] => 0,
+                                                     slnodespair[2] => 0),
+                                                     essentialgenes,
+                                                     lowerbound,
+                                                     upperbound,
+                                                     verbose)
 
          for (essentialnode, essentialvalue) in sampleresults
              for sl in slessential

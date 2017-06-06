@@ -44,6 +44,10 @@ function parse_commandline()
         "key-outputs-file"
         help = "This is the full path of the keyoutputs file."
         required = true
+        "all-outputs-file"
+        help = "This file will contain the values for x and x_bar for all samples (variables will be listed as x:x_bar"
+        default = ""
+        required = false
     end
 
     return parse_args(s)
@@ -69,6 +73,7 @@ function main()
                   parsed_args["copynumber"],
                   parsed_args["onenormal"],
                   parsed_args["tissue-type"],
+                  parsed_args["all-outputs-file"],
                   parsed_args["verbose"])
 end
 
