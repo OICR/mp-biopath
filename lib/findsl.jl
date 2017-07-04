@@ -3,6 +3,7 @@ module FindSL
 include("valuetostate.jl")
 include("dbidnamemapping.jl")
 include("essential.jl")
+include("expression.jl")
 include("nlmodel.jl")
 include("pi.jl")
 
