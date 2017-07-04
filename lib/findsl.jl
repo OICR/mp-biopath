@@ -6,8 +6,9 @@ include("essential.jl")
 include("nlmodel.jl")
 include("pi.jl")
 
-function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, pairwisefile, dbidfile, verbose)
+function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, pairwisefile, dbidfile, tissueType, verbose)
     pinodes = Pi.readFile(pifile)
+    expression = Expression.get(dbidfile, tissueType)
     essentialgenes = Essential.getGenes(collect(keys(pinodes)), dbidfile)
     allGenes = DbIdNameMapping.allGeneReferenceProduct(dbidfile)
     allGenesSet = Set(allGenes)
@@ -32,6 +33,7 @@ function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, up
                                                         essentialgenes,
                                                         lowerbound,
                                                         upperbound,
+                                                        expression,
                                                         verbose)
 
                 essentialnodes = []
@@ -80,6 +82,7 @@ function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, up
                                              essentialgenes,
                                              lowerbound,
                                              upperbound,
+                                             expression,
                                              verbose)
 
             for resultnode in keys(sampleresults)

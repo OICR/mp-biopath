@@ -120,3 +120,38 @@ julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/PIP3_
 ```bash
 julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt ~/git/PGM/InputDataForTesting/Mock_Short_Input_Data_for_PIP3_Activates_AKT_Signaling_Text.txt <results-file> ~/git/PGM/Expected_results_for_mock_input_data/PIP3_activates_AKT_signaling_Expected_Results_for_Mock_input_Data.csv
 ```
+
+### create Tsne Plot
+
+1) start interactive server
+2) Start julia repl
+
+```bash
+julia
+```
+
+3) Install tsne package
+
+```julia
+Pkg.clone("git://github.com/lejon/TSne.jl.git")
+```
+
+4) Exit repl
+
+```julia
+exit()
+```
+
+4) Run tsne command
+
+Make sure the subgroup\_label is the name of the column that you are using to categorize the rows
+
+```bash
+julia bin/create_tsne_plot.jl haveheader --labelcolname=subgroup_label /data/gecco/mpbiopath_results.summary.observation.subgroup.tsv
+```
+
+This will generate a file in working directory called Plot2.png.
+
+5) Move image to mounted volume 
+
+

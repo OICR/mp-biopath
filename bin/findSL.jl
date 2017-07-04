@@ -24,6 +24,10 @@ function parse_commandline()
         "--lowerbound", "-l"
             arg_type = Float64
             default = 0.001
+        "--tissue-type"
+            help = "This will correspond to a tissue type in the file data/expression-data.tsv"
+            arg_type = AbstractString
+            default = "esophagus"
         "--verbose", "-v"
             help = "This will cause output to be printed to standard out."
             action = :store_true
@@ -60,6 +64,7 @@ function main()
                parsed_args["upregulated-cutoff"],
                parsed_args["pairwise-interaction-file"],
                parsed_args["db-id-file"],
+               parsed_args["tissue-type"],
                parsed_args["verbose"])
 end
 
