@@ -6,4 +6,6 @@ COPY . /app/
 
 WORKDIR /app
 
-CMD ["julia bin/runInference.jl --help"]
+CMD chmod u+x /app/bin/mp-biopath
+
+CMD ["./bin/mpbiopath --help"]

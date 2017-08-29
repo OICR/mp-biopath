@@ -6,7 +6,7 @@ include("../lib/inference.jl")
 
 function parse_commandline()
     s = ArgParseSettings("This script is for infering values for keyoutputs for pathway from observation data.",
-                         version = "0.0.1",
+                         version = "0.1.0",
                          add_version = true)
 
     @add_arg_table s begin
