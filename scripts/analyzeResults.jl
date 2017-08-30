@@ -2,7 +2,7 @@
 
 using ArgParse
 
-include("../lib/inference.jl")
+include("../src/inference.jl")
 
 function parse_commandline()
     s = ArgParseSettings("This interface is for analyzing the results files produced by running inference with respect to a expected results file.",

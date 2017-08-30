@@ -2,7 +2,7 @@
 
 using ArgParse
 
-include("../lib/findsl.jl")
+include("../src/findsl.jl")
 
 function parse_commandline()
      s = ArgParseSettings("This program finds Synthetic Lethal pairs that knock out one or more genes from the essential gene database",

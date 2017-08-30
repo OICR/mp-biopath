@@ -126,7 +126,7 @@ julia scripts/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/P
 ### Run Development
 
 ```bash
-docker run -v`pwd`:/data -it  oicr/mpbiopath-env:0.0.4-SNAPSHOT /scripts/bash
+docker run -v`pwd`:/app -it  oicr/mpbiopath-env:0.0.4-SNAPSHOT /bin/bash
 ```
 
 ### create Tsne Plot

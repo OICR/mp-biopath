@@ -2,7 +2,7 @@
 
 using ArgParse
 
-include("../lib/analyzeknownsllist.jl")
+include("../src/analyzeknownsllist.jl")
 
 function parse_commandline()
     s = ArgParseSettings("This interface is used for analyzing the Synthetic Lethal pairs in the SL database that are found within a specified pairwise interaction file.",

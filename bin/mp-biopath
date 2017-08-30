@@ -2,7 +2,7 @@
 
 using ArgParse
 
-include("../lib/inference.jl")
+include("../src/inference.jl")
 
 function parse_commandline()
     s = ArgParseSettings("This script is for infering values for keyoutputs for pathway from observation data.",
