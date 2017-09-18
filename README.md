@@ -123,6 +123,12 @@ julia scripts/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/P
 julia scripts/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt ~/git/PGM/InputDataForTesting/Mock_Short_Input_Data_for_PIP3_Activates_AKT_Signaling_Text.txt <results-file> ~/git/PGM/Expected_results_for_mock_input_data/PIP3_activates_AKT_signaling_Expected_Results_for_Mock_input_Data.csv
 ```
 
+### Making Environment container
+
+```bash
+make build-env
+```
+
 ### Run Development
 
 ```bash
