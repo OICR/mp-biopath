@@ -20,18 +20,18 @@ module CLI
 export Command, Option
 
 immutable Command
-    name::UTF8String
-    help::UTF8String
+    name::String
+    help::String
 end
 
 immutable Option
-    flag::UTF8String
-    help::UTF8String
+    flag::String
+    help::String
     T::Type
     required::Bool
     min::Number # The minimum number of arguments passed to this option
     max::Number # The maximum number of arguments passed to this option
-    conflicts::Vector{UTF8String} # A list of options that this one conflicts with
+    conflicts::Vector{String} # A list of options that this one conflicts with
 end
 
 Option(flag,help;
@@ -39,7 +39,7 @@ Option(flag,help;
        required=false,
        min=0,
        max=0,
-       conflicts=UTF8String[]) = Option(flag,help,T,required,min,max,conflicts)
+       conflicts=String[]) = Option(flag,help,T,required,min,max,conflicts)
 
 function Base.print(io::IO,command::Command)
     print(io,"  ")
@@ -111,7 +111,7 @@ function parse_option(T::Type,arg)
     end
 end
 
-parse_option_helper(::Type{UTF8String},arg) = utf8(arg)
+parse_option_helper(::Type{String},arg) = utf8(arg)
 parse_option_helper(::Type{Int},arg) = parse(Int,arg)
 parse_option_helper(::Type{Float64},arg) = parse(Float64,arg)
 
@@ -132,7 +132,7 @@ function parse_args(args)
         error("Please select from the list options.")
     end
 
-    args_dict = Dict{UTF8String,Any}()
+    args_dict = Dict{String,Any}()
     idx = 2
     while idx <= length(args)
         if !(args[idx] in option_flags)
