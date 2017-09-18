@@ -1,7 +1,7 @@
 module Inference
 
 include("probability.jl")
-include("observations.jl")
+include("evidence.jl")
 include("nlmodel.jl")
 include("results.jl")
 include("keyoutputs.jl")

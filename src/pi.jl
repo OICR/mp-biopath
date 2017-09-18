@@ -1,5 +1,8 @@
 module Pi
 
+using DataFrames
+using CSV
+
 export readPiFile
 
 type ModelANDParents
@@ -25,36 +28,37 @@ end
 ## If there is only one parent it will be an AND relation
 
 function readFile(fname)
-    f1 = open(fname)
-    data = readlines(f1)
+    df = CSV.read(fname,
+                  delim="\t",
+                  nullable=false,
+                  header=["parentName", "childName", "posneg", "andor"],
+                  types=[String, String, Int, Int])
 
     PIs = Dict{AbstractString,Any}()
 
-    for line in data
-        (parentName, childName, posneg, andor) = split(chomp(line), '\t')
+    for row in eachrow(df)
+        posnegbool = row[:posneg] == 1? true: false
+        andBool = row[:andor] == 0? true: false
 
-        posnegbool = posneg == "1"? true: false
-        andBool = andor == "0"? true: false
-
-        if haskey(PIs, childName)
+        if haskey(PIs, row[:childName])
             if posnegbool
                 parents = andBool?
-                             PIs[childName].andPosParents:
-                             PIs[childName].orPosParents
+                             PIs[row[:childName]].andPosParents:
+                             PIs[row[:childName]].orPosParents
             else
                 parents = andBool?
-                             PIs[childName].andNegParents:
-                             PIs[childName].orNegParents
+                             PIs[row[:childName]].andNegParents:
+                             PIs[row[:childName]].orNegParents
             end
 
-            push!(parents, parentName)
+            push!(parents, row[:parentName])
         else
             posParents = AbstractString[]
             negParents = AbstractString[]
             if posnegbool
-                push!(posParents, parentName)
+                push!(posParents, row[:parentName])
             else
-                push!(negParents, parentName)
+                push!(negParents, row[:parentName])
             end
 
             node = PIparents(andBool? posParents: AbstractString[],
@@ -62,14 +66,13 @@ function readFile(fname)
                              andBool? AbstractString[]: posParents,
                              andBool? AbstractString[]: negParents)
 
-            PIs[childName] = node
+            PIs[row[:childName]] = node
         end
     end
 
-    for line in data
-        (parentName, childName, posneg, andor) = split(chomp(line), '\t')
-        if !haskey(PIs, parentName)
-            PIs[parentName] = PIparents(AbstractString[],AbstractString[],AbstractString[],AbstractString[])
+    for row in eachrow(df)
+        if !haskey(PIs, row[:parentName])
+            PIs[row[:parentName]] = PIparents(AbstractString[],AbstractString[],AbstractString[],AbstractString[])
         end
     end
 
@@ -123,8 +126,6 @@ function readFile(fname)
         end
 
     end
-
-    close(f1)
 
     return nodes
 end

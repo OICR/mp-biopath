@@ -1,7 +1,7 @@
 module SL
 
 include("dbidnamemapping.jl")
-include("observations.jl")
+include("evidence.jl")
 
 function getNodes(dbidfile)
     genetonodes = DbIdNameMapping.geneToNodes(dbidfile)

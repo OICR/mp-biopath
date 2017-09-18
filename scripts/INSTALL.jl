@@ -8,6 +8,7 @@ Pkg.add("CoinOptServices")
 Pkg.add("AmplNLWriter")
 Pkg.add("Requests")
 Pkg.add("FactCheck")
+Pkg.add("CSV");
 
 #for tsne
 Pkg.add("DataFrames")

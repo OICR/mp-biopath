@@ -1,14 +1,14 @@
 module AnalyzeKnownSLList
 
-include("../lib/pi.jl")
-include("../lib/observations.jl")
-include("../lib/nlmodel.jl")
-include("../lib/keyoutputs.jl")
-include("../lib/essential.jl")
-include("../lib/results.jl")
-include("../lib/sl.jl")
-include("../lib/dbidnamemapping.jl")
-#include("../lib/coexpress.jl")
+include("../src/pi.jl")
+include("../src/evidence.jl")
+include("../src/nlmodel.jl")
+include("../src/keyoutputs.jl")
+include("../src/essential.jl")
+include("../src/results.jl")
+include("../src/sl.jl")
+include("../src/dbidnamemapping.jl")
+#include("../src/coexpress.jl")
 
 
 function run(pifile, slfilename, lowerbound, upperbound, dbidfile, verbose)
