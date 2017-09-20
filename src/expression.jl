@@ -1,34 +1,60 @@
 module Expression
 
+using CSV
+using DataFrames
+using DataStructures
+
 include("dbidnamemapping.jl")
 
 function hugoGeneExpression(tissueType)
     hugoGeneExpressionValues = Dict()
 
-    column_index = -1
-    line_count = 0
-    for line in readlines("./data/expression-data.tsv")
-        if ismatch(r"^#", line) == false
-            line_count += 1
-            fields = chomp(line)
-            line_parts = split(fields, "\t")
+    expressionFilename = "./data/expression-data.tsv"
 
-            if line_count == 1
-                column_index = findfirst(x -> x == tissueType, line_parts)
-                if column_index == 0
-                    println("tissue type not found")
-                    exit()
-                end
-            else
-                if column_index == -1
-                    exit()
-                else
-                    hugoGene = convert(String, line_parts[2])
-                    expression_value = line_parts[column_index]
-                    hugoGeneExpressionValues[hugoGene] = expression_value
-                end
-            end
-        end
+    columns = OrderedDict("Gene ID" => String,
+                   "Gene Name" => String,
+                   "adipose tissue" => Float16,
+                   "adrenal gland" => Float16,
+                   "bone marrow" => Float16,
+                   "cerebral cortex" => Float16,
+                   "colon" => Float16,
+                   "duodenum" => Float16,
+                   "endometrium" => Float16,
+                   "esophagus" => Float16,
+                   "fallopian tube" => Float16,
+                   "gall bladder" => Float16,
+                   "heart" => Float16,
+                   "kidney" => Float16,
+                   "liver" => Float16,
+                   "lung" => Float16,
+                   "lymph node" => Float16,
+                   "ovary" => Float16,
+                   "pancreas" => Float16,
+                   "placenta" => Float16,
+                   "prostate gland" => Float16,
+                   "rectum" => Float16,
+                   "saliva-secreting gland" => Float16,
+                   "skeletal muscle tissue" => Float16,
+                   "small intestine" => Float16,
+                   "smooth muscle tissue" => Float16,
+                   "spleen" => Float16,
+                   "stomach" => Float16,
+                   "testis" => Float16,
+                   "thyroid gland" => Float16,
+                   "tonsil" => Float16,
+                   "urinary bladder" => Float16,
+                   "vermiform appendix" => Float16,
+                   "zone of skin" => Float16)
+
+    df = CSV.read(expressionFilename,
+                  delim = "\t",
+                  header = collect(keys(columns)),
+                  types = collect(values(columns)),
+                  datarow = 5)
+
+    for row in eachrow(df)
+        hugoGeneExpressionValues[row[Symbol("Gene Name")]] = row[Symbol(tissueType)]
+
     end
 
     return hugoGeneExpressionValues
