@@ -7,8 +7,6 @@ using DataStructures
 include("dbidnamemapping.jl")
 
 function hugoGeneExpression(tissueType)
-    hugoGeneExpressionValues = Dict()
-
     expressionFilename = "./data/expression-data.tsv"
 
     columns = OrderedDict("Gene ID" => String,
@@ -52,6 +50,7 @@ function hugoGeneExpression(tissueType)
                   types = collect(values(columns)),
                   datarow = 5)
 
+    hugoGeneExpressionValues = Dict()
     for row in eachrow(df)
         hugoGeneExpressionValues[row[Symbol("Gene Name")]] = row[Symbol(tissueType)]
 

@@ -1,14 +1,34 @@
 module Keyoutputs
 
-function getNodes(keyoutputsfile)
-    data = readlines(keyoutputsfile)
-    shift!(data)
+using CSV
+using DataFrames
+using DataStructures
 
+function getNodes(keyoutputsFilename)
+
+    columns = OrderedDict("parent_pathway_id" => String,
+                 "pathway_id" => String,
+                 "pathway_name" => String,
+                 "output_reactome_dbid" => String,
+                 "mapping_id" => String,
+                 "description" => String,
+                 "specific" => String,
+                 "direct_measurement" => String,
+                 "dm_method" => String,
+                 "indirect_measurement" => String,
+                 "im_method" => String)
+
+    df = CSV.read(keyoutputsFilename,
+                  delim = "\t",
+                  header = collect(keys(columns)),
+                  types = collect(values(columns)),
+                  datarow = 2)
+
+println(df)
+exit()
     keyoutputs = Dict{AbstractString,Any}()
-
-    for line in data
-         linefields = split(chomp(line), '\t')
-         keyoutputs[linefields[5]] = 1
+    for row in eachrow(df)
+        keyoutputs[row[:mapping_id]] = 1
     end
 
     return Set(collect(keys(keyoutputs)))
