@@ -24,11 +24,13 @@ function getNodes(keyoutputsFilename)
                   types = collect(values(columns)),
                   datarow = 2)
 
-println(df)
-exit()
+
     keyoutputs = Dict{AbstractString,Any}()
     for row in eachrow(df)
-        keyoutputs[row[:mapping_id]] = 1
+        mapping_id = row[:mapping_id]
+        if (isnull(mapping_id) == false)
+            keyoutputs[get(mapping_id)] = 1
+        end
     end
 
     return Set(collect(keys(keyoutputs)))
