@@ -1,10 +1,16 @@
 module Observations
 
-include("dbidnamemapping.jl")
+function get(evidence, pinodes, IDMapping)
+    sampleNodeState = Dict()
 
-function get(fname, pinodes, dbidfile, copynumber, oneNormal)
-    genetonodes = DbIdNameMapping.geneToRootNodes(pinodes, dbidfile)
+    if evidence["dna"]
+        getGenomic(evidence["dna"], IDMapping)
+    end
 
+
+end
+
+function getDnaEvidence(evidence, idMapping)
     divideby = copynumber? 2:1
     data = readlines(fname)
 

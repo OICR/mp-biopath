@@ -7,12 +7,21 @@ include("results.jl")
 include("keyoutputs.jl")
 include("expression.jl")
 include("pi.jl")
+include("idMap.jl")
 
-function run(pifile, observationfile, resultsfile, keyoutputsfile, dbidfile, lowerbound, upperbound, copynumberflag, onenormalflag, tissueType, allOutputsFile, verbose)
-    pinodes = Pi.readFile(pifile)
-    expression = Expression.get(dbidfile, tissueType)
-    observations = Observations.get(observationfile, pinodes, dbidfile, copynumberflag, onenormalflag)
-    keyoutputs = Keyoutputs.getNodes(keyoutputsfile)
+function run(config, verbose)
+    println(config["pathways"])
+    for pathway in config["pathways"]
+        runPathway(config, pathway, verbose)
+    end
+end
+
+function runPathway(config, pathway, verbose)
+    pinodes = Pi.readFile(pathway)
+    IdMap = IdMap.get(config["IDMappingFile"])
+    expression = Expression.get(IDMap, config["tissueType"])
+    observations = Observations.get(config["evidence"], pinodes, IDMap)
+    keyoutputs = Keyoutputs.getNodes(config["keyoutputs"])
     keyoutputs = ()
     nodesampleresults = Dict()
     allNodeResults = Dict()

@@ -4,8 +4,6 @@ using CSV
 using DataFrames
 using DataStructures
 
-include("dbidnamemapping.jl")
-
 function hugoGeneExpression(tissueType)
     expressionFilename = "./data/expression-data.tsv"
 
@@ -50,35 +48,12 @@ function hugoGeneExpression(tissueType)
                   types = collect(values(columns)),
                   datarow = 5)
 
-    hugoGeneExpressionValues = Dict()
+    geneExpressionValues = Dict()
     for row in eachrow(df)
-        hugoGeneExpressionValues[row[Symbol("Gene Name")]] = row[Symbol(tissueType)]
-
+        geneExpressionValues[row[Symbol("Gene Name")]] = row[Symbol(tissueType)]
     end
 
-    return hugoGeneExpressionValues
-end
-
-
-function getNodes(dbidfile, tissueType)
-    hugoGeneExpressionValues = hugoGeneExpression(tissueType)
-    genetonode = DbIdNameMapping.geneToNodes(dbidfile)
-
-    expressionNodeValues = Dict()
-
-    for (hugogene, value) in hugoGeneExpressionValues
-        if haskey(genetonode, hugogene)
-            for node in genetonode[hugogene]
-                expressionNodeValues[node] = value
-            end
-        end
-    end
-
-    return expressionNodeValues
-end
-
-function get(dbidfile, tissueType)
-    return getNodes(dbidfile, tissueType)
+    return geneExpressionValues
 end
 
 end

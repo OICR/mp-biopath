@@ -3,8 +3,8 @@ module NLmodel
 using JuMP
 using AmplNLWriter
 
-function run(nodes, measurednodestate, keyoutputs, LB, UB, expression, verbose)
-    model = Model(solver=CouenneNLSolver(["bonmin.nlp_log_level=0"; "bonmin.bb_log_level=0"]))
+function run(nodes, measuredNodeState, keyoutputs, LB, UB, expression, solverOptions, verbose)
+    model = Model(solver=CouenneNLSolver(solverOptions))
 
     weightRoot = 5
     weightMeasured = 10000
@@ -16,17 +16,17 @@ function run(nodes, measurednodestate, keyoutputs, LB, UB, expression, verbose)
     @variable(model, LB <= x_bar[1:length(nodesList)] <= UB, start = 1)
     @variable(model, LB <= p[1:length(nodesList)] <= UB)
     @variable(model, LB <= n[1:length(nodesList)] <= UB)
-    @variable(model, m[1:length(keys(measurednodestate))])
+    @variable(model, m[1:length(keys(measuredNodeState))])
 
     rootIdxs = []
     variableIdxs = []
-    for node in collect(keys(measurednodestate))
+    for node in collect(keys(measuredNodeState))
         if indexin([node],nodesList) == [0]
-            delete!(measurednodestate, node)
+            delete!(measuredNodeState, node)
         end
     end
 
-    measuredIdxs = indexin(collect(keys(measurednodestate)), nodesList)
+    measuredIdxs = indexin(collect(keys(measuredNodeState)), nodesList)
 
     for nodeName in keys(nodes)
         nodeIdxs = indexin([nodeName], nodesList)
@@ -34,11 +34,11 @@ function run(nodes, measurednodestate, keyoutputs, LB, UB, expression, verbose)
 
         measured = false
         j = 0
-        for node in collect(keys(measurednodestate))
+        for node in collect(keys(measuredNodeState))
             j = j + 1
             if measuredIdxs[j] == nodeIndex
                 measured = true
-                rhs = measurednodestate[node] < LB? LB: measurednodestate[node]
+                rhs = measuredNodeState[node] < LB? LB: measuredNodeState[node]
                 @constraint(model, measure[nodeIndex], m[j] == rhs)
                 break
             end
