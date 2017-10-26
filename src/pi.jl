@@ -95,6 +95,8 @@ function readFile(fname)
             negParents = PIs[nodeName].andNegParents
             if length(parents) == 1 && length(negParents) == 1
                 nodes[nodeName] = ModelANDParents("ANDNEG", union(parents, negParents))
+            elseif length(parents) == 0 && length(negParents) == 1
+                nodes[nodeName] = ModelANDParents("NEG", negParents)
             elseif length(parents) == 1 && length(negParents) == 0
                 nodes[nodeName] = ModelANDParents("AND", parents)
             else

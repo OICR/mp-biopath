@@ -91,6 +91,11 @@ function run(nodes, measuredNodeState, keyoutputs, LB, UB, expression, solverOpt
                                  and[nodeIndex],
                                  x[parentIndexes[1]] * x[parentIndexes[2]] == x_bar[nodeIndex])
                 end
+            elseif nodes[nodeName].relation == "NEG"
+                parentIndexes = indexin(nodes[nodeName].parents, nodesList)
+                @NLconstraint(model,
+                            and[nodeIndex],
+                            1 / x[parentIndexes[1]] == x_bar[nodeIndex])
             elseif nodes[nodeName].relation == "ANDNEG"
                 parentIndexes = indexin(nodes[nodeName].parents, nodesList)
                 @NLconstraint(model,
