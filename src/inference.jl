@@ -18,7 +18,7 @@ end
 
 function runPathway(config, pathway, verbose)
     pinodes = Pi.readFile(pathway)
-    IdMap = IdMap.get(config["IDMappingFile"])
+    IDMap = IdMap.get(config["IDMappingFile"])
     expression = Expression.get(IDMap, config["tissueType"])
     observations = Observations.get(config["evidence"], pinodes, IDMap)
     keyoutputs = Keyoutputs.getNodes(config["keyoutputs"])

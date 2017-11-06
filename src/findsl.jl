@@ -1,7 +1,7 @@
 module FindSL
 
 include("valuetostate.jl")
-include("dbidnamemapping.jl")
+include("idMap.jl")
 include("essential.jl")
 include("expression.jl")
 include("nlmodel.jl")
@@ -9,7 +9,8 @@ include("pi.jl")
 
 function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, pairwisefile, dbidfile, tissueType, verbose)
     pinodes = Pi.readFile(pifile)
-    expression = Expression.get(dbidfile, tissueType)
+    IDMap = IdMap.get(dbidfile)
+    expression = Expression.get(IDMap, tissueType)
     essentialgenes = Essential.getGenes(collect(keys(pinodes)), dbidfile)
     allGenes = DbIdNameMapping.allGeneReferenceProduct(dbidfile)
     allGenesSet = Set(allGenes)

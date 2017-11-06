@@ -7,7 +7,7 @@ include("../src/keyoutputs.jl")
 include("../src/essential.jl")
 include("../src/results.jl")
 include("../src/sl.jl")
-include("../src/dbidnamemapping.jl")
+include("../src/idMap.jl")
 #include("../src/coexpress.jl")
 
 

@@ -1,6 +1,6 @@
 module CoExpress
 
-include("dbidnamemapping.jl")
+include("idMap.jl")
 
 using Requests
 

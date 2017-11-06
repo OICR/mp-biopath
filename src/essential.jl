@@ -1,7 +1,7 @@
 module Essential
 
 include("ensemblegenemap.jl")
-include("dbidnamemapping.jl")
+include("idMap.jl")
 
 function essentialGenesHugo()
     ensembletohugo = EnsembleGeneMap.ensembleToHugo()

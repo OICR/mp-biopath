@@ -2,7 +2,14 @@ module Expression
 
 using CSV
 using DataFrames
+using DataTables
 using DataStructures
+
+function readExpressionFile() 
+    expressionFilename = "./data/expression-data.tsv"
+    return readtable(expressionFilename, skiprows = 5)
+end
+
 
 function hugoGeneExpression(tissueType)
     expressionFilename = "./data/expression-data.tsv"
