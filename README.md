@@ -131,8 +131,10 @@ make build-env
 
 ### Run Development
 
+In order to develop with in the docker environment you can use the following command. It will log you in as your current user. This will make it so that the file permissions stay in sync with the host. If you prefer to log in as root you should leav out the "--user" flag and the mapping for the passwd file
+
 ```bash
-docker run -v`pwd`:/app --env JULIA_LOAD_PATH=/app/src/ -it  oicr/mpbiopath-env:0.0.4-SNAPSHOT /bin/bash
+docker run --user $(id -u) -v /etc/passwd:/etc/passwd:ro -v`pwd`:/app -v`pwd`/../PathwayAnalysis:/data --env JULIA_LOAD_PATH=/app/src/ -it  oicr/mpbiopath-env:0.0.4-SNAPSHOT /bin/bash
 ```
 
 ### create Tsne Plot
