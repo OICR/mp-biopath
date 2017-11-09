@@ -78,15 +78,14 @@ function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, up
             end
             candidates = candidates + 1
 
-            sampleresults = NLmodel.run(pinodes,
-                                        Dict(nodeone["name"] => nodeone["state"],
-                                             nodetwo["name"] => nodetwo["state"]),
-                                             essentialgenes,
-                                             lowerbound,
-                                             upperbound,
-                                             expression,
-                                             verbose)
-
+            (sampleresults, x, x_bar) = NLmodel.run(pinodes,
+                                            Dict(nodeone["name"] => nodeone["state"],
+                                                 nodetwo["name"] => nodetwo["state"]),
+                                                 essentialgenes,
+                                                 lowerbound,
+                                                 upperbound,
+                                                 expression,
+                                                verbose)
             for resultnode in keys(sampleresults)
                value = sampleresults[resultnode]
                state = ValueToState.getState(value,
