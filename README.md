@@ -131,7 +131,7 @@ make build-env
 
 ### Run Development
 
-In order to develop with in the docker environment you can use the following command. It will log you in as your current user. This will make it so that the file permissions stay in sync with the host. If you prefer to log in as root you should leav out the "--user" flag and the mapping for the passwd file. In order to commit and push changes. You will need to do this from the host machine.
+In order to develop with in the docker environment you can use the following command. It will log you in as your current user. This will make it so that the file permissions stay in sync with the host. If you prefer to log in as root you should leav out the "--user" flag and the mapping for the passwd file. In order to commit and push changes. You will need to do this from the host machine. Files can be edited from either inside or ouside of the running container. The App itself should be run from inside the container.
 
 ```bash
 docker run --user $(id -u) -v /etc/passwd:/etc/passwd:ro -v`pwd`:/app -v`pwd`/../PathwayAnalysis:/data --env JULIA_LOAD_PATH=/app/src/ -it  oicr/mpbiopath-env:0.0.4-SNAPSHOT /bin/bash
