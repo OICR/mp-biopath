@@ -2,9 +2,10 @@ module NLmodel
 
 using JuMP
 using AmplNLWriter
+using CoinOptServices
 
-function run(nodes, measuredNodeState, keyoutputs, LB, UB, expression, solverOptions, verbose)
-    model = Model(solver=CouenneNLSolver(solverOptions))
+function run(nodes, measurednodestate, keyoutputs, LB, UB, expression, SolverOptions, verbose)
+    model = Model(solver=AmplNLSolver(CoinOptServices.couenne, solverOptions))
 
     weightRoot = 5
     weightMeasured = 10000
@@ -39,43 +40,27 @@ function run(nodes, measuredNodeState, keyoutputs, LB, UB, expression, solverOpt
             if measuredIdxs[j] == nodeIndex
                 measured = true
                 rhs = measuredNodeState[node] < LB? LB: measuredNodeState[node]
-                @constraint(model, measure[nodeIndex], m[j] == rhs)
+                @constraint(model, m[j] == rhs)
                 break
             end
         end
 
         if nodes[nodeName].relation == "ROOT"
             if measured
-                @constraint(model,
-                            pindexrootmeasured[nodeIndex],
-                            p[nodeIndex] >= x[nodeIndex] - m[j])
-                @constraint(model,
-                            nindexrootmeasured[nodeIndex],
-                            n[nodeIndex] >= m[j] - x[nodeIndex])
+                @constraint(model, p[nodeIndex] >= x[nodeIndex] - m[j])
+                @constraint(model, n[nodeIndex] >= m[j] - x[nodeIndex])
             else
-                @constraint(model,
-                            pindexroot[nodeIndex],
-                            p[nodeIndex] >= x[nodeIndex] - 1)
-                @constraint(model,
-                            nindexroot[nodeIndex],
-                            n[nodeIndex] >= 1 - x[nodeIndex])
+                @constraint(model, p[nodeIndex] >= x[nodeIndex] - 1)
+                @constraint(model, n[nodeIndex] >= 1 - x[nodeIndex])
                 push!(rootIdxs, nodeIdxs[1])
             end
         else
             if measured
-                @constraint(model,
-                            pindexrootmeasured[nodeIndex],
-                            p[nodeIndex] >= x[nodeIndex] - m[j])
-                @constraint(model,
-                            nindexrootmeasured[nodeIndex],
-                            n[nodeIndex] >= m[j] - x[nodeIndex])
+                @constraint(model, p[nodeIndex] >= x[nodeIndex] - m[j])
+                @constraint(model, n[nodeIndex] >= m[j] - x[nodeIndex])
             else
-                @constraint(model,
-                            pindex[nodeIndex],
-                            p[nodeIndex] >= x[nodeIndex] - x_bar[nodeIndex])
-                @constraint(model,
-                            nindex[nodeIndex],
-                            n[nodeIndex] >= x_bar[nodeIndex] - x[nodeIndex])
+                @constraint(model, p[nodeIndex] >= x[nodeIndex] - x_bar[nodeIndex])
+                @constraint(model, n[nodeIndex] >= x_bar[nodeIndex] - x[nodeIndex])
             end
 
             push!(variableIdxs, nodeIdxs[1])
@@ -83,24 +68,16 @@ function run(nodes, measuredNodeState, keyoutputs, LB, UB, expression, solverOpt
             if nodes[nodeName].relation == "AND"
                 parentIndexes = indexin(nodes[nodeName].parents, nodesList)
                 if length(parentIndexes) == 1
-                    @constraint(model,
-                                and[nodeIndex],
-                                x[parentIndexes[1]] == x_bar[nodeIndex])
+                    @constraint(model, x[parentIndexes[1]] == x_bar[nodeIndex])
                 else
-                     @NLconstraint(model,
-                                 and[nodeIndex],
-                                 x[parentIndexes[1]] * x[parentIndexes[2]] == x_bar[nodeIndex])
+                     @NLconstraint(model, x[parentIndexes[1]] * x[parentIndexes[2]] == x_bar[nodeIndex])
                 end
             elseif nodes[nodeName].relation == "NEG"
                 parentIndexes = indexin(nodes[nodeName].parents, nodesList)
-                @NLconstraint(model,
-                            and[nodeIndex],
-                            1 / x[parentIndexes[1]] == x_bar[nodeIndex])
+                @NLconstraint(model, 1 / x[parentIndexes[1]] == x_bar[nodeIndex])
             elseif nodes[nodeName].relation == "ANDNEG"
                 parentIndexes = indexin(nodes[nodeName].parents, nodesList)
-                @NLconstraint(model,
-                            and[nodeIndex],
-                            x[parentIndexes[1]] / x[parentIndexes[2]] == x_bar[nodeIndex])
+                @NLconstraint(model, x[parentIndexes[1]] / x[parentIndexes[2]] == x_bar[nodeIndex])
             elseif nodes[nodeName].relation == "OR"
                 if verbose
                     println("Child node: $nodeName")
@@ -123,9 +100,7 @@ function run(nodes, measuredNodeState, keyoutputs, LB, UB, expression, solverOpt
                 end
 
                 if count_expression == 0
-                    @constraint(model,
-                       orposparentbelow[nodeIndex],
-                        sum{x[posParentIdxs[a]], a = 1:length(posParentIdxs)} / length(posParentIdxs) ==  x_bar[nodeIndex])
+                    @constraint(model, sum{x[posParentIdxs[a]], a = 1:length(posParentIdxs)} / length(posParentIdxs) ==  x_bar[nodeIndex])
                 else
                     average_expression = total_expression / count_expression
 
@@ -140,9 +115,7 @@ function run(nodes, measuredNodeState, keyoutputs, LB, UB, expression, solverOpt
 
                     total_expression = sum(evs)
 
-                    @constraint(model,
-                        orposparentbelow[nodeIndex],
-                        sum{evs[a] * x[posParentIdxs[a]], a = 1:length(posParentIdxs)} / total_expression ==  x_bar[nodeIndex])
+                    @constraint(model, sum{evs[a] * x[posParentIdxs[a]], a = 1:length(posParentIdxs)} / total_expression ==  x_bar[nodeIndex])
                 end
            end
         end
@@ -186,7 +159,7 @@ function run(nodes, measuredNodeState, keyoutputs, LB, UB, expression, solverOpt
         x_values[nodesList[i]] = getvalue(x[i])
         x_bar_values[nodesList[i]] = getvalue(x_bar[i])
     end
- 
+
 
 
     return [keyresults, x_values, x_bar_values]

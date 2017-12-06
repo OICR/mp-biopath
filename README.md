@@ -145,6 +145,9 @@ docker run --user $(id -u) -v /etc/passwd:/etc/passwd:ro -v`pwd`:/app -v`pwd`/..
 ```bash
 julia
 ```
+<<<<<<< HEAD
+# mp-biopath-documentation
+=======
 
 3) Install tsne package
 
@@ -171,3 +174,4 @@ This will generate a file in working directory called Plot2.png.
 5) Move image to mounted volume 
 
 
+>>>>>>> origin/develop
