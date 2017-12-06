@@ -4,6 +4,8 @@
 
 A command line tool for modelling the effects of perterbations on biological pathways.
 
+For a full user guide please refer to the following [document](https://oicr.gitbooks.io/mp-biopath-documentation/content/)
+
 # Installation
 
 ## Julia (http://julialang.org/)
@@ -25,7 +27,7 @@ make install
 ## Running Inference
 
 ```bash
-julia bin/runInference.jl --help
+./bin/pgmlab --help
 ```
 
 # Install TSNe package
@@ -89,12 +91,12 @@ http://coxpresdb.jp/help/API.shtml
 ## Test 
 
 ```bash
-julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways\ where\ negative\ OR\ is\ AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt ~/git/PGM/InputDataForTesting/Mock_Short_Input_Data_for_PIP3_Activates_AKT_Signaling_Text.txt --key-outputs
+julia scripts/analyzeBioNetwork.jl ~/git/PGM/Pathways\ where\ negative\ OR\ is\ AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt ~/git/PGM/InputDataForTesting/Mock_Short_Input_Data_for_PIP3_Activates_AKT_Signaling_Text.txt --key-outputs
 ```bash
 
 ## Find SI
 ```bash
-julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways\ where\ negative\ OR\ is\ AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt --find-si --key-outputs
+julia scripts/analyzeBioNetwork.jl ~/git/PGM/Pathways\ where\ negative\ OR\ is\ AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt --find-si --key-outputs
 ```
 
 ## Get unique SI Pairs
@@ -105,19 +107,69 @@ cut -f2,4 PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_Nega
 ## test commands
 
 ```bash
-time julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt --find-si
+time julia scripts/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt --find-si
 ```
 
 ```bash
-julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt --analyze-known-si-list
+julia scripts/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt --analyze-known-si-list
 ```
 
 ```bash
-julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt ~/git/PGM/InputDataForTesting/Mock_Short_Input_Data_for_PIP3_Activates_AKT_Signaling_Text.txt
+julia scripts/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt ~/git/PGM/InputDataForTesting/Mock_Short_Input_Data_for_PIP3_Activates_AKT_Signaling_Text.txt
 ```
 
 ### inspecting results from observation file
 ```bash
-julia bin/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt ~/git/PGM/InputDataForTesting/Mock_Short_Input_Data_for_PIP3_Activates_AKT_Signaling_Text.txt <results-file> ~/git/PGM/Expected_results_for_mock_input_data/PIP3_activates_AKT_signaling_Expected_Results_for_Mock_input_Data.csv
+julia scripts/analyzeBioNetwork.jl ~/git/PGM/Pathways_where_negative_OR_is_AND/PIP3_activates_AKT_signaling_Sept23_2016_sorted_checked_patched_1_NegativeORtoAND.txt ~/git/PGM/InputDataForTesting/Mock_Short_Input_Data_for_PIP3_Activates_AKT_Signaling_Text.txt <results-file> ~/git/PGM/Expected_results_for_mock_input_data/PIP3_activates_AKT_signaling_Expected_Results_for_Mock_input_Data.csv
 ```
+
+### Making Environment container
+
+```bash
+make build-env
+```
+
+### Run Development
+
+```bash
+docker run -v`pwd`:/app --env JULIA_LOAD_PATH=/app/src/ -it  oicr/mpbiopath-env:0.0.4-SNAPSHOT /bin/bash
+```
+
+### create Tsne Plot
+
+1) start interactive server
+2) Start julia repl
+
+```bash
+julia
+```
+<<<<<<< HEAD
 # mp-biopath-documentation
+=======
+
+3) Install tsne package
+
+```julia
+Pkg.clone("git://github.com/lejon/TSne.jl.git")
+```
+
+4) Exit repl
+
+```julia
+exit()
+```
+
+4) Run tsne command
+
+Make sure the subgroup\_label is the name of the column that you are using to categorize the rows
+
+```bash
+julia scripts/create_tsne_plot.jl haveheader --labelcolname=subgroup_label /data/gecco/mpbiopath_results.summary.observation.subgroup.tsv
+```
+
+This will generate a file in working directory called Plot2.png.
+
+5) Move image to mounted volume 
+
+
+>>>>>>> origin/develop
