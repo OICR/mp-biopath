@@ -1,20 +1,99 @@
-counneopt:
-  - iteration_limit=10 
-  - bonmin.nlp_log_level=0
+# MP-BioPath Inference Configuration
+#
+# Creator: Adam wright 
+# Email: adam.j.wright82@gmail.com
+#
+# All runtime parameters for an inference run should be sepecified in a file
+# that follows the format specified in this file.
+#
+# ############################################################################
 
-tissueType: esophagus
 
-IDMappingFile: ./data/id_mapping.inferred.txt
+# #############################################################################
+#
+# COIN OR runtime options
+#
+# Couenne options:
+# https://github.com/coin-or/Counne/blob/master/Couenne/src/couenne.opt
+#
+# Bomin options:
+# https://github.com/coin-or/Bonmin/blob/master/Bonmine/test/bonmin.opt
+#
+# #############################################################################
 
-keyoutputs: ./data/key_outputs.tsv 
+coin-options:
+    - iteration_limit=10 
+    - bonmin.nlp_log_level=0
+
+# #############################################################################
+#
+# Expression
+# One set of results will be generated perl tissue type specified.
+#
+# #############################################################################
+
+expression:
+    - files: /data/expression-data.tsv
+      tissue: - esophagus
+
+# #############################################################################
+#
+# Keyoutputs
+#
+# If specified the results will be filterd by the keyoutput specified in this
+# folder. This is required for generating the heatmap.
+#
+# #############################################################################
+
+keyoutputs:
+    - ./data/key_outputs.tsv 
+
+
+# #############################################################################
+#
+# Pathways
+#
+# The pathways are from REACTOME. 
+# ID map is required for allowing the user to use HUGO names or type specific IDs
+#
+# #############################################################################
 
 pathways:
-  - ./test/files/pathways/and.tsv
+    - folder: ./test/files/pathways
+      id-map:
+          - file: ./data/id_mapping.inferred.txt
+      files: - and.tsv
+
+# #############################################################################
+#
+# Evidence
+#
+# The possible entity types are: "dna", "rna", "protein", "small-molecule",
+# and "generic". For all filetypes you can specify nodes with their Database_Identifier,
+# Node_Name or Reference_Entity_Identifier. For DNA, RNA and Prtein you can specify
+# the nodes with their HUGO ID.
+# 
+# For "dna" there are two sub-categories: "gneomic" and "copyNumber". All other
+# entity types do not have su categories.
+#
+# #############################################################################
 
 evidence:
   - dna:
     - genomic: 
       - ./test/files/evidence/and.tsv
 
-resultsDir:
-  - ./test/files/results/
+# #############################################################################
+#
+# Results
+#
+# The generated results will contain several files
+# It is recommended to use a unique folder for each run
+# Options for generate include: "heatmap"
+#
+# #############################################################################
+
+results:
+    - directory: ./test/files/results/
+    - generate: - heatmap
+
