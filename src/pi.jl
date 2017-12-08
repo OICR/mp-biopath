@@ -24,7 +24,6 @@ type PIparents
 end
 
 # Assumptions:
-## Can't have node with only negative parents
 ## If there is only one parent it will be an AND relation
 
 function readFile(fname)
@@ -90,6 +89,13 @@ function readFile(fname)
                 orNodeName = "$nodeName\_OR"
                 nodes[orNodeName] = ModelORParents("OR", PIs[nodeName].orPosParents, PIs[nodeName].orNegParents)
                 push!(parents, orNodeName)
+            end
+
+            if ((length(PIs[nodeName].andNegParents) > 1) && (length(parents) == 0))
+                pseudoParent = "PSEUDONODE_PARENT_$nodeName"
+                push!(PIs[nodeName].andPosParents, pseudoParent)
+                nodes[pseudoParent] = ModelANDParents("ROOT", AbstractString[])
+                parents = PIs[nodeName].andPosParents
             end
 
             negParents = PIs[nodeName].andNegParents
