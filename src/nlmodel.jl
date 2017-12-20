@@ -100,7 +100,7 @@ function run(nodes, measurednodestate, keyoutputs, LB, UB, expression, SolverOpt
                 end
 
                 if count_expression == 0
-                    @constraint(model, sum{x[posParentIdxs[a]], a = 1:length(posParentIdxs)} / length(posParentIdxs) ==  x_bar[nodeIndex])
+                    @constraint(model, sum(x[posParentIdxs[a]] for a = 1:length(posParentIdxs)) / length(posParentIdxs) ==  x_bar[nodeIndex])
                 else
                     average_expression = total_expression / count_expression
 
@@ -115,7 +115,7 @@ function run(nodes, measurednodestate, keyoutputs, LB, UB, expression, SolverOpt
 
                     total_expression = sum(evs)
 
-                    @constraint(model, sum{evs[a] * x[posParentIdxs[a]], a = 1:length(posParentIdxs)} / total_expression ==  x_bar[nodeIndex])
+                    @constraint(model, sum(evs[a] * x[posParentIdxs[a]] for a = 1:length(posParentIdxs)) / total_expression ==  x_bar[nodeIndex])
                 end
            end
         end
@@ -123,9 +123,9 @@ function run(nodes, measurednodestate, keyoutputs, LB, UB, expression, SolverOpt
 
     @NLobjective(model,
                  Min,
-                 weightHard * sum{p[variableIdxs[i]] + n[variableIdxs[i]], i = 1:length(variableIdxs)}
-                 + weightMeasured * sum{p[measuredIdxs[j]] + n[measuredIdxs[j]], j = 1:length(measuredIdxs)}
-                 + weightRoot * sum{p[rootIdxs[k]] + n[rootIdxs[k]], k = 1:length(rootIdxs)})
+                 weightHard * sum(p[variableIdxs[i]] + n[variableIdxs[i]] for i = 1:length(variableIdxs))
+                 + weightMeasured * sum(p[measuredIdxs[j]] + n[measuredIdxs[j]] for j = 1:length(measuredIdxs))
+                 + weightRoot * sum(p[rootIdxs[k]] + n[rootIdxs[k]] for k = 1:length(rootIdxs)))
 
     if verbose
         println("Solving Model")
