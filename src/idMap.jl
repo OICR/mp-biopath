@@ -1,51 +1,63 @@
 module IdMap
 
+
 using DataFrames
+using Nullables
 using CSV
 
-function get(dbidfile)
-    df = CSV.read(fname,
+  #                null="N/A",
+function get(IDfile)
+    df = CSV.read(IDfile,
                   delim="\t",
+                  datarow=2,
+                  quotechar="\\",
                   nullable=false,
                   header=["Database_Identifier",
                           "Node_Name",
                           "Display_Name",
                           "Reference_Entity_Name",
                           "Reference_Entity_Identifier",
-                          "Instance_Class",
-                          "Type"],
-                  types=[int,
-                         String,
+                          "Instance_Class"],
+                  types=[String,
                          String,
                          String,
                          String,
                          String,
                          String])
 
-    idMapping = Dict()    
+    idMap = Dict()
     for row in eachrow(df)
-       nodeType = row[:Type]
+        dbID = row[:Database_Identifier]
+        if haskey(idMap, dbID) == false
+            idMap[dbID] = []
+        end
+        push!(idMap[dbID], row)
 
-       if haskey(idMapping, nodeType)
-           idMapping[nodeType] = Dict()
-       end
+        nodeName = row[:Node_Name]
+        if haskey(idMap, nodeName) == false
+            idMap[nodeName] = []
+        end
+        push!(idMap[nodeName], row)
 
-       entityID = row[:referenceEntityID]
-       if haskey(idMapping[nodeType], entityID)
-          idMapping[nodeType][entityID] = []
-       end
-       push!(idMapping[nodeType][entityID], row)
-
-       entityName = row[:referenceEntityName]
-       if haskey(idMapping[nodeType], entityName)
-          idMapping[nodeType][entityName] = []
-       end
-       push!(idMapping[nodeType][entityName], row)
+        refID = row[:Reference_Entity_Identifier]
+        if refID != "N/A"
+            if haskey(idMap, refID) == false
+                idMap[refID] = []
+            end
+            push!(idMap[refID], row)
+        end
     end
 
-    return idMapping
+    return idMap
 end
 
+function idToNodes(idMap, id, entityType="generic")
+   if entityType == "generic"
+       println("need to finish this")
+   end
+
+   return 1
+end
 
 function allGeneReferenceProduct(dbidfile)
     genes = []

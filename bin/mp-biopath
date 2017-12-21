@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 
 using DocOpt
-import YAML
+
 
 doc = """MP-BioPath.
 
@@ -17,7 +17,7 @@ Options:
   --version        Show version.
 """
 
-include("../src/inference.jl")
+
 
 arguments = docopt(doc, version=v"1.0.0")
 
@@ -30,21 +30,30 @@ if (verbose)
 end
 
 if (!isfile(configFile))
-   error("config file not found")
+   error("Config file not found")
 end
 
 if (verbose)
-   info("parsing config file: $configFile")
+   info("Parsing config file: $configFile")
 end
 
+import YAML
 config = YAML.load(open(configFile))
 
 if (verbose)
   dump(config)
 end
 
+
+include("../src/inference.jl")
+
 function main()
-    Inference.run(config, verbose)
+    if arguments["inference"]
+       if (verbose)
+           info("Inference Selected")
+       end
+       Inference.run(config, verbose)
+    end
 end
 
 main()

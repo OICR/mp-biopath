@@ -34,7 +34,7 @@ coin-options:
 
 expression:
     - files: /data/expression-data.tsv
-      tissue: - esophagus
+      tissue: esophagus
 
 # #############################################################################
 #
@@ -62,7 +62,8 @@ pathways:
     - folder: ./test/files/pathways
       id-map:
           - file: ./data/id_mapping.inferred.txt
-      files: - and.tsv
+      files:
+          - and.tsv
 
 # #############################################################################
 #
@@ -95,5 +96,6 @@ evidence:
 
 results:
     - directory: ./test/files/results/
-    - generate: - heatmap
+    - generate:
+        - heatmap
 
