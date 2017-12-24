@@ -2,22 +2,19 @@ module Expression
 
 using CSV
 using DataFrames
-using DataTables
-using DataStructures
 
-function geneExpressionMap(filename, dataRow, tissueType)
+function getTissue(file, tissue)
     # Where the Gene Name is the HUGO name
-    # The data is expected to be Float16 data
-    df = CSV.read(filename,
-                  delim = "\t",
-                  datarow = dataRow)
-
-    geneExpressionValues = Dict()
+    df = CSV.read(file, delim="\t", weakrefstrings=false)
+    tissueValues = Dict()
     for row in eachrow(df)
-        geneExpressionMap[row[Symbol("Gene Name")]] = row[Symbol(tissueType)]
+        value = row[Symbol(tissue)]
+        if isnull(value) == false
+            tissueValues[get(row[Symbol("Gene Name")])] = get(value)
+        end
     end
 
-    return geneExpressionMap
+    return tissueValues
 end
 
 end

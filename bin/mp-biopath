@@ -52,7 +52,7 @@ function main()
        if (verbose)
            info("Inference Selected")
        end
-       Inference.run(config, verbose)
+       Inference.run(configFile, config, verbose)
     end
 end
 

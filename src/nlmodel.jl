@@ -4,14 +4,15 @@ using JuMP
 using AmplNLWriter
 using CoinOptServices
 
-function run(nodes, measurednodestate, keyoutputs, LB, UB, expression, SolverOptions, verbose)
-    model = Model(solver=AmplNLSolver(CoinOptServices.couenne, solverOptions))
+function runModel(nodes, measuredNodeState, LB, UB, expression, options, verbose)
+    model = Model(solver=AmplNLSolver(CoinOptServices.couenne, options))
 
     weightRoot = 5
     weightMeasured = 10000
     weightHard = 10
 
     nodesList = collect(keys(nodes))
+    filter!((node,v)->indexin([node], nodesList) != [0], measuredNodeState)
 
     @variable(model, LB <= x[1:length(nodesList)] <= UB, start = 1)
     @variable(model, LB <= x_bar[1:length(nodesList)] <= UB, start = 1)
@@ -21,12 +22,6 @@ function run(nodes, measurednodestate, keyoutputs, LB, UB, expression, SolverOpt
 
     rootIdxs = []
     variableIdxs = []
-    for node in collect(keys(measuredNodeState))
-        if indexin([node],nodesList) == [0]
-            delete!(measuredNodeState, node)
-        end
-    end
-
     measuredIdxs = indexin(collect(keys(measuredNodeState)), nodesList)
 
     for nodeName in keys(nodes)
@@ -138,19 +133,9 @@ function run(nodes, measurednodestate, keyoutputs, LB, UB, expression, SolverOpt
         println("Objective value: ", getobjectivevalue(model))
     end
 
-    keyresults = Dict()
-    keyoutputsArray = collect(keyoutputs)
-    if length(keyoutputs) > 0
-        keyoutputIdx = indexin(keyoutputsArray, nodesList)
-        for i in keyoutputIdx
-            if i != 0
-                keyresults[nodesList[i]] = getvalue(x[i])
-            end
-        end
-    else
-        for i in eachindex(nodesList)
-            keyresults[nodesList[i]] = getvalue(x[i])
-        end
+    results = Dict()
+    for i in eachindex(nodesList)
+         results[nodesList[i]] = getvalue(x[i])
     end
 
     x_values = Dict()
@@ -160,9 +145,7 @@ function run(nodes, measurednodestate, keyoutputs, LB, UB, expression, SolverOpt
         x_bar_values[nodesList[i]] = getvalue(x_bar[i])
     end
 
-
-
-    return [keyresults, x_values, x_bar_values]
+    return [results, x_values, x_bar_values]
 end
 
 end

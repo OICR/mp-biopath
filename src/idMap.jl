@@ -1,11 +1,9 @@
 module IdMap
 
-
 using DataFrames
-using Nullables
+#using Nullables
 using CSV
 
-  #                null="N/A",
 function get(IDfile)
     df = CSV.read(IDfile,
                   delim="\t",
@@ -38,6 +36,14 @@ function get(IDfile)
             idMap[nodeName] = []
         end
         push!(idMap[nodeName], row)
+
+        refName = row[:Reference_Entity_Name]
+        if refName != "N/A"
+            if haskey(idMap, refName) == false
+                idMap[refName] = []
+            end
+            push!(idMap[refName], row)
+        end
 
         refID = row[:Reference_Entity_Identifier]
         if refID != "N/A"
