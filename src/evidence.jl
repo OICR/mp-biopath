@@ -39,7 +39,7 @@ function getGenomic(file, idMap)
                     end
                     value = get(entry[2])
                     for node in nodes
-                        sampleNodeValue[sample][node[:Node_Name]] = value
+                        sampleNodeValue[sample][node[:Node_Name]] = value - 1
                     end
                 end
             end

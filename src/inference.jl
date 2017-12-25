@@ -78,23 +78,21 @@ function run(configFile, config, verbose)
     end
 
     mkpath(runDir)
-    cp(configFile, "$runDir/config.yaml")
-    exit()
+    cp(configFile, "$runDir/config.yaml"; remove_destination=true)
+
     for file in config["pathways"]
         if verbose
-            println("Running pathway: file")
+            println("Running pathway: $file")
         end
 
-        pathwayName = match(r".*/(.*)\.tsv", file)
-        println(pathwayName)
-        pathwayDir = "$runDir/pathayName"
-        pringln(pathwayDir)
-        exit()
-        runPathway(file, expression, IdMap, evidence, lowerbound, upperbound, config["coin-options"], runDir, verbose)
+        m = match(r".*/(?<pathway>.*)\.tsv", file)
+        pathwayName = m[:pathway]
+        pathwayDir = "$runDir/$pathwayName"
+        runPathway(file, expression, IdMap, evidence, lowerbound, upperbound, config["coin-options"], pathwayDir, verbose)
     end
 end
 
-function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, options, runDir, verbose)
+function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, options, pathwayDir, verbose)
     pinodes = Pi.readFile(file)
     nodesampleresults = Dict()
     allNodeResults = Dict()
@@ -128,15 +126,17 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, o
         end
     end
 
-    Results.createcsv(nodesampleresults,
-                      observations["columns"],
-                      resultsfile)
+    mkpath(pathwayDir)
+    resultsPath = "$pathwayDir/results.tsv"
 
-    if allOutputsFile != ""
-         Results.outputAllResults(allNodeResults,
-                                  observations["columns"],
-                                  allOutputsFile)
+    if verbose
+        println("Outputing results: $resultsPath")
     end
+
+    Results.createcsv(nodesampleresults,
+                      keys(evidence),
+                      resultsPath)
+
 end
 
 function analyzeResults(resultsfile, expectedfile, downregulatedcutoff, upregulatedcutoff, pgmlab, verbose)
