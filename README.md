@@ -47,6 +47,8 @@ Pkg.clone("git://github.com/lejon/TSne.jl.git")
 
 # Downloading Expression Data
 
+Go to https://www.ebi.ac.uk/gxa/experiments/ to find the expression file you would like to use.
+
 ```bash
 curl -o data/expression-data.tsv https://www.ebi.ac.uk/gxa/experiments/E-MTAB-2836.tsv?geneQuery=%5B%7B%22value%22%3A%22protein_coding%22%2C%22category%22%3A%22gene_biotype%22%7D%5D
 ```
@@ -132,8 +134,11 @@ make build-env
 ### Run Development
 
 ```bash
-docker run -v`pwd`:/app --env JULIA_LOAD_PATH=/app/src/ -it  oicr/mpbiopath-env:0.0.4-SNAPSHOT /bin/bash
+make run-bash
 ```
+
+This command will run bash inside a pre-specified docker envionment. Feel free to copy the command and specify your desired environment
+
 
 ### create Tsne Plot
 
@@ -143,9 +148,6 @@ docker run -v`pwd`:/app --env JULIA_LOAD_PATH=/app/src/ -it  oicr/mpbiopath-env:
 ```bash
 julia
 ```
-<<<<<<< HEAD
-# mp-biopath-documentation
-=======
 
 3) Install tsne package
 
@@ -170,6 +172,3 @@ julia scripts/create_tsne_plot.jl haveheader --labelcolname=subgroup_label /data
 This will generate a file in working directory called Plot2.png.
 
 5) Move image to mounted volume 
-
-
->>>>>>> origin/develop

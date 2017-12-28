@@ -11,10 +11,11 @@ Pkg.add("FactCheck")
 Pkg.add("CSV")
 Pkg.add("YAML")
 Pkg.add("JSON")
+Pkg.add("DocOpt")
+Pkg.add("DataFrames")
+Pkg.add("DataTables")
 
 #for tsne
-Pkg.add("DataFrames")
-Pkg.add("DocOpt")
 Pkg.add("Gadfly")
 Pkg.add("Cairo")
 Pkg.add("Fontconfig")

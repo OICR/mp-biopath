@@ -1,7 +1,7 @@
 module FindSL
 
 include("valuetostate.jl")
-include("dbidnamemapping.jl")
+include("idMap.jl")
 include("essential.jl")
 include("expression.jl")
 include("nlmodel.jl")
@@ -9,9 +9,13 @@ include("pi.jl")
 
 function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, upregulatedcutoff, pairwisefile, dbidfile, tissueType, verbose)
     pinodes = Pi.readFile(pifile)
-    expression = Expression.get(dbidfile, tissueType)
+    IDMap = IdMap.get(dbidfile)
+
+    expression = Expression.get(IDMap, tissueType)
     #essentialgenes = Essential.getGenes(collect(keys(pinodes)), dbidfile)
     essentialgenes = AbstractString["419195","5668934"]
+    essentialgenes = Essential.getGenes(collect(keys(pinodes)), dbidfile)
+
     allGenes = DbIdNameMapping.allGeneReferenceProduct(dbidfile)
     allGenesSet = Set(allGenes)
 
@@ -131,13 +135,13 @@ function run(pifile, slfilename, lowerbound, upperbound, downregulatedcutoff, up
                                 write(sloutfile, "$count\t")
                                 write(sloutfile, nodeone["name"])
                                 write(sloutfile, "\t")
-                                write(sloutfile, nodeone["state"])
+                                write(sloutfile, String(nodeone["state"]))
                                 write(sloutfile, "\t")
                                 write(sloutfile, string(valueone))
                                 write(sloutfile, "\t")
                                 write(sloutfile, nodetwo["name"])
                                 write(sloutfile, "\t")
-                                write(sloutfile, nodetwo["state"])
+                                write(sloutfile, String(nodetwo["state"]))
                                 write(sloutfile, "\t")
                                 write(sloutfile, string(valuetwo))
                                 write(sloutfile, "\t")

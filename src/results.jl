@@ -2,23 +2,24 @@ module Results
 
 include("valuetostate.jl")
 
-function createcsv(nodesampleresults, columns, resultfilename)
+function createcsv(nodeSampleResults, columns, resultfilename)
     outfile = open(resultfilename, "w")
 
-    write(outfile, join(columns, "\t"))
+    sortedColumns = sort(collect(columns))
+    sortedColumnsFull = copy(sortedColumns)
+    unshift!(sortedColumnsFull, "node")
+
+    write(outfile, join(sortedColumnsFull, "\t"))
     write(outfile, "\n")
 
-    for node in keys(nodesampleresults)
+    for node in keys(nodeSampleResults)
         write(outfile, "$node\t")
 
         index = 0
         lengthColumns = length(columns)
-        for column in columns
+        for column in sortedColumns
             index += 1
-            if column == "gene"
-                continue
-            end
-            value = round(nodesampleresults[node][column], 2)
+            value = round(nodeSampleResults[node][column], 2)
             write(outfile, "$value")
             if lengthColumns == index
                 write(outfile, "\n")

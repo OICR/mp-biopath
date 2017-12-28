@@ -4,37 +4,112 @@ include("probability.jl")
 include("evidence.jl")
 include("nlmodel.jl")
 include("results.jl")
-include("keyoutputs.jl")
 include("expression.jl")
 include("pi.jl")
+include("idMap.jl")
 
-function run(pifile, observationfile, resultsfile, keyoutputsfile, dbidfile, lowerbound, upperbound, copynumberflag, onenormalflag, tissueType, allOutputsFile, verbose)
-    pinodes = Pi.readFile(pifile)
-    expression = Expression.get(dbidfile, tissueType)
-    observations = Observations.get(observationfile, pinodes, dbidfile, copynumberflag, onenormalflag)
-    keyoutputs = Keyoutputs.getNodes(keyoutputsfile)
-    keyoutputs = ()
-    nodesampleresults = Dict()
-    allNodeResults = Dict()
-    for sample in observations["columns"]
-        if sample == "gene"
-            continue
+function run(configFile, config, verbose)
+    if haskey(config, "id-map")
+        if verbose
+            println("Reading in idMap")
+        end
+        IDMap = IdMap.get(config["id-map"])
+    else
+        prinln("Need to specify 'id-map' in config file")
+        exit(1)
+    end
+
+    if haskey(config, "expression")
+        if verbose
+            println("Reading in expression")
         end
 
+        if haskey(config["expression"], "file") == false || haskey(config["expression"], "tissue") == false
+            println("Expresion section of config needs 'file' and 'tissue' to be specified")
+            exit(1)
+        end
+
+        expression = Expression.getTissue(config["expression"]["file"],
+                                          config["expression"]["tissue"])
+
+    else
+        println("Missing expression section of config")
+        exit(1)
+    end
+
+    if haskey(config, "upperbound")
+        upperbound = config["upperbound"]
+    else
+        println("Need to specify upperbound")
+        exit(1)
+    end
+
+    if haskey(config, "lowerbound")
+        lowerbound = config["lowerbound"]
+    else
+        println("Need to specify lowerbound")
+        exit(1)
+    end
+
+    if haskey(config, "evidence")
+        evidence = Evidence.getEvidence(config["evidence"], IDMap)
+    else
+        println("Evidence section of config is missing")
+        exit(1)
+    end
+
+    runID = haskey(config, "id")? config["id"]: Base.Random.uuid4()
+    println("runID: $runID")
+
+
+    if haskey(config, "results")
+        resultsConfig = config["results"]
+        if haskey(resultsConfig, "directory")
+
+             directory =resultsConfig["directory"]
+             runDir = endswith(directory, "/")? "$directory$runID": "$directory/$runID"
+        else
+            println("Need to specify directory in results section of config")
+            exit(1)
+        end
+    else
+        println("Results seciont required")
+        exit(1)
+    end
+
+    mkpath(runDir)
+    cp(configFile, "$runDir/config.yaml"; remove_destination=true)
+
+    for file in config["pathways"]
+        if verbose
+            println("Running pathway: $file")
+        end
+
+        m = match(r".*/(?<pathway>.*)\.tsv", file)
+        pathwayName = m[:pathway]
+        pathwayDir = "$runDir/$pathwayName"
+        runPathway(file, expression, IdMap, evidence, lowerbound, upperbound, config["coin-options"], pathwayDir, verbose)
+    end
+end
+
+function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, options, pathwayDir, verbose)
+    pinodes = Pi.readFile(file)
+    nodesampleresults = Dict()
+    allNodeResults = Dict()
+    for sample in keys(evidence)
         if verbose
             println("Running $sample")
         end
 
-        samplenodestate = observations["samplenodestate"]
-        nodestate = samplenodestate[sample]
+        nodestate = evidence[sample]
 
-        (sampleresults, x, x_bar) = NLmodel.run(pinodes,
-                                                nodestate,
-                                                keyoutputs,
-                                                lowerbound,
-                                                upperbound,
-                                                expression,
-                                                verbose)
+        (sampleresults, x, x_bar) = NLmodel.runModel(pinodes,
+                                                    nodestate,
+                                                    lowerbound,
+                                                    upperbound,
+                                                    expression,
+                                                    options,
+                                                    verbose)
 
         for nodeName in keys(sampleresults)
             if length(keys(nodesampleresults)) == 0 || haskey(nodesampleresults, nodeName) == false
@@ -43,24 +118,25 @@ function run(pifile, observationfile, resultsfile, keyoutputsfile, dbidfile, low
             nodesampleresults[nodeName][sample] = sampleresults[nodeName]
         end
 
-        if allOutputsFile != ""
-           for nodeName in keys(x)
-               if length(keys(allNodeResults)) == 0 || haskey(allNodeResults, nodeName) == false
-                   allNodeResults[nodeName] = Dict()
-               end
-               allNodeResults[nodeName][sample] = [x[nodeName], x_bar[nodeName]]
-           end 
+        for nodeName in keys(x)
+            if length(keys(allNodeResults)) == 0 || haskey(allNodeResults, nodeName) == false
+                allNodeResults[nodeName] = Dict()
+            end
+            allNodeResults[nodeName][sample] = [x[nodeName], x_bar[nodeName]]
         end
     end
-    Results.createcsv(nodesampleresults,
-                      observations["columns"],
-                      resultsfile)
 
-    if allOutputsFile != ""
-         Results.outputAllResults(allNodeResults,
-                                  observations["columns"],
-                                  allOutputsFile)
+    mkpath(pathwayDir)
+    resultsPath = "$pathwayDir/results.tsv"
+
+    if verbose
+        println("Outputing results: $resultsPath")
     end
+
+    Results.createcsv(nodesampleresults,
+                      keys(evidence),
+                      resultsPath)
+
 end
 
 function analyzeResults(resultsfile, expectedfile, downregulatedcutoff, upregulatedcutoff, pgmlab, verbose)

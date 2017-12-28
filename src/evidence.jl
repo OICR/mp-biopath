@@ -1,10 +1,58 @@
-module Observations
+module Evidence
 
-include("dbidnamemapping.jl")
+using Nullables
+using DataFrames
+using CSV
 
-function get(fname, pinodes, dbidfile, copynumber, oneNormal)
-    genetonodes = DbIdNameMapping.geneToRootNodes(pinodes, dbidfile)
+function getEvidence(evidence, idMapping)
+    sampleNodeValue = Dict()
+    if haskey(evidence, "dna")
+        evidenceDNA = evidence["dna"]
+        if haskey(evidenceDNA, "genomic")
+            genomicFile = evidenceDNA["genomic"]
+            genomicEvidence = getGenomic(genomicFile, idMapping)
+        end
+        sampleNodeValue = genomicEvidence["sampleNodeValue"]
+    end
 
+    return sampleNodeValue
+end
+
+function getGenomic(file, idMap)
+    df = CSV.read(file, delim="\t", weakrefstrings=false)
+
+    geneNodeMap = Dict()
+    sampleNodeValue = Dict()
+    for sample in eachrow(df)
+        gene = get(sample[Symbol("gene")])
+        nodes = idMap[gene]
+        geneNodeMap[gene] = nodes
+
+        geneValue = Dict()
+        first = true
+        for entry in sample
+            if first == false
+                sample = entry[1]
+                if isnull(entry[2]) == false
+                    if haskey(sampleNodeValue, sample) == false
+                        sampleNodeValue[sample] = Dict()
+                    end
+                    value = get(entry[2])
+                    for node in nodes
+                        sampleNodeValue[sample][node[:Node_Name]] = value - 1
+                    end
+                end
+            end
+            first = false
+        end
+    end
+
+    return Dict("sampleNodeValue" => sampleNodeValue,
+                "geneNodeMap" => geneNodeMap)
+end
+
+
+function getDnaEvidence(evidence, idMapping)
     divideby = copynumber? 2:1
     data = readlines(fname)
 

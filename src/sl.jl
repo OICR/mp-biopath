@@ -1,6 +1,6 @@
 module SL
 
-include("dbidnamemapping.jl")
+include("idMap.jl")
 include("evidence.jl")
 
 function getNodes(dbidfile)
