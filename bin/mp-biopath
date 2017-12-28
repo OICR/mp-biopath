@@ -1,0 +1,60 @@
+#!/usr/bin/env julia
+
+using DocOpt
+
+
+doc = """MP-BioPath.
+
+Usage:
+  mp-biopath inference --config=<file> [-verbose]
+  mp-biopath -h | --help
+  mp-biopath --version
+
+Options:
+  --config <file>  Configuration file to use for run 
+  -h --help        Show this screen.
+  -v -verbose      Verbose output
+  --version        Show version.
+"""
+
+
+
+arguments = docopt(doc, version=v"1.0.0")
+
+configFile = arguments["--config"]
+
+verbose = arguments["-v"]
+
+if (verbose)
+   dump(configFile)
+end
+
+if (!isfile(configFile))
+   error("Config file not found")
+end
+
+if (verbose)
+   info("Parsing config file: $configFile")
+end
+
+import YAML
+config = YAML.load(open(configFile))
+
+if (verbose)
+  dump(config)
+end
+
+
+include("../src/inference.jl")
+
+function main()
+    if arguments["inference"]
+       if (verbose)
+           info("Inference Selected")
+       end
+       Inference.run(configFile, config, verbose)
+    end
+end
+
+main()
+
