@@ -51,34 +51,34 @@ function run(configFile, config, verbose)
         exit(1)
     end
 
-    if haskey(config, "evidence")
-        evidence = Evidence.getEvidence(config["evidence"], IDMap)
-    else
-        println("Evidence section of config is missing")
-        exit(1)
-    end
-
     runID = haskey(config, "id")? config["id"]: Base.Random.uuid4()
-    println("runID: $runID")
-
+    info("runID: $runID")
 
     if haskey(config, "results")
         resultsConfig = config["results"]
         if haskey(resultsConfig, "directory")
 
-             directory =resultsConfig["directory"]
+             directory = resultsConfig["directory"]
              runDir = endswith(directory, "/")? "$directory$runID": "$directory/$runID"
         else
             println("Need to specify directory in results section of config")
             exit(1)
         end
     else
-        println("Results seciont required")
+        println("Results section required")
         exit(1)
     end
 
     mkpath(runDir)
     cp(configFile, "$runDir/config.yaml"; remove_destination=true)
+
+    if haskey(config, "evidence")
+        evidence = Evidence.getEvidence(config["evidence"], IDMap, runDir)
+    else
+        println("Evidence section of config is missing")
+        exit(1)
+    end
+
 
     for file in config["pathways"]
         if verbose

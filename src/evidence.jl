@@ -4,7 +4,9 @@ using Nullables
 using DataFrames
 using CSV
 
-function getEvidence(evidence, idMapping)
+function getEvidence(evidence, idMapping, runDir)
+    evidenceMapFile = "$runDir/evidenceIDMapping.tsv"
+
     sampleNodeValue = Dict()
     if haskey(evidence, "dna")
         evidenceDNA = evidence["dna"]
@@ -13,24 +15,43 @@ function getEvidence(evidence, idMapping)
             genomicEvidence = getGenomic(genomicFile, idMapping)
         end
         sampleNodeValue = genomicEvidence["sampleNodeValue"]
+        outputToEvidenceMap("genomic", evidenceMapFile, genomicEvidence["geneNodesMap"])
     end
 
     return sampleNodeValue
 end
 
+function outputToEvidenceMap(evidenceType, file, geneNodesMap)
+    outfile = open(file, "w")
+
+    for gene in keys(geneNodesMap)
+        for node in geneNodesMap[gene]
+            id = node[:Database_Identifier]
+            nodeName = node[:Node_Name]
+            write(outfile, "$evidenceType\t$gene\t$id\t$nodeName\n")
+        end
+    end
+
+    close(outfile)
+end
+
+
 function getGenomic(file, idMap)
     df = CSV.read(file, delim="\t", weakrefstrings=false)
 
+    # This should be changed to only include nodes that it will acually be mapped to in the model. i.e. DNA nodes
+
     geneNodeMap = Dict()
     sampleNodeValue = Dict()
-    for sample in eachrow(df)
-        gene = get(sample[Symbol("gene")])
+    geneNodesMap = Dict()
+    for row in eachrow(df)
+        gene = get(row[Symbol("gene")])
         nodes = idMap[gene]
-        geneNodeMap[gene] = nodes
+        geneNodesMap[gene] = nodes;
 
         geneValue = Dict()
         first = true
-        for entry in sample
+        for entry in row
             if first == false
                 sample = entry[1]
                 if isnull(entry[2]) == false
@@ -48,7 +69,7 @@ function getGenomic(file, idMap)
     end
 
     return Dict("sampleNodeValue" => sampleNodeValue,
-                "geneNodeMap" => geneNodeMap)
+                "geneNodesMap" => geneNodesMap)
 end
 
 
