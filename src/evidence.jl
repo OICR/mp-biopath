@@ -55,12 +55,14 @@ function getGenomic(file, idMap)
             if first == false
                 sample = entry[1]
                 if isnull(entry[2]) == false
-                    if haskey(sampleNodeValue, sample) == false
-                        sampleNodeValue[sample] = Dict()
-                    end
                     value = get(entry[2])
-                    for node in nodes
-                        sampleNodeValue[sample][node[:Node_Name]] = value - 1
+                    if value != -999
+                        if haskey(sampleNodeValue, sample) == false
+                            sampleNodeValue[sample] = Dict()
+                        end
+                        for node in nodes
+                            sampleNodeValue[sample][node[:Node_Name]] = value
+                        end
                     end
                 end
             end
