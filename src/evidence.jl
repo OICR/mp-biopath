@@ -4,7 +4,9 @@ using Nullables
 using DataFrames
 using CSV
 
-function getEvidence(evidence, idMapping)
+function getEvidence(evidence, idMapping, runDir)
+    evidenceMapFile = "$runDir/evidenceIDMapping.tsv"
+
     sampleNodeValue = Dict()
     if haskey(evidence, "dna")
         evidenceDNA = evidence["dna"]
@@ -13,42 +15,63 @@ function getEvidence(evidence, idMapping)
             genomicEvidence = getGenomic(genomicFile, idMapping)
         end
         sampleNodeValue = genomicEvidence["sampleNodeValue"]
+        outputToEvidenceMap("genomic", evidenceMapFile, genomicEvidence["geneNodesMap"])
     end
 
     return sampleNodeValue
 end
 
-function getGenomic(file, idMap)
-    df = CSV.read(file, delim="\t", weakrefstrings=false)
+function outputToEvidenceMap(evidenceType, file, geneNodesMap)
+    outfile = open(file, "w")
 
-    geneNodeMap = Dict()
-    sampleNodeValue = Dict()
-    for sample in eachrow(df)
-        gene = get(sample[Symbol("gene")])
-        nodes = idMap[gene]
-        geneNodeMap[gene] = nodes
-
-        geneValue = Dict()
-        first = true
-        for entry in sample
-            if first == false
-                sample = entry[1]
-                if isnull(entry[2]) == false
-                    if haskey(sampleNodeValue, sample) == false
-                        sampleNodeValue[sample] = Dict()
-                    end
-                    value = get(entry[2])
-                    for node in nodes
-                        sampleNodeValue[sample][node[:Node_Name]] = value - 1
-                    end
-                end
-            end
-            first = false
+    for gene in keys(geneNodesMap)
+        for node in geneNodesMap[gene]
+            id = node[:Database_Identifier]
+            nodeName = node[:Node_Name]
+            write(outfile, "$evidenceType\t$gene\t$id\t$nodeName\n")
         end
     end
 
+    close(outfile)
+end
+
+
+function getGenomic(file, idMap)
+    df = CSV.read(file, delim="\t", weakrefstrings=false)
+
+    # This should be changed to only include nodes that it will acually be mapped to in the model. i.e. DNA nodes
+
+    geneNodeMap = Dict()
+    sampleNodeValue = Dict()
+    geneNodesMap = Dict()
+    for row in eachrow(df)
+        gene = get(row[Symbol("gene")])
+        if haskey(idMap, gene) == true
+            nodes = idMap[gene]
+            geneNodesMap[gene] = nodes;
+            geneValue = Dict()
+            first = true
+            for entry in row
+                if first == false
+                    sample = entry[1]
+                    if isnull(entry[2]) == false
+                        value = get(entry[2])
+                        if value != -999
+                            if haskey(sampleNodeValue, sample) == false
+                                sampleNodeValue[sample] = Dict()
+                            end
+                            for node in nodes
+                                sampleNodeValue[sample][node[:Node_Name]] = value
+                            end
+                        end
+                    end
+                end
+                first = false
+            end
+        end
+    end
     return Dict("sampleNodeValue" => sampleNodeValue,
-                "geneNodeMap" => geneNodeMap)
+                "geneNodesMap" => geneNodesMap)
 end
 
 

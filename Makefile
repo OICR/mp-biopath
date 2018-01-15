@@ -6,7 +6,7 @@ build-env:
 
 .PHONY: build-app
 build-app:
-	docker build -t oicr/mpbiopath:1.0.1-SNAPSHOT -f docker/Dockerfile.app .
+	docker build -t oicr/mpbiopath:1.0.1 -f docker/Dockerfile.app .
 
 .PHONY: run-bash
 run-bash:

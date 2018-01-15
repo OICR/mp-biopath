@@ -32,7 +32,7 @@ function runModel(nodes, measuredNodeState, LB, UB, expression, options, verbose
         j = 0
         for node in collect(keys(measuredNodeState))
             j = j + 1
-            if measuredIdxs[j] == nodeIndex
+            if measuredIdxs[j] == nodeIndex && nodes[nodeName].relation == "ROOT"
                 measured = true
                 rhs = measuredNodeState[node] < LB? LB: measuredNodeState[node]
                 @constraint(model, m[j] == rhs)
