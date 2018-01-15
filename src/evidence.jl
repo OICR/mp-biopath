@@ -46,30 +46,30 @@ function getGenomic(file, idMap)
     geneNodesMap = Dict()
     for row in eachrow(df)
         gene = get(row[Symbol("gene")])
-        nodes = idMap[gene]
-        geneNodesMap[gene] = nodes;
-
-        geneValue = Dict()
-        first = true
-        for entry in row
-            if first == false
-                sample = entry[1]
-                if isnull(entry[2]) == false
-                    value = get(entry[2])
-                    if value != -999
-                        if haskey(sampleNodeValue, sample) == false
-                            sampleNodeValue[sample] = Dict()
-                        end
-                        for node in nodes
-                            sampleNodeValue[sample][node[:Node_Name]] = value
+        if haskey(idMap, gene) == true
+            nodes = idMap[gene]
+            geneNodesMap[gene] = nodes;
+            geneValue = Dict()
+            first = true
+            for entry in row
+                if first == false
+                    sample = entry[1]
+                    if isnull(entry[2]) == false
+                        value = get(entry[2])
+                        if value != -999
+                            if haskey(sampleNodeValue, sample) == false
+                                sampleNodeValue[sample] = Dict()
+                            end
+                            for node in nodes
+                                sampleNodeValue[sample][node[:Node_Name]] = value
+                            end
                         end
                     end
                 end
+                first = false
             end
-            first = false
         end
     end
-
     return Dict("sampleNodeValue" => sampleNodeValue,
                 "geneNodesMap" => geneNodesMap)
 end
