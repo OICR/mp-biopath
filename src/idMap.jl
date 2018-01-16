@@ -1,10 +1,9 @@
 module IdMap
 
 using DataFrames
-#using Nullables
 using CSV
 
-function get(IDfile)
+function getIDmap(IDfile)
     df = CSV.read(IDfile,
                   delim="\t",
                   datarow=2,

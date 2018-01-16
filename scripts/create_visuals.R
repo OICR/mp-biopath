@@ -75,7 +75,7 @@ if (grepl("h", visual)) {
 }
 
 if (grepl("t", visual)) {
-if (!require("Rtsne")) {install.packages("Rtsne", repos='https://cloud.r-project.org')}
+    if (!require("Rtsne")) {install.packages("Rtsne", repos='https://cloud.r-project.org')}
 
     #sets seed so that tsne plot looks the same when you rerun the script
     set.seed(20)

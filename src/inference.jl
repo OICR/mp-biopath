@@ -13,7 +13,7 @@ function run(configFile, config, verbose)
         if verbose
             println("Reading in idMap")
         end
-        IDMap = IdMap.get(config["id-map"])
+        IDMap = IdMap.getIDmap(config["id-map"])
     else
         prinln("Need to specify 'id-map' in config file")
         exit(1)
