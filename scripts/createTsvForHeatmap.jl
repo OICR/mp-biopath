@@ -19,9 +19,6 @@ function parse_commandline()
         "pathway-list-file"
             help = "This is the pathway list file provided by Reactome"
             required = true
-        "db-id-file"
-            help = "This is file contains a mapping between pathaway IDs, gene names and Reactome IDs"
-            required = true
         "key-outputs-file"
             help = "This file contains the list of keyoutputs for each pathway"
             required = true
@@ -42,7 +39,6 @@ function main()
 
     CreateTsvForHeatmap.run(parsed_args["results-folder"],
                             parsed_args["pathway-list-file"],
-                            parsed_args["db-id-file"],
                             parsed_args["key-outputs-file"],
                             parsed_args["verbose"])
 end

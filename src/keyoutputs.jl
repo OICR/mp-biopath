@@ -6,39 +6,30 @@ using DataFrames
 function getKeyoutputs(file)
     df = CSV.read(file,
                   delim="\t",
-                  datarow=2,
+                  datarow=1,
                   quotechar="\\",
+                  nullable=false,
                   header=["pathway_id",
                           "pathway_name",
-                          "output_reactome_dbid",
-                          "mapping_id",
-                          "description",
-                          "specific",
-                          "direct_measurement",
-                          "dm_method",
-                          "indirect_measurement",
-                          "im_methodDatabase_Identifier"],
+                          "node_id",
+                          "node_name"],
                   types=[String,
-                         String,
-                         String,
-                         String,
-                         String,
-                         String,
-                         String,
                          String,
                          String,
                          String])
 
-    keyoutputMap = Dict()
+    keyoutputList = Dict()
     for row in eachrow(df)
-        pathwayID = get(row[Symbol("pathway_id")])
-        if haskey(keyoutputMap, pathwayID) == false
-            keyoutputMap[pathwayID] = []
+        if !isnull(row[Symbol("pathway_name")])
+            pathwayName = row[Symbol("pathway_name")]
+            if haskey(keyoutputList, pathwayName) == false
+               keyoutputList[pathwayName] = Dict()
+            end
+            keyoutputList[pathwayName][row[:node_name]] = row[:node_id]
         end
-        push!(keyoutputMap[pathwayID], get(row[:output_reactome_dbid]))
     end
   
-    return keyoutputMap
+    return keyoutputList
 end
 
 end
