@@ -42,7 +42,7 @@ my_palette <- colorRampPalette(c("blue", "white", "red"))(n=199)
 row_annotation <- unlist(strsplit(colour_column_string, ", "))
 
 if (grepl("h", visual)) {
-    output_htmap <- paste("./", output_name, "_heatmap.svg", sep = "")
+    output_htmap <- paste(output_name, "_heatmap.svg", sep = "")
     par(lend = 1)
     svg(output_htmap)
 }
@@ -53,9 +53,13 @@ colour_string <- unlist(strsplit(list_colours, ", "))
 htmap <- heatmap.2(log10(y),
         scale="none",
         key=TRUE,
-        key.title=NA,
+        key.title="Pathways",
         keysize =1.00,
-        key.xlab=NA,
+        key.xlab="Log Base 10",
+        xlab="Donor",
+        ylab="Keyoutputs",
+        labRow=FALSE,
+        labCol=FALSE,
         symkey=FALSE,
         density.info="none",
         col=my_palette,

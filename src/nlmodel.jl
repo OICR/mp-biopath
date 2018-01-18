@@ -4,7 +4,7 @@ using JuMP
 using AmplNLWriter
 using CoinOptServices
 
-function runModel(nodes, measuredNodeState, LB, UB, expression, options, verbose)
+function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, verbose)
     model = Model(solver=AmplNLSolver(CoinOptServices.couenne, options))
 
     weightRoot = 5
@@ -12,14 +12,19 @@ function runModel(nodes, measuredNodeState, LB, UB, expression, options, verbose
     weightHard = 10
 
     nodesList = collect(keys(nodes))
-    filter!((node,v)->indexin([node], nodesList) != [0], measuredNodeState)
+    measuredNodeState = filter((node,v)->indexin([node], nodesList) != [0], measuredNodeStateFull)
 
     @variable(model, LB <= x[1:length(nodesList)] <= UB, start = 1)
     @variable(model, LB <= x_bar[1:length(nodesList)] <= UB, start = 1)
     @variable(model, LB <= p[1:length(nodesList)] <= UB)
     @variable(model, LB <= n[1:length(nodesList)] <= UB)
-    @variable(model, m[1:length(keys(measuredNodeState))])
+    
+    numberMeasuredNodes = length(keys(measuredNodeState))
 
+    if numberMeasuredNodes > 0
+       @variable(model, m[1:numberMeasuredNodes])
+    end
+ 
     rootIdxs = []
     variableIdxs = []
     measuredIdxs = indexin(collect(keys(measuredNodeState)), nodesList)
@@ -65,7 +70,7 @@ function runModel(nodes, measuredNodeState, LB, UB, expression, options, verbose
                 if length(parentIndexes) == 1
                     @constraint(model, x[parentIndexes[1]] == x_bar[nodeIndex])
                 else
-                     @NLconstraint(model, x[parentIndexes[1]] * x[parentIndexes[2]] == x_bar[nodeIndex])
+                    @NLconstraint(model, x[parentIndexes[1]] * x[parentIndexes[2]] == x_bar[nodeIndex])
                 end
             elseif nodes[nodeName].relation == "NEG"
                 parentIndexes = indexin(nodes[nodeName].parents, nodesList)
@@ -74,9 +79,6 @@ function runModel(nodes, measuredNodeState, LB, UB, expression, options, verbose
                 parentIndexes = indexin(nodes[nodeName].parents, nodesList)
                 @NLconstraint(model, x[parentIndexes[1]] / x[parentIndexes[2]] == x_bar[nodeIndex])
             elseif nodes[nodeName].relation == "OR"
-                if verbose
-                    println("Child node: $nodeName")
-                end
                 posParentIdxs = indexin(nodes[nodeName].posParents, nodesList)
                 count_expression = 0
                 total_expression = 0

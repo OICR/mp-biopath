@@ -61,7 +61,7 @@ function getGenomic(file, idMap)
                                 sampleNodeValue[sample] = Dict()
                             end
                             for node in nodes
-                                sampleNodeValue[sample][node[:Node_Name]] = value
+                                sampleNodeValue[sample][node[:Node_Name]] = (value == 0)? 0.01: value
                             end
                         end
                     end

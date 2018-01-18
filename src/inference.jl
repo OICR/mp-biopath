@@ -94,28 +94,28 @@ end
 
 function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, options, pathwayDir, verbose)
     pinodes = Pi.readFile(file)
-    nodesampleresults = Dict()
+    nodeSampleResults = Dict()
     allNodeResults = Dict()
     for sample in keys(evidence)
         if verbose
             println("Running $sample")
         end
 
-        nodestate = evidence[sample]
+        nodeState = evidence[sample]
 
-        (sampleresults, x, x_bar) = NLmodel.runModel(pinodes,
-                                                    nodestate,
-                                                    lowerbound,
-                                                    upperbound,
-                                                    expression,
-                                                    options,
-                                                    verbose)
+        (sampleResults, x, x_bar) = NLmodel.runModel(pinodes,
+                                                     nodeState,
+                                                     lowerbound,
+                                                     upperbound,
+                                                     expression,
+                                                     options,
+                                                     verbose)
 
-        for nodeName in keys(sampleresults)
-            if length(keys(nodesampleresults)) == 0 || haskey(nodesampleresults, nodeName) == false
-                nodesampleresults[nodeName] = Dict()
+        for nodeName in keys(sampleResults)
+            if length(keys(nodeSampleResults)) == 0 || haskey(nodeSampleResults, nodeName) == false
+                nodeSampleResults[nodeName] = Dict()
             end
-            nodesampleresults[nodeName][sample] = sampleresults[nodeName]
+            nodeSampleResults[nodeName][sample] = sampleResults[nodeName]
         end
 
         for nodeName in keys(x)
@@ -125,7 +125,7 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, o
             allNodeResults[nodeName][sample] = [x[nodeName], x_bar[nodeName]]
         end
     end
-
+ 
     mkpath(pathwayDir)
     resultsPath = "$pathwayDir/results.tsv"
 
@@ -133,10 +133,9 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, o
         println("Outputing results: $resultsPath")
     end
 
-    Results.createcsv(nodesampleresults,
+    Results.createcsv(nodeSampleResults,
                       keys(evidence),
                       resultsPath)
-
 end
 
 function analyzeResults(resultsfile, expectedfile, downregulatedcutoff, upregulatedcutoff, pgmlab, verbose)

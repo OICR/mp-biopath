@@ -2,7 +2,7 @@ DATA_DIR=../PathwayAnalysis
 
 .PHONY: build-env
 build-env:
-	docker build -t oicr/mpbiopath-env:1.0.1-SNAPSHOT -f docker/Dockerfile.env .
+	docker build -t oicr/mpbiopath-env:1.0.1 -f docker/Dockerfile.env .
 
 .PHONY: build-app
 build-app:

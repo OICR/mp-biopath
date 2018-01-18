@@ -69,8 +69,6 @@ else:
 			if cols[-1] in pathway_color_map:
 				colour_column_string += (pathway_color_map[cols[-1]] + ", ")
 				key_outputs.append(cols[-1])
-			else:
-				colour_column_string += ", "
 
 	colour_column_string = colour_column_string[:-2] #equivalent to colour_column_string
 
