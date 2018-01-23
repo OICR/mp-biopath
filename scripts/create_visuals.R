@@ -50,22 +50,27 @@ if (grepl("h", visual)) {
 pathway_string <- unlist(strsplit(list_pathways, ", "))
 colour_string <- unlist(strsplit(list_colours, ", "))
 
+nr = dim(y)[1]
+nc = dim(y)[2]
+
+print(nr)
+print(nc)
+
 htmap <- heatmap.2(log10(y),
         scale="none",
         key=TRUE,
         key.title="Pathways",
         keysize =1.00,
         key.xlab="Log Base 10",
-        xlab="Donor",
+        xlab="Donors",
         ylab="Keyoutputs",
-        labRow=FALSE,
         labCol=FALSE,
         symkey=FALSE,
         density.info="none",
         col=my_palette,
         trace="none",
-        cexRow=0.3,
-        cexCol=0.05,
+        cexRow=0.01 + 0.1/log10(nr),
+        cexCol=0.01 + 0.1/log10(nc),
         margins=c(12,15),
         RowSideColors=row_annotation)
 

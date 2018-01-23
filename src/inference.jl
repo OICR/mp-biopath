@@ -79,23 +79,23 @@ function run(configFile, config, verbose)
         exit(1)
     end
 
-
-    for file in config["pathways"]
-        if verbose
-            println("Running pathway: $file")
+    @sync begin
+        for file in config["pathways"]
+            if verbose
+                println("Running pathway: $file")
+            end
+    
+            m = match(r".*/(?<pathway>.*)\.tsv", file)
+            pathwayName = m[:pathway]
+            pathwayDir = "$runDir/$pathwayName"
+            @async runPathway(file, expression, IdMap, evidence, lowerbound, upperbound, config["coin-options"], pathwayDir, verbose)
         end
-
-        m = match(r".*/(?<pathway>.*)\.tsv", file)
-        pathwayName = m[:pathway]
-        pathwayDir = "$runDir/$pathwayName"
-        runPathway(file, expression, IdMap, evidence, lowerbound, upperbound, config["coin-options"], pathwayDir, verbose)
     end
 end
 
 function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, options, pathwayDir, verbose)
     pinodes = Pi.readFile(file)
     nodeSampleResults = Dict()
-    allNodeResults = Dict()
     for sample in keys(evidence)
         if verbose
             println("Running $sample")
@@ -116,13 +116,6 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, o
                 nodeSampleResults[nodeName] = Dict()
             end
             nodeSampleResults[nodeName][sample] = sampleResults[nodeName]
-        end
-
-        for nodeName in keys(x)
-            if length(keys(allNodeResults)) == 0 || haskey(allNodeResults, nodeName) == false
-                allNodeResults[nodeName] = Dict()
-            end
-            allNodeResults[nodeName][sample] = [x[nodeName], x_bar[nodeName]]
         end
     end
  
