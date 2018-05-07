@@ -83,7 +83,7 @@ else:
 if args.heatmap is "F":
 	print "heatmap script is not executed"
 
-command = "Rscript"
+command = "Rscript" # --vanilla --slave < "
 path2script = "create_visuals.R"
 
 #takes into account user's options
@@ -100,4 +100,5 @@ else:
 	
 #calls and executes Rscript (create_visuals.R) by passing in arguments
 cmd = [command, path2script, args.data, colour_column_string, args.output, output_string, colour_string, switch]
+#print cmd
 subprocess.call(cmd, universal_newlines = True)

@@ -19,6 +19,7 @@ cranMirror <- "https://cloud.r-project.org/"
 if (!require(gplots)) {install.packages("gplots", repos=cranMirror)}
 if (!require(Rcpp)) {install.packages("Rcpp", repos=cranMirror)}
 if (!require(ggplot2)) {install.packages("ggplot2", repos=cranMirror)}
+if (!require(dendextend)) {install.packages("dendextendRpp", repos=cranMirror)}
 
 args = commandArgs(trailingOnly = TRUE)
 
@@ -30,7 +31,7 @@ list_colours <- args[5]
 visual <- args[6]
 
 library(dendextend)
- library(gplots)
+library(gplots)
 # library(ggplot2)
 
 #loads in data file containing donors and nodes/observations
@@ -43,13 +44,18 @@ my_palette <- colorRampPalette(c("blue", "white", "red"))(n=199)
 row_annotation <- unlist(strsplit(colour_column_string, ", "))
 
 if (grepl("h", visual)) {
-    output_htmap <- "gecco_heatmap_new.svg"
+    output_htmap <- "gecco_heatmap.svg"
     par(lend = 1)
     svg(output_htmap)
 }
 
 pathway_string <- unlist(strsplit(list_pathways, ", "))
 colour_string <- unlist(strsplit(list_colours, ", "))
+
+nr = dim(y)[1]
+nc = dim(y)[2]
+
+print("creating heatmap")
 
 htmap <- heatmap.2(log10(y),
         scale="none",
@@ -65,10 +71,31 @@ htmap <- heatmap.2(log10(y),
         density.info="none",
         col=my_palette,
         trace="none",
-        cexRow=0.03,
-        cexCol=0.05,
+#        cexRow=0.03,
+#        cexCol=0.05,
+        cexRow=0.01 + 0.1/log10(nr),
+        cexCol=0.01 + 0.1/log10(nc),
         margins=c(12,15),
         RowSideColors=row_annotation)
+print("created heatmap")
+    cd <- htmap$colDendrogram
+print("DDD")
+print(class(cd))
+print("printed cd")
+#    pdf("mydendrogram.pdf")
+#    plot.new()
+#    plot(cd)
+#    dev.off()
+    dd <- cutree(cd, k=[1:10])
+#print("eeeee")
+  #  print(dd)
+#    num_clusters <- 6
+#    print("before")
+#    ddcut <- cutree(as.hclust(dd),k=[1:6])#num_clusters)
+#    print("after")
+ #   print(ddcut)
+#    print("end")
+
 
 #library(dynamicTreeCut)
 #cd <- htmap$colDendrogram
@@ -91,7 +118,7 @@ if (grepl("h", visual)) {
 	   y.intersp = 0.7,
 	   cex=0.4)
     svg(output_htmap)
-    dev.off()
+    dev.off() 
 }
 
 if (grepl("t", visual)) {
