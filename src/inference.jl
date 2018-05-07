@@ -140,7 +140,7 @@ function analyzeResults(resultsfile, expectedfile, downregulatedcutoff, upregula
     results = results_data["samplenodestate"]
     results_counts = results_data["counts"]
     probability = 1;
-    correct_counts = Dict("1" => 0, "2" => 0, "3" => 0)
+    correct_counts = Dict("0" => 0, "1" => 0, "2" => 0)
     errors = Dict()
     for patientname in keys(expected)
         expected_patient_nodes = expected[patientname]

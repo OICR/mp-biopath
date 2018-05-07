@@ -53,27 +53,23 @@ function run(resultsFolder, pathwayListFile, keyOutputsFile, verbose)
                   write(outfile, "pathway_label\n")
                end
 
+               fivePercent = 0.05 * size(columns,1)
+
                for row in eachrow(df)
                   nodeName = row[:node]
                   if haskey(keyoutputs, pathwayName) && haskey(keyoutputs[pathwayName], nodeName)
                       nodeId = keyoutputs[pathwayName][nodeName]
 
-                      found = false
-                      currentValue = -1
+                      countChanged = 0
                       for col in columns
                           if col != :node
-                              if currentValue == -1
-                                  currentValue = row[col]
-                              end 
-                              if row[col] != currentValue
-                                  value = row[col]
-                                  found = true
-                                  break
-                              end
+                             if row[col] != 1
+                                 countChanged += 1 
+                             end
                           end
                       end
-
-                      if found == true
+                      
+                      if countChanged >= fivePercent
                           for col in columns
                               if col == :node
                                   write(outfile, "$(pathwayId)-$(nodeId)\t")

@@ -78,7 +78,7 @@ function getResults(resultfilename, downregulatedcutoff, upregulatedcutoff, pgml
         end
     end
 
-    counts = Dict("1" => 0, "2" => 0, "3" => 0)
+    counts = Dict("0" => 0, "1" => 0, "2" => 0)
 
     node = ""
     for line in result_data
@@ -115,7 +115,7 @@ function getExpected(expectedfile)
         end
     end
 
-    counts = Dict("1" => 0, "2" => 0, "3" => 0)
+    counts = Dict("0" => 0, "1" => 0, "2" => 0)
 
     node = ""
     for line in expected_data
@@ -126,11 +126,7 @@ function getExpected(expectedfile)
             if i == 1
                 node = lineparts[1]
             else
-                statename = lineparts[i]
-                state = statename == "UP" ? "3":
-                            statename == "DOWN"? "1":
-                                statename == "NC"? "2": statename
-                statename = "fixed"
+                state = lineparts[i]
                 counts[state] = counts[state] + 1
                 samplenodestate[column][node] = state
             end
