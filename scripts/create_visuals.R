@@ -30,13 +30,14 @@ list_pathways <- args[4]
 list_colours <- args[5]
 visual <- args[6]
 
+library(dendextend)
 library(gplots)
 # library(ggplot2)
 
 #loads in data file containing donors and nodes/observations
 data <- read.table(data_file, header = TRUE, sep = "\t", row.names = 1)
-
-y <- as.matrix(data[1:nrow(data),1:(ncol(data)-1)])
+df <- data[1:nrow(data),1:(ncol(data)-1)]
+y <- as.matrix(df)
 y <- y[] + 0.01
 
 my_palette <- colorRampPalette(c("blue", "white", "red"))(n=199)
@@ -93,11 +94,26 @@ print("printed cd")
 #    print("end")
 
 
+#library(dynamicTreeCut)
+#cd <- htmap$colDendrogram
+#dd <- cutreeDynamic(cd )#, k=1:10)
+
+#k3 <- kmeans(na.omit(t(df)), centers = 6, nstart = 25)
+#print(k3$cluster)
+#exit()
+
+#d1 <- cophenetic(cd)
+#print(d1)
+
 if (grepl("h", visual)) {
     legend("topright",      # location of the legend on the heatmap plot
-               legend = pathway_string, # category labels
-               col = colour_string,
-               border=FALSE, bty="n", lwd = 6, y.intersp = 0.7, cex=0.5)
+           legend = pathway_string, # category labels
+           col = colour_string,
+           border=FALSE,
+	   bty="n",
+	   lwd = 4,
+	   y.intersp = 0.7,
+	   cex=0.4)
     svg(output_htmap)
     dev.off() 
 }
@@ -109,9 +125,10 @@ if (grepl("t", visual)) {
     set.seed(20)
 
     #gets information from heatmap dendrogram for use in tsne plot
-    dd <- as.hclust(htmap$colDendrogram)
-    num_clusters <- 4
-    ddcut <- cutree(as.hclust(dd),k=num_clusters) #k = number of clusters
+    ddcut <- cutree(htmap$colDendrogram, k=6)
+ #   dd <- as.hclust(htmap$colDendrogram)
+    num_clusters <- 6
+ #   ddcut <- cutree(as.hclust(dd),k=num_clusters) #k = number of clusters
     #manipulate data file for use in the tsne plot
     m <- data[,1:(ncol(data) - 1)] #removes pathway column
     new_data <- rbind(m, ddcut) #adds in subgrouping row (will become a column once matrix is transposed)
@@ -126,7 +143,7 @@ if (grepl("t", visual)) {
     #make 2d tsne plot
     library(Rtsne)
 
-    output_tsne <- paste("./", output_name, "_tsne.svg", sep = "")
+    output_tsne <- "/home/awright/gecco/gecco_tsne.svg" #paste("./", output_name, "_tsne.svg", sep = "")
     par(lend = 1)
     svg(output_tsne)
 
@@ -163,25 +180,31 @@ if (grepl("k", visual)) {
     library(survminer)
 
     #reads in toy data set with clinical data
-    gecco_test <- read.csv("kaplan_test.tsv", sep = "\t", header = F)
+    gecco_test <- read.csv("/home/awright/gecco/gecco_680_kaplan.tsv", sep = "\t", header = F)
 
     #renames columns names for data frame
     colnames(gecco_test) <- c("donor", "subgroup", "age", "status", "time")
   
     #makes survival object to be plotted and is grouped by SUBGROUP
-    gecco.by.subgroup <- survfit(Surv(time, status == 2) ~ subgroup, data = gecco_test, conf.type = "log-log")
+    gecco.by.subgroup <- survfit(Surv(time, status == 3) ~ subgroup, data = gecco_test, conf.type = "log-log")
 
-    output_kaplan <- paste("./", output_name, "_kaplan.svg", sep = "")
+    output_kaplan <- "/home/awright/gecco/gecco_kaplan.svg"
     par(lend = 1)
     svg(output_kaplan)
 
     #makes kaplan meier plots with tables
     surv_plot <- ggsurvplot(gecco.by.subgroup, data = gecco_test, risk.table = TRUE,
-               linetype = c(1,2,3,4), #different types of lines
-               # surv.median.line = "v",
+               linetype = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20), #different types of lines
+               #surv.median.line = "v",
                conf.int = FALSE,
-               cumcensor = TRUE,
-               break.time.by = 200)
+               pval = TRUE,
+               tables.height = 0.5,
+               xlim = c(0, 5), #1825),
+               ylim = c(0.8,1),
+ #              cumcensor = TRUE,
+               #fun = "cumhaz",
+               break.time.by = 1
+               )
     print(surv_plot)
 
     svg(output_kaplan)
