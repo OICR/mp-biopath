@@ -16,10 +16,13 @@ function run(resultsFolder, pathwayListFile, keyOutputsFile, verbose)
        println("$resultsFolder is not a directory")
     else
        mergedResultsFile = "$(resultsFolder)results.tsv"
+       mergedResultsPathwayLevelFile = "$(resultsFolder)pathway-level-results.tsv"
+
        outfile = open(mergedResultsFile, "w")
+       outPathwayFile = open(mergedResultsPathwayLevelFile, "w")
 
        if verbose
-           println("creating: $mergedResultsFile")
+           println("creating: $mergedResultsFile and $mergedResultsPathwayLevelFile")
        end
 
        dirContents = readdir(resultsFolder)
@@ -51,10 +54,19 @@ function run(resultsFolder, pathwayListFile, keyOutputsFile, verbose)
                       end
                   end
                   write(outfile, "pathway_label\n")
+
+                  write(outPathwayFile, "nodes\t")
+                  for col in columns
+                      if col != :node
+                         write(outPathwayFile, "$col\t")
+                      end
+                  end
+                  write(outPathwayFile, "pathway_label\n")
                end
 
                fivePercent = 0.05 * size(columns,1)
-
+               
+               averageValues = []
                for row in eachrow(df)
                   nodeName = row[:node]
                   if haskey(keyoutputs, pathwayName) && haskey(keyoutputs[pathwayName], nodeName)
@@ -79,8 +91,25 @@ function run(resultsFolder, pathwayListFile, keyOutputsFile, verbose)
                               end
                           end
                           write(outfile, "$shortName\n")
+                          push!(averageValues, row)
                       end
                   end
+               end
+
+               numElements = length(averageValues)
+               if numElements > 0
+                   write(outPathwayFile, "$(pathwayId)\t")
+                   for col in columns
+                      if col != :node
+                          sum = 0
+                          for row in averageValues
+                              sum = sum + row[Symbol(col)]
+                          end
+                          average = sum / numElements
+                          write(outPathwayFile, "$average\t")
+                      end
+                   end
+                   write(outPathwayFile, "$shortName\n")
                end
            end
         end
