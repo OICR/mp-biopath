@@ -105,7 +105,6 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, o
 
         (sampleResults, x, x_bar) = NLmodel.runModel(pinodes,
                                                      nodeState,
-                                                     lowerbound,
                                                      upperbound,
                                                      expression,
                                                      options,
@@ -117,6 +116,7 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, o
             end
             nodeSampleResults[nodeName][sample] = sampleResults[nodeName]
         end
+	last
     end
  
     mkpath(pathwayDir)

@@ -55,7 +55,7 @@ colour_string <- unlist(strsplit(list_colours, ", "))
 nr = dim(y)[1]
 nc = dim(y)[2]
 
-print("creating heatmap")
+#print("creating heatmap")
 
 htmap <- heatmap.2(log10(y),
         scale="none",
@@ -77,25 +77,25 @@ htmap <- heatmap.2(log10(y),
         cexCol=0.01 + 0.1/log10(nc),
         margins=c(12,15),
         RowSideColors=row_annotation)
-print("created heatmap")
+#print("created heatmap")
     cd <- htmap$colDendrogram
-print("DDD")
-print(class(cd))
-print("printed cd")
+#print("DDD")
+#print(class(cd))
+#print("printed cd")
 #    pdf("mydendrogram.pdf")
 #    plot.new()
 #    plot(cd)
 #    dev.off()
-    dd <- cutree(cd, k=[1:10])
+#    dd <- cutree(cd, k=[1:10])
 #print("eeeee")
-  #  print(dd)
+#    print(dd)
 #    num_clusters <- 6
 #    print("before")
-#    ddcut <- cutree(as.hclust(dd),k=[1:6])#num_clusters)
+    ddcut <- cutree(as.hclust(cd), k = 2)#num_clusters)
 #    print("after")
- #   print(ddcut)
+    print(ddcut)
 #    print("end")
-
+exit()
 
 #library(dynamicTreeCut)
 #cd <- htmap$colDendrogram

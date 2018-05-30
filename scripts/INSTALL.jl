@@ -1,5 +1,7 @@
 Pkg.update()
 Pkg.add("JuMP")
+Pkg.add("PiecewiseLinearOpt")
+#Pkg.add("Gurobi")
 Pkg.add("ArgParse")
 Pkg.add("Ipopt")
 Pkg.add("Cbc")
