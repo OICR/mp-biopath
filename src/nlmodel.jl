@@ -73,7 +73,7 @@ function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, ver
                     # Using Vmax*x/(Km+x) - Michaelis Menten equation
                     # NLconstraint(model, (UB * (x[parentIndexes[1]] * x[parentIndexes[2]])) / (99 + (x[parentIndexes[1]] * x[parentIndexes[2]])) == x_bar[nodeIndex])
 
-                    # Using curve from https://mycurvefit.com/
+                    # Using curve from https://mycurvefit.com/ with poinrs 0.01,0.01 | 1,1 | 99,99 | 10000,99.99 
                     @NLconstraint(model, 99.9901 + (0.009901955 - 99.9901) / (1 + (x[parentIndexes[1]] * x[parentIndexes[2]] / 9.949869) ^ 2.004288) == x_bar[nodeIndex])
                 end
             elseif nodes[nodeName].relation == "NEG"
