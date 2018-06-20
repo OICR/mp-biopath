@@ -70,7 +70,11 @@ function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, ver
                 if length(parentIndexes) == 1
                     @constraint(model, x[parentIndexes[1]] == x_bar[nodeIndex])
                 else
-                    @NLconstraint(model, x[parentIndexes[1]] * x[parentIndexes[2]] == x_bar[nodeIndex])
+                    # Using Vmax*x/(Km+x) - Michaelis Menten equation
+                    # NLconstraint(model, (UB * (x[parentIndexes[1]] * x[parentIndexes[2]])) / (99 + (x[parentIndexes[1]] * x[parentIndexes[2]])) == x_bar[nodeIndex])
+
+                    # Using curve from https://mycurvefit.com/
+                    @NLconstraint(model, 99.9901 + (0.009901955 - 99.9901) / (1 + (x[parentIndexes[1]] * x[parentIndexes[2]] / 9.949869) ^ 2.004288) == x_bar[nodeIndex])
                 end
             elseif nodes[nodeName].relation == "NEG"
                 parentIndexes = indexin(nodes[nodeName].parents, nodesList)
