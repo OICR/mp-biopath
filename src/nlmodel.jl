@@ -1,15 +1,16 @@
 module NLmodel
 
 using JuMP
-using AmplNLWriter
+using AmplNLWriter, Ipopt
 using CoinOptServices
 
 function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, verbose)
-    model = Model(solver=AmplNLSolver(CoinOptServices.couenne, options))
+    # model = Model(solver=AmplNLSolver(CoinOptServices.couenne, options))
+    model = Model(solver=AmplNLSolver(Ipopt.amplexe, options))
 
     weightRoot = 5
     weightMeasured = 10000
-    weightHard = 10
+    weightHard = 100
 
     nodesList = collect(keys(nodes))
     measuredNodeState = filter((node,v)->indexin([node], nodesList) != [0], measuredNodeStateFull)
@@ -52,7 +53,7 @@ function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, ver
             else
                 @constraint(model, p[nodeIndex] >= x[nodeIndex] - 1)
                 @constraint(model, n[nodeIndex] >= 1 - x[nodeIndex])
-                push!(rootIdxs, nodeIdxs[1])
+                push!(rootIdxs, nodeIndex)
             end
         else
             if measured
@@ -63,7 +64,7 @@ function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, ver
                 @constraint(model, n[nodeIndex] >= x_bar[nodeIndex] - x[nodeIndex])
             end
 
-            push!(variableIdxs, nodeIdxs[1])
+            push!(variableIdxs, nodeIndex)
 
             if nodes[nodeName].relation == "AND"
                 parentIndexes = indexin(nodes[nodeName].parents, nodesList)
@@ -120,9 +121,9 @@ function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, ver
 
     @NLobjective(model,
                  Min,
-                 weightHard * sum(p[variableIdxs[i]] + n[variableIdxs[i]] for i = 1:length(variableIdxs))
-                 + weightMeasured * sum(p[measuredIdxs[j]] + n[measuredIdxs[j]] for j = 1:length(measuredIdxs))
-                 + weightRoot * sum(p[rootIdxs[k]] + n[rootIdxs[k]] for k = 1:length(rootIdxs)))
+                 weightHard * sum(p[variableIdxs[i]] + n[variableIdxs[i]] for i = 1:length(variableIdxs))^2
+                 + weightMeasured * sum(p[measuredIdxs[j]] + n[measuredIdxs[j]] for j = 1:length(measuredIdxs))^2
+                 + weightRoot * sum(p[rootIdxs[k]] + n[rootIdxs[k]] for k = 1:length(rootIdxs))^2)
 
     if verbose
         println("Solving Model")

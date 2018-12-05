@@ -25,7 +25,7 @@ function getKeyoutputs(file)
             if haskey(keyoutputList, pathwayName) == false
                keyoutputList[pathwayName] = Dict()
             end
-            keyoutputList[pathwayName][row[:node_name]] = row[:node_id]
+            keyoutputList[pathwayName][row[:node_id]] = row[:node_name]
         end
     end
   
