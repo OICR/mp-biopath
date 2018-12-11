@@ -41,6 +41,7 @@ function run(resultsFolder, pathwayListFile, keyOutputsFile, verbose)
                df = CSV.read(resultsFile,
                              delim="\t",
                              datarow=2,
+			     types=Dict(1=>String),
                              quotechar="\\",
                              nullable=false)
 
@@ -96,7 +97,6 @@ function run(resultsFolder, pathwayListFile, keyOutputsFile, verbose)
                numElements = length(averageValues)
 
                if numElements > 0
-                   println("nume: $numElements")
                    write(outPathwayFile, "$(pathwayId)\t")
                    for col in columns
                       if col != :node
