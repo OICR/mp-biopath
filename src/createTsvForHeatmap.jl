@@ -103,9 +103,9 @@ function run(resultsFolder, pathwayListFile, keyOutputsFile, verbose)
                       if col != :node
                           sum = 0
                           for row in averageValues
-                              sum = sum + row[Symbol(col)]
+                              sum = sum + log(10, row[Symbol(col)])
                           end
-                          average = sum / numElements
+                          average = 10 ^ (sum / numElements)
                           write(outPathwayFile, "$average\t")
                       end
                    end

@@ -8,4 +8,4 @@ install:
 
 script:
     - docker build -t mpbiopath -f docker/Dockerfile.app .
-    - docker run mpbiopath julia test/runtests.jl
+    - docker run mpbiopath make run-tests
