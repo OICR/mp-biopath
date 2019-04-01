@@ -13,6 +13,9 @@ function createcsv(nodeSampleResults, columns, resultfilename)
     write(outfile, "\n")
 
     for node in keys(nodeSampleResults)
+        if contains(node, "PSEUDONODE")
+            continue
+        end
         write(outfile, "$node\t")
 
         index = 0

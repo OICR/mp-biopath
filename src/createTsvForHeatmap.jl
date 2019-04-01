@@ -41,6 +41,7 @@ function run(resultsFolder, pathwayListFile, keyOutputsFile, verbose)
                df = CSV.read(resultsFile,
                              delim="\t",
                              datarow=2,
+			     types=Dict(1=>String),
                              quotechar="\\",
                              nullable=false)
 
@@ -68,10 +69,8 @@ function run(resultsFolder, pathwayListFile, keyOutputsFile, verbose)
                
                averageValues = []
                for row in eachrow(df)
-                  nodeName = row[:node]
-                  if haskey(keyoutputs, pathwayName) && haskey(keyoutputs[pathwayName], nodeName)
-                      nodeId = keyoutputs[pathwayName][nodeName]
-
+                  nodeId = string(row[:node])
+                  if haskey(keyoutputs, pathwayName) && haskey(keyoutputs[pathwayName], nodeId)
                       countChanged = 0
                       for col in columns
                           if col != :node
@@ -80,7 +79,6 @@ function run(resultsFolder, pathwayListFile, keyOutputsFile, verbose)
                              end
                           end
                       end
-                      
                       if countChanged >= fivePercent
                           for col in columns
                               if col == :node
@@ -97,6 +95,7 @@ function run(resultsFolder, pathwayListFile, keyOutputsFile, verbose)
                end
 
                numElements = length(averageValues)
+
                if numElements > 0
                    write(outPathwayFile, "$(pathwayId)\t")
                    for col in columns

@@ -96,6 +96,15 @@ end
 function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, options, pathwayDir, verbose)
     pinodes = Pi.readFile(file)
     nodeSampleResults = Dict()
+
+    (baseSampleResults, x, x_bar) = NLmodel.runModel(pinodes,
+                                                     Dict(),
+                                                     lowerbound,
+                                                     upperbound,
+                                                     expression,
+                                                     options,
+                                                     verbose)
+
     for sample in keys(evidence)
         if verbose
             println("Running $sample")
@@ -115,10 +124,11 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, o
             if length(keys(nodeSampleResults)) == 0 || haskey(nodeSampleResults, nodeName) == false
                 nodeSampleResults[nodeName] = Dict()
             end
-            nodeSampleResults[nodeName][sample] = sampleResults[nodeName]
+	    calculatedValue = sampleResults[nodeName] - (baseSampleResults[nodeName] - 1)
+            nodeSampleResults[nodeName][sample] = (calculatedValue < 0) ? 0 : calculatedValue
         end
     end
- 
+
     mkpath(pathwayDir)
     resultsPath = "$pathwayDir/results.tsv"
 
