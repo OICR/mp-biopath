@@ -15,7 +15,7 @@ function run(resultsFolder, pathwayListFile, keyOutputsFile, verbose)
     if !isdir(resultsFolder)
        println("$resultsFolder is not a directory")
     else
-       mergedResultsFile = "$(resultsFolder)results.tsv"
+       mergedResultsFile = "$(resultsFolder)keyoutput-results.tsv"
        mergedResultsPathwayLevelFile = "$(resultsFolder)pathway-level-results.tsv"
 
        outfile = open(mergedResultsFile, "w")
@@ -25,19 +25,23 @@ function run(resultsFolder, pathwayListFile, keyOutputsFile, verbose)
            println("creating: $mergedResultsFile and $mergedResultsPathwayLevelFile")
        end
 
-       dirContents = readdir(resultsFolder)
+       pathwaysFolder= joinpath(resultsFolder, "pathways")
+       dirContents = readdir(pathwaysFolder)
+       println("Run Directory:")
+       println(dirContents)
+       println("pathways:")
+       println(pathwaysFolder)
        columns = ()
        for pathwayName in dirContents
-           path = "$resultsFolder$pathwayName"
+           path = "$pathwaysFolder/$pathwayName"
            if verbose
                println("Processing: $path")
            end 
-
            if isdir(path)
                pathwayId = get(pathwayList[pathwayName][:pathway_id])
                colour = get(pathwayList[pathwayName][:colour])
                shortName = get(pathwayList[pathwayName][:short_name])
-               resultsFile = "$path/results.tsv"
+               resultsFile = joinpath(path, "results.tsv")
                df = CSV.read(resultsFile,
                              delim="\t",
                              datarow=2,

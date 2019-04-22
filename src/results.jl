@@ -65,7 +65,7 @@ function outputAllResults(nodesampleresults, columns, resultfilename)
 end
 
 
-function getResults(resultfilename, downregulatedcutoff, upregulatedcutoff, pgmlab)
+function getResults(resultfilename)
     result_data = readlines(resultfilename)
 
     header = shift!(result_data)
@@ -92,14 +92,12 @@ function getResults(resultfilename, downregulatedcutoff, upregulatedcutoff, pgml
             if i == 1
                 node = lineparts[1]
             else
-                state = pgmlab? lineparts[i]: ValueToState.getStateNumber(lineparts[i], downregulatedcutoff, upregulatedcutoff)
-                counts[state] = counts[state] + 1
-                samplenodestate[column][node] = state
+                samplenodestate[column][node] = lineparts[i]
             end
         end
     end
 
-    return Dict("counts" => counts, "samplenodestate" => samplenodestate)
+    return samplenodestate
 end
 
 function getExpected(expectedfile)
@@ -130,8 +128,10 @@ function getExpected(expectedfile)
                 node = lineparts[1]
             else
                 state = lineparts[i]
-                counts[state] = counts[state] + 1
-                samplenodestate[column][node] = state
+                if state != "-999"
+                    counts[state] = counts[state] + 1
+                    samplenodestate[column][node] = state
+                end
             end
         end
     end

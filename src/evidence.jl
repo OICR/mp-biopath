@@ -35,11 +35,12 @@ function outputToEvidenceMap(evidenceType, file, geneNodesMap)
     close(outfile)
 end
 
-
 function getGenomic(file, idMap)
-    df = CSV.read(file, delim="\t", weakrefstrings=false)
+    headers = split(strip(readline(file)),'\t')
+    ncols = length(headers)
+    datatypes = vcat(String, [Float64 for i=2:ncols])
 
-    # This should be changed to only include nodes that it will acually be mapped to in the model. i.e. DNA nodes
+    df = CSV.read(file, delim="\t", types=datatypes, weakrefstrings=false)
 
     geneNodeMap = Dict()
     sampleNodeValue = Dict()

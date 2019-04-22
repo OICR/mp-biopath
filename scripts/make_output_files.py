@@ -17,7 +17,7 @@
 # A file containing list of pathways and colours associated with them is
 # required to run script.
 
-# Ensure that "create_visuals.R" script is in the same location as this script
+# Ensure that "create_visuals.R" script is in the scripts folder
 
 #################################################################################
 
@@ -42,11 +42,12 @@ parser.add_argument("-k", "--kaplan", help="specify to create Kaplan Meier curve
 	action = "store_true")
 parser.add_argument("-p", "--pathway_list", help="list of pathways with colours specified")
 parser.add_argument("-o", "--output", help="specify output file name", default="output")
+parser.add_argument("-c", "--compound", help="specify compound name")
 
 args = parser.parse_args()
 
 if args.pathway_list is None:
-	print "Need pathway list file for heatmap"
+	print("Need pathway list file for heatmap")
 else:
 	pathway_color_map = {}
 	with open(args.pathway_list, 'r') as p:
@@ -81,10 +82,10 @@ else:
 	colour_string = colour_string[:-2]
 
 if args.heatmap is "F":
-	print "heatmap script is not executed"
+	print("heatmap script is not executed")
 
 command = "Rscript" # --vanilla --slave < "
-path2script = "create_visuals.R"
+path2script = "scripts/create_visuals.R"
 
 #takes into account user's options
 #user can specify to create tsne and/or kaplan meier survival curves
@@ -99,6 +100,6 @@ else:
 	switch = "h"
 	
 #calls and executes Rscript (create_visuals.R) by passing in arguments
-cmd = [command, path2script, args.data, colour_column_string, args.output, output_string, colour_string, switch]
-#print cmd
+cmd = [command, path2script, args.data, colour_column_string, args.output, output_string, colour_string, switch]#, args.compound]
+print(cmd)
 subprocess.call(cmd, universal_newlines = True)

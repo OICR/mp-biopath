@@ -7,47 +7,56 @@ include("results.jl")
 include("expression.jl")
 include("pi.jl")
 include("idMap.jl")
+include("sampleTissueMap.jl")
 
 function run(configFile, config, verbose)
+
     if haskey(config, "id-map")
         if verbose
-            println("Reading in idMap")
+            info("Reading in idMap")
         end
         IDMap = IdMap.getIDmap(config["id-map"])
     else
-        prinln("Need to specify 'id-map' in config file")
+        info("ERROR: Need to specify 'id-map' in config file")
         exit(1)
     end
 
+    expression = Dict()
     if haskey(config, "expression")
         if verbose
-            println("Reading in expression")
+            info("Reading in expression")
         end
 
         if haskey(config["expression"], "file") == false || haskey(config["expression"], "tissue") == false
-            println("Expresion section of config needs 'file' and 'tissue' to be specified")
+            info("ERROR: Expresion section of config needs 'file' and 'tissue' to be specified")
             exit(1)
         end
 
-        expression = Expression.getTissue(config["expression"]["file"],
-                                          config["expression"]["tissue"])
+        expression = Expression.getExpression(config["expression"]["file"])
+        tissueParam = config["expression"]["tissue"]
 
-    else
-        println("Missing expression section of config")
-        exit(1)
+        tissue = Dict()
+        if haskey(tissueParam, "mapping-file")
+            tissue["map"] = SampleTissueMap.getTissueMap(tissueParam["mapping-file"])
+        elseif haskey(tissueParam, "name")
+            tissue["name"] = tissueParam["name"]
+        else
+            info("ERROR: Under the expression -> tissue section of the config you need to speficy either the key mapping-file or name")
+            exit(1)
+        end
     end
 
     if haskey(config, "upperbound")
         upperbound = config["upperbound"]
     else
-        println("Need to specify upperbound")
-        exit(1)
+        info("ERROR: Need to specify upperbound in config")
+        error(1)
     end
 
     if haskey(config, "lowerbound")
         lowerbound = config["lowerbound"]
     else
-        println("Need to specify lowerbound")
+        warn("Need to specify lowerbound in config")
         exit(1)
     end
 
@@ -57,26 +66,43 @@ function run(configFile, config, verbose)
     if haskey(config, "results")
         resultsConfig = config["results"]
         if haskey(resultsConfig, "directory")
-
              directory = resultsConfig["directory"]
-             runDir = endswith(directory, "/")? "$directory$runID": "$directory/$runID"
+             resultsDir = endswith(directory, "/")? "$directory$runID": "$directory/$runID"
+             pathwayResultsDir = "$resultsDir/pathways"
         else
-            println("Need to specify directory in results section of config")
-            exit(1)
+            error("Need to specify directory in results section of config")
         end
     else
-        println("Results section required")
-        exit(1)
+        error("Results section in config required")
     end
 
-    mkpath(runDir)
-    cp(configFile, "$runDir/config.yaml"; remove_destination=true)
+    mkpath(resultsDir)
+    mkpath(pathwayResultsDir)
+    cp(configFile, "$resultsDir/config.yaml"; remove_destination=true)
 
     if haskey(config, "evidence")
-        evidence = Evidence.getEvidence(config["evidence"], IDMap, runDir)
+        evidence = Evidence.getEvidence(config["evidence"], IDMap, resultsDir)
     else
-        println("Evidence section of config is missing")
-        exit(1)
+        error("Evidence section of config is missing")
+    end
+
+    for sample in keys(evidence)
+        if haskey(tissue, "name")
+            tissueType = Symbol(tissue["name"])
+        else
+            if haskey(tissue["map"], Symbol(sample))
+                tissueType = Symbol(tissue["map"][Symbol(sample)])
+            else
+                info("Tissue for sample $sample not found")
+                exit(1)
+            end
+         end
+
+         expressionColumns = names(expression)
+         if findfirst(expressionColumns, tissueType) == 0
+	     info("ERROR tissue type $tissueType not found in expression file")
+             exit(1)
+         end
     end
 
     @sync begin
@@ -84,30 +110,46 @@ function run(configFile, config, verbose)
             if verbose
                 println("Running pathway: $file")
             end
-    
+
             m = match(r".*/(?<pathway>.*)\.tsv", file)
             pathwayName = m[:pathway]
-            pathwayDir = "$runDir/$pathwayName"
-            @async runPathway(file, expression, IdMap, evidence, lowerbound, upperbound, config["coin-options"], pathwayDir, verbose)
+            pathwayDir = "$pathwayResultsDir/$pathwayName"
+            @async runPathway(file, expression, IdMap, evidence, lowerbound, upperbound, config["coin-options"], tissue, pathwayDir, verbose)
         end
     end
 end
 
-function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, options, pathwayDir, verbose)
+function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, options, tissue, pathwayDir, verbose)
     pinodes = Pi.readFile(file)
     nodeSampleResults = Dict()
-
-    (baseSampleResults, x, x_bar) = NLmodel.runModel(pinodes,
-                                                     Dict(),
-                                                     lowerbound,
-                                                     upperbound,
-                                                     expression,
-                                                     options,
-                                                     verbose)
+    basePathwayTissueResults = Dict()
 
     for sample in keys(evidence)
+        if haskey(tissue, "name")
+            tissueType = Symbol(tissue["name"])
+        else
+            if haskey(tissue["map"], Symbol(sample))
+                tissueType = Symbol(tissue["map"][Symbol(sample)])
+            else
+                info("Tissue for sample $sample not found")
+		exit(1)
+            end
+        end
+        expressionMap = tissueType == Expression.getTissue(expression, tissueType)
+
+        if haskey(basePathwayTissueResults, tissueType) == false
+            (basePathwayResults, x, x_bar) = NLmodel.runModel(pinodes,
+                                                              Dict(),
+                                                              lowerbound,
+                                                              upperbound,
+                                                              expressionMap,
+                                                              options,
+                                                              verbose)
+            basePathwayTissueResults[tissueType] = basePathwayResults
+        end
+
         if verbose
-            println("Running $sample")
+            info("Running $sample")
         end
 
         nodeState = evidence[sample]
@@ -116,7 +158,7 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, o
                                                      nodeState,
                                                      lowerbound,
                                                      upperbound,
-                                                     expression,
+                                                     expressionMap,
                                                      options,
                                                      verbose)
 
@@ -124,7 +166,7 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, o
             if length(keys(nodeSampleResults)) == 0 || haskey(nodeSampleResults, nodeName) == false
                 nodeSampleResults[nodeName] = Dict()
             end
-	    calculatedValue = sampleResults[nodeName] - (baseSampleResults[nodeName] - 1)
+	    calculatedValue = sampleResults[nodeName] - (basePathwayTissueResults[tissueType][nodeName] - 1)
             nodeSampleResults[nodeName][sample] = (calculatedValue < 0) ? 0 : calculatedValue
         end
     end
@@ -133,7 +175,7 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, o
     resultsPath = "$pathwayDir/results.tsv"
 
     if verbose
-        println("Outputing results: $resultsPath")
+        info("Outputing results: $resultsPath")
     end
 
     Results.createcsv(nodeSampleResults,
@@ -141,69 +183,3 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, o
                       resultsPath)
 end
 
-function analyzeResults(resultsfile, expectedfile, downregulatedcutoff, upregulatedcutoff, pgmlab, verbose)
-    expected_data = Results.getExpected(expectedfile)
-    expected = expected_data["samplenodestate"]
-    expected_counts = expected_data["counts"]
-
-    results_data = Results.getResults(resultsfile, downregulatedcutoff, upregulatedcutoff, pgmlab)
-    results = results_data["samplenodestate"]
-    results_counts = results_data["counts"]
-    probability = 1;
-    correct_counts = Dict("0" => 0, "1" => 0, "2" => 0)
-    errors = Dict()
-    for patientname in keys(expected)
-        expected_patient_nodes = expected[patientname]
-        results_patient_nodes = results[patientname]
-        for nodename in keys(expected_patient_nodes)
-            expectedvalue = expected_patient_nodes[nodename]
-            resultvalue = results_patient_nodes[nodename]
-            if expectedvalue == resultvalue
-                correct_counts[expectedvalue] = correct_counts[expectedvalue] + 1
-            else
-                if haskey(errors, patientname) == false
-                    errors[patientname] = Dict()
-                end
-                errors[patientname][nodename] = [expectedvalue, resultvalue];
-            end
-        end
-    end
-    println("expected")
-    println(expected_counts)
-    println("results")
-    println(results_counts)
-    println("correct counts")
-    println(correct_counts)
-
-    total = 0
-    for (state, value) in expected_counts
-        total += value
-    end
-
-    total_correct = 0
-    for (state, value) in correct_counts
-        total_correct += value
-    end
-
-    percent_correct = total_correct/total * 100
-    println("percent correct: $percent_correct")
-
-    total_prob = Float64(1.0)
-    for (state, value) in correct_counts
-        new_prob = Probability.KorMoreSuccess(expected_counts[state], value, expected_counts[state]/total)
-        total_prob *= new_prob
-    end
-
-    println("Probability: $total_prob\n")
-
-    println("Patient\tNode\tExpected\tActual\n")
-    for patientname in keys(errors)
-        patient = errors[patientname]
-        for genename in keys(patient)
-            values = errors[patientname][genename]
-            println("$patientname\t$genename\t", values[1], "\t", values[2])
-        end
-    end
-end
-
-end

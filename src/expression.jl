@@ -3,12 +3,28 @@ module Expression
 using CSV
 using DataFrames
 
-function getTissue(file, tissue)
+function getExpression(filename)
+    headerCount = open(filename) do file
+        lineCounter = 1
+        for line in eachline(file)
+             if string(line[1]) == "#"
+                lineCounter += 1
+             else
+                break
+             end
+        end
+
+        lineCounter
+    end
+
+    return CSV.read(filename, delim="\t", header=headerCount, weakrefstrings=false)
+end
+
+function getTissue(df, tissue)
     # Where the Gene Name is the HUGO name
-    df = CSV.read(file, delim="\t", weakrefstrings=false)
     tissueValues = Dict()
     for row in eachrow(df)
-        value = row[Symbol(tissue)]
+        value = row[tissue]
         if isnull(value) == false
             tissueValues[get(row[Symbol("Gene Name")])] = get(value)
         end
