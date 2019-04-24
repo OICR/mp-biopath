@@ -1,7 +1,7 @@
 module ValueToState
 
 function getState(value_str, downregulatedCutoff, upregulatedCutoff)
-    value = typeof(value_str) == Float64? value_str: parse(Float64, value_str)
+    value = typeof(value_str) == Float64 ? value_str : parse(Float64, value_str)
     if upregulatedCutoff < value
         return "Up Regulated"
     elseif downregulatedCutoff > value

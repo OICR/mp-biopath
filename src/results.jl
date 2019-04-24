@@ -7,7 +7,7 @@ function createcsv(nodeSampleResults, columns, resultfilename)
 
     sortedColumns = sort(collect(columns))
     sortedColumnsFull = copy(sortedColumns)
-    unshift!(sortedColumnsFull, "node")
+    pushfirst!(sortedColumnsFull, "node")
 
     write(outfile, join(sortedColumnsFull, "\t"))
     write(outfile, "\n")
@@ -68,7 +68,7 @@ end
 function getResults(resultfilename)
     result_data = readlines(resultfilename)
 
-    header = shift!(result_data)
+    header = popfirst!(result_data)
     headerparts = split(chomp(header), "\t")
 
     samplenodestate = Dict()
@@ -103,7 +103,7 @@ end
 function getExpected(expectedfile)
     expected_data = readlines(expectedfile)
 
-    header = shift!(expected_data)
+    header = popfirst!(expected_data)
     headerparts = split(chomp(header), "\t")
 
     samplenodestate = Dict()

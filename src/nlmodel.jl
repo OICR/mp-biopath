@@ -1,12 +1,15 @@
 module NLmodel
 
 using JuMP
-using AmplNLWriter, Ipopt
-using CoinOptServices
+#using AmplNLWriter, 
+using Ipopt
+#using CoinOptServices
 
 function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, verbose)
     # model = Model(solver=AmplNLSolver(CoinOptServices.couenne, options))
-    model = Model(solver=AmplNLSolver(Ipopt.amplexe, options))
+    # model = Model(solver=AmplNLSolver(Ipopt.amplexe, options))
+    println("runningmodel")
+    model = Model(with_optimizer(Ipopt, options))
 
     weightRoot = 5
     weightMeasured = 10000
@@ -31,6 +34,7 @@ function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, ver
     measuredIdxs = indexin(collect(keys(measuredNodeState)), nodesList)
 
     for nodeName in keys(nodes)
+        println(nodeName)
         nodeIdxs = indexin([nodeName], nodesList)
         nodeIndex = nodeIdxs[1]
 
@@ -40,7 +44,7 @@ function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, ver
             j = j + 1
             if measuredIdxs[j] == nodeIndex && nodes[nodeName].relation == "ROOT"
                 measured = true
-                rhs = measuredNodeState[node] < LB? LB: measuredNodeState[node]
+                rhs = measuredNodeState[node] < LB ? LB : measuredNodeState[node]
                 @constraint(model, m[j] == rhs)
                 break
             end
@@ -141,6 +145,8 @@ function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, ver
          results[nodesList[i]] = getvalue(x[i])
     end
 
+    print(results)
+exit()
     x_values = Dict()
     x_bar_values = Dict()
     for i in eachindex(nodesList)

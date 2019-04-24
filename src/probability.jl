@@ -3,7 +3,7 @@ module Probability
 #Binomial Theorem
 function KSuccess(n, k, pSuccess)
     possibilities = Binomial(n,k)
-    nCk =  n == k? 1 : possibilities
+    nCk =  n == k ? 1 : possibilities
     probability = nCk * pSuccess ^ k * (1 - pSuccess) ^ (n-k)
 
     return probability

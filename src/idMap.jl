@@ -7,7 +7,7 @@ function getIDmap(IDfile)
     df = CSV.read(IDfile,
                   delim="\t",
                   datarow=2,
-                  quotechar="\\",
+                  quotechar=UInt8('\\'),
                   nullable=false,
                   header=["Database_Identifier",
                           "Node_Name",

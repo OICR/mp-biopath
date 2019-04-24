@@ -6,13 +6,19 @@ using CSV
 
 function getEvidence(evidence, idMapping, runDir)
     evidenceMapFile = "$runDir/evidenceIDMapping.tsv"
-
+    println(evidence)
     sampleNodeValue = Dict()
     if haskey(evidence, "dna")
+        println("hasDNA")
         evidenceDNA = evidence["dna"]
         if haskey(evidenceDNA, "genomic")
+            println("hasGenomic")
             genomicFile = evidenceDNA["genomic"]
             genomicEvidence = getGenomic(genomicFile, idMapping)
+            println("GE")
+            println(genomicEvidence)
+            println("after")
+exit()
         end
         sampleNodeValue = genomicEvidence["sampleNodeValue"]
         outputToEvidenceMap("genomic", evidenceMapFile, genomicEvidence["geneNodesMap"])
@@ -46,23 +52,25 @@ function getGenomic(file, idMap)
     sampleNodeValue = Dict()
     geneNodesMap = Dict()
     for row in eachrow(df)
-        gene = get(row[Symbol("gene")])
+        gene = row[Symbol("gene")]
         if haskey(idMap, gene) == true
             nodes = idMap[gene]
             geneNodesMap[gene] = nodes;
             geneValue = Dict()
-            first = true
+            firstColumn = true
             for entry in row
-                if first == false
+                if firstColumn == false
                     sample = entry[1]
-                    if isnull(entry[2]) == false
-                        value = get(entry[2])
+                    if hasvalue(entry[2]) == true
+                        value = entry[2]
                         if value != -999
                             if haskey(sampleNodeValue, sample) == false
                                 sampleNodeValue[sample] = Dict()
                             end
                             for node in nodes
-                                sampleNodeValue[sample][node[:Database_Identifier]] = (value == 0)? 0.01: value
+                                sampleNodeValue[sample][node[:Database_Identifier]] = (value == 0) ? 0.01 : value
+                                println(samepleNodeValue)
+                                exit()
                             end
                         end
                     end
@@ -77,10 +85,10 @@ end
 
 
 function getDnaEvidence(evidence, idMapping)
-    divideby = copynumber? 2:1
+    divideby = copynumber ? 2 : 1
     data = readlines(fname)
 
-    header = shift!(data)
+    header = popfirst!(data)
     headerparts = split(chomp(header), "\t")
 
     samplenodestate = Dict()
@@ -104,9 +112,9 @@ function getDnaEvidence(evidence, idMapping)
             else
                 if haskey(genetonodes, gene)
                     for node in Array(genetonodes[gene])
-                        samplenodestate[column][node] = oneNormal?
+                        samplenodestate[column][node] = oneNormal ?
                                                             parse(Float64, lineparts[i]) :
-                                                            copynumber?
+                                                            copynumber ?
                                                                parse(Float64,lineparts[i]) / 2 :
                                                                parse(Float64,lineparts[i]) - 1
                     end

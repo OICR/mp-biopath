@@ -13,43 +13,43 @@ function run(configFile, config, verbose)
 
     if haskey(config, "id-map")
         if verbose
-            info("Reading in idMap")
+            println("Reading in idMap")
         end
         IDMap = IdMap.getIDmap(config["id-map"])
     else
-        info("ERROR: Need to specify 'id-map' in config file")
+        println("ERROR: Need to specify 'id-map' in config file")
         exit(1)
     end
 
     expression = Dict()
     if haskey(config, "expression")
         if verbose
-            info("Reading in expression")
+            println("Reading in expression")
         end
 
         if haskey(config["expression"], "file") == false || haskey(config["expression"], "tissue") == false
-            info("ERROR: Expresion section of config needs 'file' and 'tissue' to be specified")
+            println("ERROR: Expresion section of config needs 'file' and 'tissue' to be specified")
             exit(1)
         end
 
         expression = Expression.getExpression(config["expression"]["file"])
-        tissueParam = config["expression"]["tissue"]
-
+        tissueParam = config["expression"]["tissue"][1]
+        
         tissue = Dict()
         if haskey(tissueParam, "mapping-file")
             tissue["map"] = SampleTissueMap.getTissueMap(tissueParam["mapping-file"])
         elseif haskey(tissueParam, "name")
             tissue["name"] = tissueParam["name"]
         else
-            info("ERROR: Under the expression -> tissue section of the config you need to speficy either the key mapping-file or name")
+            println("ERROR: Under the expression -> tissue section of the config you need to speficy either the key mapping-file or name")
             exit(1)
         end
     end
-
+    
     if haskey(config, "upperbound")
         upperbound = config["upperbound"]
     else
-        info("ERROR: Need to specify upperbound in config")
+        println("ERROR: Need to specify upperbound in config")
         error(1)
     end
 
@@ -60,14 +60,14 @@ function run(configFile, config, verbose)
         exit(1)
     end
 
-    runID = haskey(config, "id")? config["id"]: Base.Random.uuid4()
-    info("runID: $runID")
+    runID = haskey(config, "id") ? config["id"] : Base.Random.uuid4()
+    println("runID: $runID")
 
     if haskey(config, "results")
         resultsConfig = config["results"]
         if haskey(resultsConfig, "directory")
              directory = resultsConfig["directory"]
-             resultsDir = endswith(directory, "/")? "$directory$runID": "$directory/$runID"
+             resultsDir = endswith(directory, "/") ? "$directory$runID" : "$directory/$runID"
              pathwayResultsDir = "$resultsDir/pathways"
         else
             error("Need to specify directory in results section of config")
@@ -78,14 +78,16 @@ function run(configFile, config, verbose)
 
     mkpath(resultsDir)
     mkpath(pathwayResultsDir)
-    cp(configFile, "$resultsDir/config.yaml"; remove_destination=true)
+    cp(configFile, "$resultsDir/config.yaml", force=true)
 
     if haskey(config, "evidence")
+        println("inside evidence")
         evidence = Evidence.getEvidence(config["evidence"], IDMap, resultsDir)
     else
         error("Evidence section of config is missing")
     end
-
+    print(evidence)
+exit()
     for sample in keys(evidence)
         if haskey(tissue, "name")
             tissueType = Symbol(tissue["name"])
@@ -93,14 +95,14 @@ function run(configFile, config, verbose)
             if haskey(tissue["map"], Symbol(sample))
                 tissueType = Symbol(tissue["map"][Symbol(sample)])
             else
-                info("Tissue for sample $sample not found")
+                println("Tissue for sample $sample not found")
                 exit(1)
             end
          end
 
          expressionColumns = names(expression)
          if findfirst(expressionColumns, tissueType) == 0
-	     info("ERROR tissue type $tissueType not found in expression file")
+	     println("ERROR tissue type $tissueType not found in expression file")
              exit(1)
          end
     end
@@ -131,7 +133,7 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, o
             if haskey(tissue["map"], Symbol(sample))
                 tissueType = Symbol(tissue["map"][Symbol(sample)])
             else
-                info("Tissue for sample $sample not found")
+                println("Tissue for sample $sample not found")
 		exit(1)
             end
         end
@@ -149,7 +151,7 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, o
         end
 
         if verbose
-            info("Running $sample")
+            println("Running $sample")
         end
 
         nodeState = evidence[sample]
@@ -175,7 +177,7 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, o
     resultsPath = "$pathwayDir/results.tsv"
 
     if verbose
-        info("Outputing results: $resultsPath")
+        println("Outputing results: $resultsPath")
     end
 
     Results.createcsv(nodeSampleResults,
@@ -183,3 +185,4 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, o
                       resultsPath)
 end
 
+end
