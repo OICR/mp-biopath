@@ -1,11 +1,8 @@
 #!/usr/bin/env julia
 
 using DocOpt
-using Lumberjack
 
 include("../src/inference.jl")
-
-add_truck(LumberjackTruck("mp-biopath.log"), "file-logger")
 
 doc = """MP-BioPath.
 
@@ -21,7 +18,7 @@ Options:
   --version        Show version.
 """
 
-arguments = docopt(doc, version=v"1.0.3")
+arguments = docopt(doc, version=v"1.0.4")
 
 configFile = arguments["--config"]
 
@@ -32,12 +29,12 @@ if (verbose)
 end
 
 if (!isfile(configFile))
-   info("ERROR: Config file not found")
+   println("ERROR: Config file not found")
    exit(1)
 end
 
 if (verbose)
-    info("Parsing config file: $configFile")
+    println("Parsing config file: $configFile")
 end
 
 import YAML
@@ -50,7 +47,7 @@ end
 function main()
     if arguments["inference"]
        if (verbose)
-           info("Inference Selected")
+           println("Inference Selected")
        end
        Inference.run(configFile, config, verbose)
     end

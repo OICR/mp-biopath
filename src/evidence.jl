@@ -6,7 +6,6 @@ using CSV
 
 function getEvidence(evidence, idMapping, runDir)
     evidenceMapFile = "$runDir/evidenceIDMapping.tsv"
-
     sampleNodeValue = Dict()
     if haskey(evidence, "dna")
         evidenceDNA = evidence["dna"]
@@ -41,46 +40,47 @@ function getGenomic(file, idMap)
     datatypes = vcat(String, [Float64 for i=2:ncols])
 
     df = CSV.read(file, delim="\t", types=datatypes, weakrefstrings=false)
+    samples = names(df)
+    popfirst!(samples)
 
     geneNodeMap = Dict()
     sampleNodeValue = Dict()
     geneNodesMap = Dict()
     for row in eachrow(df)
-        gene = get(row[Symbol("gene")])
+        gene = row[Symbol("gene")]
         if haskey(idMap, gene) == true
             nodes = idMap[gene]
             geneNodesMap[gene] = nodes;
             geneValue = Dict()
-            first = true
-            for entry in row
-                if first == false
-                    sample = entry[1]
-                    if isnull(entry[2]) == false
-                        value = get(entry[2])
-                        if value != -999
-                            if haskey(sampleNodeValue, sample) == false
-                                sampleNodeValue[sample] = Dict()
-                            end
-                            for node in nodes
-                                sampleNodeValue[sample][node[:Database_Identifier]] = (value == 0)? 0.01: value
-                            end
+            for sample in samples
+                value = row[sample]
+                if isa(value, Number)
+                    if value != -999
+                        if haskey(sampleNodeValue, sample) == false
+                            sampleNodeValue[sample] = Dict()
+                        end
+                        for node in nodes
+                            sampleNodeValue[sample][node[:Database_Identifier]] = (value < 0.01) ? 0.01 : value
                         end
                     end
+                else
+                   println("At least one of the values is not a number. Found non number for sample $sample row $gene Use -999 for unknown")
+                   exit(1)
                 end
-                first = false
             end
         end
     end
+
     return Dict("sampleNodeValue" => sampleNodeValue,
                 "geneNodesMap" => geneNodesMap)
 end
 
 
 function getDnaEvidence(evidence, idMapping)
-    divideby = copynumber? 2:1
+    divideby = copynumber ? 2 : 1
     data = readlines(fname)
 
-    header = shift!(data)
+    header = popfirst!(data)
     headerparts = split(chomp(header), "\t")
 
     samplenodestate = Dict()
@@ -104,9 +104,9 @@ function getDnaEvidence(evidence, idMapping)
             else
                 if haskey(genetonodes, gene)
                     for node in Array(genetonodes[gene])
-                        samplenodestate[column][node] = oneNormal?
+                        samplenodestate[column][node] = oneNormal ?
                                                             parse(Float64, lineparts[i]) :
-                                                            copynumber?
+                                                            copynumber ?
                                                                parse(Float64,lineparts[i]) / 2 :
                                                                parse(Float64,lineparts[i]) - 1
                     end

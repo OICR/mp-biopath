@@ -5,18 +5,18 @@ using CSV
 
 export readPiFile
 
-type ModelANDParents
+struct ModelANDParents
    relation::Any
    parents::Any
 end
 
-type ModelORParents
+struct ModelORParents
    relation::Any
    posParents::Any
    negParents::Any
 end
 
-type PIparents
+struct PIparents
    andPosParents::Array
    andNegParents::Array
    orPosParents::Array
@@ -36,17 +36,17 @@ function readFile(fname)
     PIs = Dict{AbstractString,Any}()
 
     for row in eachrow(df)
-        posnegbool = row[:posneg] == 1? true: false
-        andBool = row[:andor] == 0? true: false
+        posnegbool = row[:posneg] == 1 ? true : false
+        andBool = row[:andor] == 0 ? true : false
 
         if haskey(PIs, row[:childName])
             if posnegbool
-                parents = andBool?
-                             PIs[row[:childName]].andPosParents:
+                parents = andBool ?
+                             PIs[row[:childName]].andPosParents :
                              PIs[row[:childName]].orPosParents
             else
-                parents = andBool?
-                             PIs[row[:childName]].andNegParents:
+                parents = andBool ?
+                             PIs[row[:childName]].andNegParents :
                              PIs[row[:childName]].orNegParents
             end
 
@@ -60,10 +60,10 @@ function readFile(fname)
                 push!(negParents, row[:parentName])
             end
 
-            node = PIparents(andBool? posParents: AbstractString[],
-                             andBool? negParents: AbstractString[],
-                             andBool? AbstractString[]: posParents,
-                             andBool? AbstractString[]: negParents)
+            node = PIparents(andBool ? posParents : AbstractString[],
+                             andBool ? negParents : AbstractString[],
+                             andBool ? AbstractString[] : posParents,
+                             andBool ? AbstractString[] : negParents)
 
             PIs[row[:childName]] = node
         end
@@ -86,7 +86,7 @@ function readFile(fname)
             end
         else
             if (length(PIs[nodeName].orPosParents) + length(PIs[nodeName].orNegParents)) > 0
-                orNodeName = "$nodeName\_OR"
+                orNodeName = string(nodeName, "_OR")
                 nodes[orNodeName] = ModelORParents("OR", PIs[nodeName].orPosParents, PIs[nodeName].orNegParents)
                 push!(parents, orNodeName)
             end
@@ -114,7 +114,7 @@ function readFile(fname)
                        nodes[nodeName]= ModelANDParents("AND", AbstractString[childNodeName, parenti])
                        continue
                    else
-                       newChildNodeName = "$childNodeName\_PSEUDONODE\_$parenti"
+                       newChildNodeName = string(childNodeName, "_PSEUDONODE_ ", parenti)
                        nodes[newChildNodeName]= ModelANDParents("AND", AbstractString[childNodeName, parenti])
                        childNodeName = newChildNodeName
                    end
@@ -125,7 +125,7 @@ function readFile(fname)
                    if i == length(negParents)
                        nodes[nodeName]= ModelANDParents("AND", AbstractString[childNodeName, parenti])
                    else
-                       newChildNodeName = "$childNodeName\_PSEUDONODE\_$parenti"
+                       newChildNodeName = string(childNodeName, "_PSEUDONODE_", parenti)
                        nodes[newChildNodeName]= ModelANDParents("ANDNEG", AbstractString[childNodeName, parenti])
                        childNodeName = newChildNodeName
                    end

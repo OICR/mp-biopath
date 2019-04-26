@@ -1,5 +1,6 @@
 module Results
 
+using Printf
 include("valuetostate.jl")
 
 function createcsv(nodeSampleResults, columns, resultfilename)
@@ -7,13 +8,13 @@ function createcsv(nodeSampleResults, columns, resultfilename)
 
     sortedColumns = sort(collect(columns))
     sortedColumnsFull = copy(sortedColumns)
-    unshift!(sortedColumnsFull, "node")
+    pushfirst!(sortedColumnsFull, "node")
 
     write(outfile, join(sortedColumnsFull, "\t"))
     write(outfile, "\n")
 
     for node in keys(nodeSampleResults)
-        if contains(node, "PSEUDONODE")
+        if occursin("PSEUDONODE", node)
             continue
         end
         write(outfile, "$node\t")
@@ -22,7 +23,8 @@ function createcsv(nodeSampleResults, columns, resultfilename)
         lengthColumns = length(columns)
         for column in sortedColumns
             index += 1
-            value = round(nodeSampleResults[node][column], 2)
+            valueAdjusted = nodeSampleResults[node][column] + 0.005
+            value = @sprintf "%.2f" valueAdjusted
             write(outfile, "$value")
             if lengthColumns == index
                 write(outfile, "\n")
@@ -68,7 +70,7 @@ end
 function getResults(resultfilename)
     result_data = readlines(resultfilename)
 
-    header = shift!(result_data)
+    header = popfirst!(result_data)
     headerparts = split(chomp(header), "\t")
 
     samplenodestate = Dict()
@@ -103,7 +105,7 @@ end
 function getExpected(expectedfile)
     expected_data = readlines(expectedfile)
 
-    header = shift!(expected_data)
+    header = popfirst!(expected_data)
     headerparts = split(chomp(header), "\t")
 
     samplenodestate = Dict()
