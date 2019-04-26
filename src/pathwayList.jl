@@ -19,8 +19,8 @@ function getPathwayList(file)
 
     pathwayList = Dict()
     for row in eachrow(df)
-        if !isnull(row[Symbol("pathway_name")])
-            pathwayName = get(row[Symbol("pathway_name")])
+        if !isnothing(row[Symbol("pathway_name")])
+            pathwayName = row[Symbol("pathway_name")]
             pathwayList[pathwayName] = row
         end
     end

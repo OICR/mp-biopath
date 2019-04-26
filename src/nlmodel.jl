@@ -6,17 +6,14 @@ using Ipopt
 #using CoinOptServices
 
 function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, verbose)
-    # model = Model(solver=AmplNLSolver(CoinOptServices.couenne, options))
-    # model = Model(solver=AmplNLSolver(Ipopt.amplexe, options))
-    println("runningmodel")
-    model = Model(with_optimizer(Ipopt, options))
+    model = Model(with_optimizer(Ipopt.Optimizer))
 
     weightRoot = 5
     weightMeasured = 10000
     weightHard = 100
 
     nodesList = collect(keys(nodes))
-    measuredNodeState = filter((node,v)->indexin([node], nodesList) != [0], measuredNodeStateFull)
+    measuredNodeState = filter((args)->indexin([args[1]], nodesList) != [0], measuredNodeStateFull)
 
     @variable(model, LB <= x[1:length(nodesList)] <= UB, start = 1)
     @variable(model, LB <= x_bar[1:length(nodesList)] <= UB, start = 1)
@@ -32,9 +29,7 @@ function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, ver
     rootIdxs = []
     variableIdxs = []
     measuredIdxs = indexin(collect(keys(measuredNodeState)), nodesList)
-
     for nodeName in keys(nodes)
-        println(nodeName)
         nodeIdxs = indexin([nodeName], nodesList)
         nodeIndex = nodeIdxs[1]
 
@@ -67,7 +62,6 @@ function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, ver
                 @constraint(model, p[nodeIndex] >= x[nodeIndex] - x_bar[nodeIndex])
                 @constraint(model, n[nodeIndex] >= x_bar[nodeIndex] - x[nodeIndex])
             end
-
             push!(variableIdxs, nodeIndex)
 
             if nodes[nodeName].relation == "AND"
@@ -105,7 +99,6 @@ function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, ver
                     @constraint(model, sum(x[posParentIdxs[a]] for a = 1:length(posParentIdxs)) / length(posParentIdxs) ==  x_bar[nodeIndex])
                 else
                     average_expression = total_expression / count_expression
-
                     evs = []
                     for parent in nodes[nodeName].posParents
                         if haskey(expression, parent) && expression[parent] != ""
@@ -123,6 +116,10 @@ function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, ver
         end
     end
 
+    if !isempty(measuredIdxs)
+        measuredIdxs = measuredIdxs[measuredIdxs .!= nothing]
+    end
+
     @NLobjective(model,
                  Min,
                  weightHard * sum(p[variableIdxs[i]] + n[variableIdxs[i]] for i = 1:length(variableIdxs))^2
@@ -131,10 +128,10 @@ function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, ver
 
     if verbose
         println("Solving Model")
-        print(model)
+        println(model)
     end
 
-    status = solve(model)
+    optimize!(model)
 
     if verbose
         println("Objective value: ", getobjectivevalue(model))
@@ -142,16 +139,14 @@ function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, ver
 
     results = Dict()
     for i in eachindex(nodesList)
-         results[nodesList[i]] = getvalue(x[i])
+         results[nodesList[i]] = JuMP.value(x[i])
     end
 
-    print(results)
-exit()
     x_values = Dict()
     x_bar_values = Dict()
     for i in eachindex(nodesList)
-        x_values[nodesList[i]] = getvalue(x[i])
-        x_bar_values[nodesList[i]] = getvalue(x_bar[i])
+        x_values[nodesList[i]] = JuMP.value(x[i])
+        x_bar_values[nodesList[i]] = JuMP.value(x_bar[i])
     end
 
     return [results, x_values, x_bar_values]

@@ -1,5 +1,6 @@
 module Results
 
+using Printf
 include("valuetostate.jl")
 
 function createcsv(nodeSampleResults, columns, resultfilename)
@@ -13,7 +14,7 @@ function createcsv(nodeSampleResults, columns, resultfilename)
     write(outfile, "\n")
 
     for node in keys(nodeSampleResults)
-        if contains(node, "PSEUDONODE")
+        if occursin("PSEUDONODE", node)
             continue
         end
         write(outfile, "$node\t")
@@ -22,7 +23,8 @@ function createcsv(nodeSampleResults, columns, resultfilename)
         lengthColumns = length(columns)
         for column in sortedColumns
             index += 1
-            value = round(nodeSampleResults[node][column], 2)
+            valueAdjusted = nodeSampleResults[node][column] + 0.005
+            value = @sprintf "%.2f" valueAdjusted
             write(outfile, "$value")
             if lengthColumns == index
                 write(outfile, "\n")

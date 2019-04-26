@@ -25,8 +25,8 @@ function getTissue(df, tissue)
     tissueValues = Dict()
     for row in eachrow(df)
         value = row[tissue]
-        if isnull(value) == false
-            tissueValues[get(row[Symbol("Gene Name")])] = get(value)
+        if isnothing(value) == false
+            tissueValues[row[Symbol("Gene Name")]] = value
         end
     end
 

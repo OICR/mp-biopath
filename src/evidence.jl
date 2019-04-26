@@ -6,19 +6,12 @@ using CSV
 
 function getEvidence(evidence, idMapping, runDir)
     evidenceMapFile = "$runDir/evidenceIDMapping.tsv"
-    println(evidence)
     sampleNodeValue = Dict()
     if haskey(evidence, "dna")
-        println("hasDNA")
         evidenceDNA = evidence["dna"]
         if haskey(evidenceDNA, "genomic")
-            println("hasGenomic")
             genomicFile = evidenceDNA["genomic"]
             genomicEvidence = getGenomic(genomicFile, idMapping)
-            println("GE")
-            println(genomicEvidence)
-            println("after")
-exit()
         end
         sampleNodeValue = genomicEvidence["sampleNodeValue"]
         outputToEvidenceMap("genomic", evidenceMapFile, genomicEvidence["geneNodesMap"])
@@ -47,6 +40,8 @@ function getGenomic(file, idMap)
     datatypes = vcat(String, [Float64 for i=2:ncols])
 
     df = CSV.read(file, delim="\t", types=datatypes, weakrefstrings=false)
+    samples = names(df)
+    popfirst!(samples)
 
     geneNodeMap = Dict()
     sampleNodeValue = Dict()
@@ -57,28 +52,25 @@ function getGenomic(file, idMap)
             nodes = idMap[gene]
             geneNodesMap[gene] = nodes;
             geneValue = Dict()
-            firstColumn = true
-            for entry in row
-                if firstColumn == false
-                    sample = entry[1]
-                    if hasvalue(entry[2]) == true
-                        value = entry[2]
-                        if value != -999
-                            if haskey(sampleNodeValue, sample) == false
-                                sampleNodeValue[sample] = Dict()
-                            end
-                            for node in nodes
-                                sampleNodeValue[sample][node[:Database_Identifier]] = (value == 0) ? 0.01 : value
-                                println(samepleNodeValue)
-                                exit()
-                            end
+            for sample in samples
+                value = row[sample]
+                if isa(value, Number)
+                    if value != -999
+                        if haskey(sampleNodeValue, sample) == false
+                            sampleNodeValue[sample] = Dict()
+                        end
+                        for node in nodes
+                            sampleNodeValue[sample][node[:Database_Identifier]] = (value < 0.01) ? 0.01 : value
                         end
                     end
+                else
+                   println("At least one of the values is not a number. Found non number for sample $sample row $gene Use -999 for unknown")
+                   exit(1)
                 end
-                first = false
             end
         end
     end
+
     return Dict("sampleNodeValue" => sampleNodeValue,
                 "geneNodesMap" => geneNodesMap)
 end

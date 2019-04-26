@@ -33,7 +33,7 @@ function run(configFile, config, verbose)
         end
 
         expression = Expression.getExpression(config["expression"]["file"])
-        tissueParam = config["expression"]["tissue"][1]
+        tissueParam = config["expression"]["tissue"]
         
         tissue = Dict()
         if haskey(tissueParam, "mapping-file")
@@ -45,7 +45,7 @@ function run(configFile, config, verbose)
             exit(1)
         end
     end
-    
+
     if haskey(config, "upperbound")
         upperbound = config["upperbound"]
     else
@@ -66,8 +66,8 @@ function run(configFile, config, verbose)
     if haskey(config, "results")
         resultsConfig = config["results"]
         if haskey(resultsConfig, "directory")
-             directory = resultsConfig["directory"]
-             resultsDir = endswith(directory, "/") ? "$directory$runID" : "$directory/$runID"
+             dir = resultsConfig["directory"]
+             resultsDir = endswith(dir, "/") ? "$dir$runID" : "$dir/$runID"
              pathwayResultsDir = "$resultsDir/pathways"
         else
             error("Need to specify directory in results section of config")
@@ -81,13 +81,11 @@ function run(configFile, config, verbose)
     cp(configFile, "$resultsDir/config.yaml", force=true)
 
     if haskey(config, "evidence")
-        println("inside evidence")
         evidence = Evidence.getEvidence(config["evidence"], IDMap, resultsDir)
     else
         error("Evidence section of config is missing")
     end
-    print(evidence)
-exit()
+
     for sample in keys(evidence)
         if haskey(tissue, "name")
             tissueType = Symbol(tissue["name"])
@@ -101,8 +99,8 @@ exit()
          end
 
          expressionColumns = names(expression)
-         if findfirst(expressionColumns, tissueType) == 0
-	     println("ERROR tissue type $tissueType not found in expression file")
+         if findfirst(isequal(tissueType),expressionColumns) == 0
+             println("ERROR tissue type $tissueType not found in expression file")
              exit(1)
          end
     end
@@ -134,11 +132,10 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, o
                 tissueType = Symbol(tissue["map"][Symbol(sample)])
             else
                 println("Tissue for sample $sample not found")
-		exit(1)
+                exit(1)
             end
         end
-        expressionMap = tissueType == Expression.getTissue(expression, tissueType)
-
+        expressionMap = Expression.getTissue(expression, tissueType)
         if haskey(basePathwayTissueResults, tissueType) == false
             (basePathwayResults, x, x_bar) = NLmodel.runModel(pinodes,
                                                               Dict(),
@@ -155,7 +152,6 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, o
         end
 
         nodeState = evidence[sample]
-
         (sampleResults, x, x_bar) = NLmodel.runModel(pinodes,
                                                      nodeState,
                                                      lowerbound,
@@ -168,7 +164,8 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, o
             if length(keys(nodeSampleResults)) == 0 || haskey(nodeSampleResults, nodeName) == false
                 nodeSampleResults[nodeName] = Dict()
             end
-	    calculatedValue = sampleResults[nodeName] - (basePathwayTissueResults[tissueType][nodeName] - 1)
+
+            calculatedValue = sampleResults[nodeName] - (basePathwayTissueResults[tissueType][nodeName] - 1)
             nodeSampleResults[nodeName][sample] = (calculatedValue < 0) ? 0 : calculatedValue
         end
     end
