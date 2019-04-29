@@ -85,7 +85,7 @@ if args.heatmap is "F":
 	print("heatmap script is not executed")
 
 command = "Rscript" # --vanilla --slave < "
-path2script = "scripts/create_visuals.R"
+path2script = "sandbox/create_visuals.R"
 
 #takes into account user's options
 #user can specify to create tsne and/or kaplan meier survival curves

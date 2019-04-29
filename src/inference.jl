@@ -41,7 +41,7 @@ function run(configFile, config, verbose)
         elseif haskey(tissueParam, "name")
             tissue["name"] = tissueParam["name"]
         else
-            println("ERROR: Under the expression -> tissue section of the config you need to speficy either the key mapping-file or name")
+            println("ERROR: Under the expression -> tissue section of the config you need to specify either the key mapping-file or name")
             exit(1)
         end
     end
