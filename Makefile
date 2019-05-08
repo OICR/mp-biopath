@@ -18,4 +18,4 @@ get-test-expression:
 
 .PHONY: run-tests
 run-tests:
-	docker run -v ${PWD}/${DATA_DIR}:/data -v ${PWD}:/app -w /app -it oicr/mpbiopath-env:1.0.4-SNAPSHOT julia tests/run.jl
+	docker run -v ${PWD}:/app -w /app -it oicr/mpbiopath-env:1.0.4-SNAPSHOT julia tests/run.jl

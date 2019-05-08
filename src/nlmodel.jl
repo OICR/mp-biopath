@@ -6,7 +6,7 @@ using Ipopt
 #using CoinOptServices
 
 function runModel(nodes, measuredNodeStateFull, LB, UB, expression, verbose)
-    model = Model(with_optimizer(Ipopt.Optimizer, acceptable_tol=1e-8, tol=1e-10, print_level=0))
+    model = Model(with_optimizer(Ipopt.Optimizer, print_level=0))
 
     weightRoot = 500
     weightMeasured = 10000000
