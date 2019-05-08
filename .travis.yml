@@ -8,4 +8,4 @@ install:
 
 script:
     - docker build -t mpbiopath -f docker/Dockerfile.app .
-    - docker run -v /home/awright/git/mp-biopath:/app -w /app -it oicr/mpbiopath-env:1.0.4-SNAPSHOT julia tests/run.jl
+    - docker run -v ${PWD}:/app -w /app -it oicr/mpbiopath-env:1.0.4-SNAPSHOT julia tests/run.jl
