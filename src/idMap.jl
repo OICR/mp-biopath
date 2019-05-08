@@ -8,7 +8,6 @@ function getIDmap(IDfile)
                   delim="\t",
                   datarow=2,
                   quotechar=UInt8('\\'),
-                  nullable=false,
                   header=["Database_Identifier",
                           "Node_Name",
                           "Node_Type",

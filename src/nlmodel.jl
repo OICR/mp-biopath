@@ -1,16 +1,16 @@
 module NLmodel
 
 using JuMP
-#using AmplNLWriter, 
+#using AmplNLWriter,
 using Ipopt
 #using CoinOptServices
 
-function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, verbose)
-    model = Model(with_optimizer(Ipopt.Optimizer, acceptable_tol=1e-5, tol=1e-8, print_level=0))
+function runModel(nodes, measuredNodeStateFull, LB, UB, expression, verbose)
+    model = Model(with_optimizer(Ipopt.Optimizer, acceptable_tol=1e-8, tol=1e-10, print_level=0))
 
-    weightRoot = 5
-    weightMeasured = 10000
-    weightHard = 100
+    weightRoot = 500
+    weightMeasured = 10000000
+    weightHard = 10000
 
     nodesList = collect(keys(nodes))
     measuredNodeState = filter((args)->indexin([args[1]], nodesList) != [0], measuredNodeStateFull)
@@ -19,13 +19,13 @@ function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, ver
     @variable(model, LB <= x_bar[1:length(nodesList)] <= UB, start = 1)
     @variable(model, LB <= p[1:length(nodesList)] <= UB)
     @variable(model, LB <= n[1:length(nodesList)] <= UB)
-    
+
     numberMeasuredNodes = length(keys(measuredNodeState))
 
     if numberMeasuredNodes > 0
        @variable(model, m[1:numberMeasuredNodes])
     end
- 
+
     rootIdxs = []
     variableIdxs = []
     measuredIdxs = indexin(collect(keys(measuredNodeState)), nodesList)
@@ -61,8 +61,8 @@ function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, ver
             else
                 @constraint(model, p[nodeIndex] >= x[nodeIndex] - x_bar[nodeIndex])
                 @constraint(model, n[nodeIndex] >= x_bar[nodeIndex] - x[nodeIndex])
+                push!(variableIdxs, nodeIndex)
             end
-            push!(variableIdxs, nodeIndex)
 
             if nodes[nodeName].relation == "AND"
                 parentIndexes = indexin(nodes[nodeName].parents, nodesList)
@@ -134,7 +134,7 @@ function runModel(nodes, measuredNodeStateFull, LB, UB, expression, options, ver
     optimize!(model)
 
     if verbose
-        println("Objective value: ", getobjectivevalue(model))
+        println("Objective value: ", JuMP.objective_value(model))
     end
 
     results = Dict()

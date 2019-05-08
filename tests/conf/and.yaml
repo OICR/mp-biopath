@@ -1,29 +1,34 @@
-# MP-BioPath Inference Configuration
-#
-# Creator: Adam wright 
-# Email: adam.j.wright82@gmail.com
-#
-# All runtime parameters for an inference run should be sepecified in a file
-# that follows the format specified in this file.
-#
-# ############################################################################
-
-
 # #############################################################################
 #
-# COIN OR runtime options
+# The results will be put into a subfolder based on the specified id.
+# If no id is specified a UUID will be specified
 #
-# Couenne options:
-# https://github.com/coin-or/Counne/blob/master/Couenne/src/couenne.opt
+# #############################################################################
+
+id: testset
+
+# #############################################################################
+# 
+# COIN-OR settings
 #
-# Bomin options:
-# https://github.com/coin-or/Bonmin/blob/master/Bonmine/test/bonmin.opt
+# All settings can be found in COIN-OR's documentation:
+# https://github.com/coin-or/Bonmin/blob/master/Bonmin/test/bonmin.opt
 #
 # #############################################################################
 
 coin-options:
-    - iteration_limit=10 
-    - bonmin.nlp_log_level=0
+   acceptable_tol: 1e-4
+   tol: 1e-8
+   max_iter: 200
+
+# #############################################################################
+#
+# Model Settings
+#
+# #############################################################################
+
+upperbound: 100
+lowerbound: 0.01
 
 # #############################################################################
 #
@@ -32,9 +37,10 @@ coin-options:
 #
 # #############################################################################
 
-expression:
-    - files: /data/expression-data.tsv
-      tissue: esophagus
+#expression:
+#   file: tests/files/E-MTAB-2836.tsv
+#   tissue: 
+#      name: colon
 
 # #############################################################################
 #
@@ -45,9 +51,10 @@ expression:
 #
 # #############################################################################
 
-keyoutputs:
-    - ./data/key_outputs.tsv 
+#keyoutputs:
+#    - ./data/key_outputs.tsv 
 
+id-map: tests/files/db_id_to_name_mapping_loop_tests.txt
 
 # #############################################################################
 #
@@ -58,12 +65,9 @@ keyoutputs:
 #
 # #############################################################################
 
+
 pathways:
-    - folder: ./test/files/pathways
-      id-map:
-          - file: ./data/id_mapping.inferred.txt
-      files:
-          - and.tsv
+    - tests/files/pathways/and.tsv
 
 # #############################################################################
 #
@@ -74,15 +78,15 @@ pathways:
 # Node_Name or Reference_Entity_Identifier. For DNA, RNA and Prtein you can specify
 # the nodes with their HUGO ID.
 # 
-# For "dna" there are two sub-categories: "gneomic" and "copyNumber". All other
+# For "dna" there are two sub-categories: "genomic" and "copyNumber". All other
 # entity types do not have su categories.
 #
 # #############################################################################
 
 evidence:
-  - dna:
-    - genomic: 
-      - ./test/files/evidence/and.tsv
+  dna:
+    genomic: 
+      tests/files/evidence/and.tsv
 
 # #############################################################################
 #
@@ -95,7 +99,4 @@ evidence:
 # #############################################################################
 
 results:
-    - directory: ./test/files/results/
-    - generate:
-        - heatmap
-
+    directory: tests/files/results/

@@ -23,8 +23,7 @@ function createcsv(nodeSampleResults, columns, resultfilename)
         lengthColumns = length(columns)
         for column in sortedColumns
             index += 1
-            valueAdjusted = nodeSampleResults[node][column] + 0.005
-            value = @sprintf "%.2f" valueAdjusted
+            value = @sprintf "%.2f" nodeSampleResults[node][column]
             write(outfile, "$value")
             if lengthColumns == index
                 write(outfile, "\n")

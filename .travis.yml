@@ -4,7 +4,7 @@ services:
       - docker
 
 install:
-      - docker pull oicr/mpbiopath-env:0.0.4-SNAPSHOT
+      - docker pull oicr/mpbiopath-env:1.0.4-SNAPSHOT
 
 script:
     - docker build -t mpbiopath -f docker/Dockerfile.app .

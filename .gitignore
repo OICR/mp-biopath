@@ -6,4 +6,4 @@ deps/deps.jl
 *.swp
 *.swo
 
-test/files/results/
+tests/files/results/

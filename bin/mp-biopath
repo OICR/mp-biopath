@@ -12,7 +12,7 @@ Usage:
   mp-biopath --version
 
 Options:
-  --config <file>  Configuration file to use for run 
+  --config <file>  Configuration file to use for run
   -h --help        Show this screen.
   -v -verbose      Verbose output
   --version        Show version.
@@ -54,4 +54,3 @@ function main()
 end
 
 main()
-

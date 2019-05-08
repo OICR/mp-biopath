@@ -1,0 +1,102 @@
+# #############################################################################
+#
+# The results will be put into a subfolder based on the specified id.
+# If no id is specified a UUID will be specified
+#
+# #############################################################################
+
+id: testset
+
+# #############################################################################
+# 
+# COIN-OR settings
+#
+# All settings can be found in COIN-OR's documentation:
+# https://github.com/coin-or/Bonmin/blob/master/Bonmin/test/bonmin.opt
+#
+# #############################################################################
+
+coin-options:
+   acceptable_tol: 1e-4
+   tol: 1e-8
+   max_iter: 200
+
+# #############################################################################
+#
+# Model Settings
+#
+# #############################################################################
+
+upperbound: 100
+lowerbound: 0.01
+
+# #############################################################################
+#
+# Expression
+# One set of results will be generated perl tissue type specified.
+#
+# #############################################################################
+
+#expression:
+#   file: tests/files/E-MTAB-2836.tsv
+#   tissue: 
+#      name: colon
+
+# #############################################################################
+#
+# Keyoutputs
+#
+# If specified the results will be filterd by the keyoutput specified in this
+# folder. This is required for generating the heatmap.
+#
+# #############################################################################
+
+#keyoutputs:
+#    - ./data/key_outputs.tsv 
+
+id-map: tests/files/db_id_to_name_mapping_loop_tests.txt
+
+# #############################################################################
+#
+# Pathways
+#
+# The pathways are from REACTOME. 
+# ID map is required for allowing the user to use HUGO names or type specific IDs
+#
+# #############################################################################
+
+
+pathways:
+    - tests/files/pathways/andneg.tsv
+
+# #############################################################################
+#
+# Evidence
+#
+# The possible entity types are: "dna", "rna", "protein", "small-molecule",
+# and "generic". For all filetypes you can specify nodes with their Database_Identifier,
+# Node_Name or Reference_Entity_Identifier. For DNA, RNA and Prtein you can specify
+# the nodes with their HUGO ID.
+# 
+# For "dna" there are two sub-categories: "genomic" and "copyNumber". All other
+# entity types do not have su categories.
+#
+# #############################################################################
+
+evidence:
+  dna:
+    genomic: 
+      tests/files/evidence/andneg.tsv
+
+# #############################################################################
+#
+# Results
+#
+# The generated results will contain several files
+# It is recommended to use a unique folder for each run
+# Options for generate include: "heatmap"
+#
+# #############################################################################
+
+results:
+    directory: tests/files/results/

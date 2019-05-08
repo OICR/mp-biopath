@@ -29,7 +29,6 @@ end
 function readFile(fname)
     df = CSV.read(fname,
                   delim="\t",
-                  nullable=false,
                   header=["parentName", "childName", "posneg", "andor"],
                   types=[String, String, Int, Int])
 
@@ -38,7 +37,6 @@ function readFile(fname)
     for row in eachrow(df)
         posnegbool = row[:posneg] == 1 ? true : false
         andBool = row[:andor] == 0 ? true : false
-
         if haskey(PIs, row[:childName])
             if posnegbool
                 parents = andBool ?
@@ -49,7 +47,6 @@ function readFile(fname)
                              PIs[row[:childName]].andNegParents :
                              PIs[row[:childName]].orNegParents
             end
-
             push!(parents, row[:parentName])
         else
             posParents = AbstractString[]
@@ -64,7 +61,6 @@ function readFile(fname)
                              andBool ? negParents : AbstractString[],
                              andBool ? AbstractString[] : posParents,
                              andBool ? AbstractString[] : negParents)
-
             PIs[row[:childName]] = node
         end
     end
@@ -114,7 +110,7 @@ function readFile(fname)
                        nodes[nodeName]= ModelANDParents("AND", AbstractString[childNodeName, parenti])
                        continue
                    else
-                       newChildNodeName = string(childNodeName, "_PSEUDONODE_ ", parenti)
+                       newChildNodeName = string(childNodeName, "_PSEUDONODE_", parenti)
                        nodes[newChildNodeName]= ModelANDParents("AND", AbstractString[childNodeName, parenti])
                        childNodeName = newChildNodeName
                    end
@@ -123,7 +119,7 @@ function readFile(fname)
                for i = 1:length(negParents)
                    parenti = negParents[i]
                    if i == length(negParents)
-                       nodes[nodeName]= ModelANDParents("AND", AbstractString[childNodeName, parenti])
+                       nodes[nodeName]= ModelANDParents("ANDNEG", AbstractString[childNodeName, parenti])
                    else
                        newChildNodeName = string(childNodeName, "_PSEUDONODE_", parenti)
                        nodes[newChildNodeName]= ModelANDParents("ANDNEG", AbstractString[childNodeName, parenti])

@@ -17,7 +17,7 @@ function getExpression(filename)
         lineCounter
     end
 
-    return CSV.read(filename, delim="\t", header=headerCount, weakrefstrings=false)
+    return CSV.read(filename, delim="\t", header=headerCount)
 end
 
 function getTissue(df, tissue)

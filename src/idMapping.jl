@@ -25,7 +25,6 @@ function geneToNodes(dbidfile)
             lineparts = split(chomp(line), "\t")
             node = String(lineparts[2])
             gene = String(lineparts[3])
-            #if match(r"Reference", lineparts[6]) != nothing
             if haskey(genetonodes, gene)
                 nodes = genetonodes[gene]
                 push!(nodes, node)
