@@ -1,56 +1,47 @@
 module IdMap
 
-using DataFrames
-using CSV
-
 function getIDmap(IDfile)
-    df = CSV.read(IDfile,
-                  delim="\t",
-                  datarow=2,
-                  quotechar=UInt8('\\'),
-                  header=["Database_Identifier",
-                          "Node_Name",
-                          "Node_Type",
-                          "Display_Name",
-                          "Reference_Entity_Name",
-                          "Reference_Entity_Identifier",
-                          "Instance_Class"],
-                  types=[String,
-                         String,
-                         String,
-                         String,
-                         String,
-                         String,
-                         String])
+    columns = [:Database_Identifier,
+               :Node_Name,
+               :Node_Type,
+               :Display_Name,
+               :Reference_Entity_Name,
+               :Reference_Entity_Identifier,
+               :Instance_Class]
 
     idMap = Dict()
-    for row in eachrow(df)
-        dbID = row[:Database_Identifier]
-        if haskey(idMap, dbID) == false
-            idMap[dbID] = []
-        end
-        push!(idMap[dbID], row)
-
-        nodeName = row[:Node_Name]
-        if haskey(idMap, nodeName) == false
-            idMap[nodeName] = []
-        end
-        push!(idMap[nodeName], row)
-
-        refName = row[:Reference_Entity_Name]
-        if refName != "N/A"
-            if haskey(idMap, refName) == false
-                idMap[refName] = []
+    open(IDfile, "r") do file
+        header = readline(file)
+        for line in eachline(file)
+            lineParts = split(chomp(line), "\t")
+            row = Dict(zip(columns, lineParts))
+            dbID = row[:Database_Identifier]
+            if haskey(idMap, dbID) == false
+                idMap[dbID] = []
             end
-            push!(idMap[refName], row)
-        end
+            push!(idMap[dbID], row)
 
-        refID = row[:Reference_Entity_Identifier]
-        if refID != "N/A"
-            if haskey(idMap, refID) == false
-                idMap[refID] = []
+            nodeName = row[:Node_Name]
+            if haskey(idMap, nodeName) == false
+                idMap[nodeName] = []
             end
-            push!(idMap[refID], row)
+            push!(idMap[nodeName], row)
+
+            refName = row[:Reference_Entity_Name]
+            if refName != "N/A"
+                if haskey(idMap, refName) == false
+                    idMap[refName] = []
+                end
+                push!(idMap[refName], row)
+            end
+
+            refID = row[:Reference_Entity_Identifier]
+            if refID != "N/A"
+                if haskey(idMap, refID) == false
+                    idMap[refID] = []
+                end
+                push!(idMap[refID], row)
+            end
         end
     end
 
@@ -90,7 +81,6 @@ function geneToNodes(dbidfile)
             lineparts = split(chomp(line), "\t")
             node = String(lineparts[2])
             gene = String(lineparts[3])
-            #if match(r"Reference", lineparts[6]) != nothing
             if haskey(genetonodes, gene)
                 nodes = genetonodes[gene]
                 push!(nodes, node)
@@ -126,7 +116,6 @@ function geneToRootNodes(pinodes, dbidfile)
             node = String(lineparts[2])
             gene = String(lineparts[3])
             if haskey(pinodes, node) && pinodes[node].relation == "ROOT"
-    #        if match(r"Reference", lineparts[6]) != nothing && haskey(pinodes, node) && pinodes[node].relation == "ROOT"
                 if haskey(genetonodes, gene)
                     nodes = genetonodes[gene]
                     push!(nodes, node)

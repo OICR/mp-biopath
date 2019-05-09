@@ -20,8 +20,8 @@ function getKeyoutputs(file)
 
     keyoutputList = Dict()
     for row in eachrow(df)
-        if !isnothing(row[Symbol("pathway_name")])
-            pathwayName = row[Symbol("pathway_name")]
+        if !isnothing(row[:pathway_name])
+            pathwayName = row[:pathway_name]
             if haskey(keyoutputList, pathwayName) == false
                keyoutputList[pathwayName] = Dict()
             end

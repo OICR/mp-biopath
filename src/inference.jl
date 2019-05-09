@@ -1,5 +1,7 @@
 module Inference
 
+using DataFrames
+
 include("probability.jl")
 include("evidence.jl")
 include("nlmodel.jl")
@@ -10,7 +12,7 @@ include("idMap.jl")
 include("sampleTissueMap.jl")
 
 function run(configFile, config, verbose)
-    
+
     if haskey(config, "id-map")
         if verbose
             println("Reading in idMap")
@@ -22,7 +24,7 @@ function run(configFile, config, verbose)
     end
 
     tissue = Dict()
-    expression = Dict()
+    expression = DataFrame()
     if haskey(config, "expression")
         if verbose
             println("Reading in expression")
@@ -88,8 +90,8 @@ function run(configFile, config, verbose)
     end
 
     if @isdefined(expression)
-        expressionColumns = keys(expression)
-        for sample in keys(evidence)
+        expressionColumns = names(expression)
+        for sample in expressionColumns
             if haskey(tissue, "name")
                 tissueType = Symbol(tissue["name"])
             elseif haskey(tissue, "map")
@@ -100,14 +102,13 @@ function run(configFile, config, verbose)
                     exit(1)
                 end
             end
-    
+
             if @isdefined(tissueType) && findfirst(isequal(tissueType),expressionColumns) == 0
                 println("ERROR tissue type $tissueType not found in expression file")
                 exit(1)
             end
         end
     end
- 
 
     for file in config["pathways"]
         if verbose
@@ -125,12 +126,8 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, t
     pinodes = Pi.readFile(file)
     nodeSampleResults = Dict()
     basePathwayTissueResults = Dict()
-
     for sample in keys(evidence)
-        if count(keys(tissue)) == 0
-           tissueType = "unspecified"
-           expressionMap = Dict()
-        else
+        if haskey(tissue, "name") || haskey(tissue, "map")
             if haskey(tissue, "name")
                 tissueType = Symbol(tissue["name"])
             elseif haskey(tissue, "map")
@@ -143,6 +140,9 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, t
             end
 
             expressionMap = Expression.getTissue(expression, tissueType)
+        else
+             tissueType = "unspecified"
+             expressionMap = Dict()
         end
 
         if haskey(basePathwayTissueResults, tissueType) == false

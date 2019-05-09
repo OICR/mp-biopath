@@ -39,7 +39,6 @@ function getGenomic(file, idMap)
     ncols = length(headers)
     datatypes = vcat(String, [Float64 for i=2:ncols])
 
-   # df = CSV.read(file, delim="\t", types=datatypes, weakrefstrings=false)
     df = CSV.read(file, delim="\t", types=datatypes)
     samples = names(df)
     popfirst!(samples)
@@ -48,7 +47,7 @@ function getGenomic(file, idMap)
     sampleNodeValue = Dict()
     geneNodesMap = Dict()
     for row in eachrow(df)
-        gene = row[Symbol("gene")]
+        gene = row[:gene]
         if haskey(idMap, gene) == true
             nodes = idMap[gene]
             geneNodesMap[gene] = nodes;
