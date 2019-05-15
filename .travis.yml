@@ -6,4 +6,4 @@ services:
 script:
     - docker build --no-cache -t oicr/mpbiopath-env:latest -f docker/Dockerfile.env .
     - docker build -t mpbiopath:latest -f docker/Dockerfile.app .
-    - docker run -v ${PWD}:/app -w /app -it oicr/mpbiopath:latest julia tests/run.jl
+    - docker run -v ${PWD}:/app -w /app -it mpbiopath:latest julia tests/run.jl
