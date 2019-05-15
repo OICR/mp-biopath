@@ -1,4 +1,4 @@
-FROM oicr/mpbiopath-env:1.0.4-SNAPSHOT
+FROM oicr/mpbiopath-env:latest
 
 RUN mkdir /app
 

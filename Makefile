@@ -1,21 +1,30 @@
 DATA_DIR=../PathwayAnalysis
+RELEASE="1.0.4"
 
 .PHONY: build-env
 build-env:
-	docker build --no-cache -t oicr/mpbiopath-env:1.0.4-SNAPSHOT -f docker/Dockerfile.env .
+	docker build --no-cache -t oicr/mpbiopath-env:latest -f docker/Dockerfile.env .
 
 .PHONY: build-app
 build-app:
-	docker build --no-cache -t oicr/mpbiopath:1.0.4-SNAPSHOT -f docker/Dockerfile.app .
+	docker build --no-cache -t oicr/mpbiopath:latest -f docker/Dockerfile.app .
 
 .PHONY: run-bash
 run-bash:
-	docker run -v ${PWD}/${DATA_DIR}:/data -v ${PWD}:/app -w /app -it oicr/mpbiopath-env:1.0.4-SNAPSHOT /bin/bash
-
-.PHONY: get-test-expression
-get-test-expression:
-	curl https://www.ebi.ac.uk/gxa/experiments-content/E-MTAB-2836/resources/ExperimentDownloadSupplier.RnaSeqBaseline/tpms.tsv -o tests/files/E-MTAB-2836.tsv
+	docker run -v ${PWD}/${DATA_DIR}:/data -v ${PWD}:/app -w /app -it oicr/mpbiopath-env:latest /bin/bash
 
 .PHONY: run-tests
 run-tests:
-	docker run -v ${PWD}:/app -w /app -it oicr/mpbiopath-env:1.0.4-SNAPSHOT julia tests/run.jl
+	docker run -v ${PWD}:/app -w /app -it oicr/mpbiopath-env:latest julia tests/run.jl
+
+.PHONY: build-app-release
+build-app-release:
+	docker build --no-cache -t oicr/mpbiopath:${MP_BIOPATH_RELEASE} -f docker/Dockerfile.app .
+
+.PHONY: run-bash-release
+run-bash-release:
+	docker run -v ${PWD}/${DATA_DIR}:/data -v ${PWD}:/app -w /app -it oicr/${MP_BIOPATH_RELEASE} /bin/bash
+
+.PHONY: run-tests-release
+run-tests-release:
+	docker run -v ${PWD}:/app -w /app -it oicr/${MP_BIOPATH_RELEASE} julia tests/run.jl
