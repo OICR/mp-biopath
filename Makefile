@@ -1,5 +1,5 @@
 DATA_DIR=../PathwayAnalysis
-RELEASE="1.0.4"
+MP_BIOPATH_RELEASE="1.0.4"
 
 .PHONY: build-env
 build-env:
