@@ -1,0 +1,63 @@
+#!/usr/bin/env julia
+
+using ArgParse
+
+include("../src/analyzeResultsFull.jl")
+
+function parse_commandline()
+    s = ArgParseSettings("This interface is for analyzing the results files produced by running inference with respect to a expected results file.",
+                         version = "1.0",
+                         add_version = true)
+
+    @add_arg_table s begin
+        "--verbose", "-v"
+            help = "This will cause output to be printed to standard out."
+            action = :store_true
+        "--results-folder"
+            help = "This the location of the results from MP-BioPath analysis"
+            required = true
+        "--expected-results-folder"
+            help = "Folder containing all the expected results based on Reactome pathways"
+            required = true
+        "--pathway-list-file"
+            help = "File conataining mapping of pathaway file name to Reactome pathway ID"
+            required = true
+        "--pathways-folder"
+            help = "Folder containing the pairwise interaction files for the pathways"
+            required = true
+        "--db-id-name-mapping-file"
+            help = "File containing map of IDs to Reactome IDs"
+            required = true
+        "--analysis-results-folder"
+            help = "Folder where all productions from analysis will be stored"
+            required = true
+        "--experimental-results-folder"
+            help = "Folder containing expected results"
+            required = true
+        
+   end
+
+    return parse_args(s)
+end
+
+function main()
+    parsed_args = parse_commandline()
+
+    if parsed_args["verbose"]
+        println("Parsed args:")
+        for (arg,val) in parsed_args
+            println("  $arg  =>  $val")
+        end
+    end
+
+    AnalyzeResultsFull.analyzeResultsFull(parsed_args["results-folder"],
+                             parsed_args["expected-results-folder"],
+                             parsed_args["pathway-list-file"],
+                             parsed_args["pathways-folder"],
+                             parsed_args["db-id-name-mapping-file"],
+                             parsed_args["analysis-results-folder"],
+                             parsed_args["experimental-results-folder"],
+                             parsed_args["verbose"])
+end
+
+main()
