@@ -49,25 +49,11 @@ function run(configFile, config, verbose)
         end
     end
 
-    if haskey(config, "upperbound")
-        upperbound = config["upperbound"]
-    else
-        println("ERROR: Need to specify upperbound in config")
-        error(1)
-    end
-
-    if haskey(config, "lowerbound")
-        lowerbound = config["lowerbound"]
-    else
-        warn("Need to specify lowerbound in config")
-        exit(1)
-    end
-
     runID = haskey(config, "id") ? config["id"] : Base.Random.uuid4()
     println("runID: $runID")
 
-    if haskey(config, "results")
-        resultsConfig = config["results"]
+    if haskey(config, "outputs")
+        resultsConfig = config["outputs"]
         if haskey(resultsConfig, "directory")
              dir = resultsConfig["directory"]
              resultsDir = endswith(dir, "/") ? "$dir$runID" : "$dir/$runID"
@@ -118,11 +104,19 @@ function run(configFile, config, verbose)
         m = match(r".*/(?<pathway>.*)\.tsv", file)
         pathwayName = m[:pathway]
         pathwayDir = "$pathwayResultsDir/$pathwayName"
-        runPathway(file, expression, idMap, evidence, lowerbound, upperbound, tissue, pathwayDir, verbose)
+        runPathway(file, expression, idMap, evidence, tissue, pathwayDir, verbose)
     end
 end
 
-function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, tissue, pathwayDir, verbose)
+function isValueNormal(k,v)::Bool
+  if v == 1.0
+      return true
+  else
+      return false
+  end
+end
+
+function runPathway(file, expression, IDMap, evidence, tissue, pathwayDir, verbose)
     pinodes = Pi.readFile(file)
     nodeSampleResults = Dict()
     basePathwayTissueResults = Dict()
@@ -145,11 +139,18 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, t
              expressionMap = Dict()
         end
 
+        nodeState = evidence[sample]
+        println(nodeState)
         if haskey(basePathwayTissueResults, tissueType) == false
+            controlNodeState = Dict()
+            for (k, v) in nodeState
+               if v == 1.0
+                  controlNodeState[k] = v
+               end
+            end
+            println(controlNodeState)
             (basePathwayResults, x, x_bar) = NLmodel.runModel(pinodes,
-                                                              Dict(),
-                                                              lowerbound,
-                                                              upperbound,
+                                                              controlNodeState,
                                                               expressionMap,
                                                               verbose)
             basePathwayTissueResults[tissueType] = basePathwayResults
@@ -159,11 +160,8 @@ function runPathway(file, expression, IDMap, evidence, lowerbound, upperbound, t
             println("Running $sample")
         end
 
-        nodeState = evidence[sample]
         (sampleResults, x, x_bar) = NLmodel.runModel(pinodes,
                                                      nodeState,
-                                                     lowerbound,
-                                                     upperbound,
                                                      expressionMap,
                                                      verbose)
 

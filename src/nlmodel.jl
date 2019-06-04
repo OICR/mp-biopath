@@ -5,9 +5,10 @@ using JuMP
 using Ipopt
 #using CoinOptServices
 
-function runModel(nodes, measuredNodeStateFull, LB, UB, expression, verbose)
+function runModel(nodes, measuredNodeStateFull, expression, verbose)
     model = Model(with_optimizer(Ipopt.Optimizer, print_level=0))
-
+    LB = 0.01
+    UB = 100
     weightRoot = 500
     weightMeasured = 10000000
     weightHard = 10000
