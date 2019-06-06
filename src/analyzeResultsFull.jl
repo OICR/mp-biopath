@@ -201,7 +201,7 @@ function addThreeDimensionalConfusionMatrixToDataFrame(df, Lowerbound, Upperboun
           confusion_matrix[3,1], confusion_matrix[3,2], confusion_matrix[3,3],
           TP_down, FP_down, FN_down, TN_down, P_down, N_down, Total,
           TP_normal, FP_normal, FN_normal, TN_normal, P_normal, N_normal,
-          TP_up, FP_up, FN_up, TN_up,
+          TP_up, FP_up, FN_up, TN_up, P_up, N_up,
           TPR_down, TNR_down, PPV_down, NPV_down, FNR_down, FPR_down, FDR_down, FOR_down, ACC_down, F1_down,
           TPR_normal, TNR_normal, PPV_normal, NPV_normal, FNR_normal, FPR_normal, FDR_normal, FOR_normal, ACC_normal, F1_normal,
           TPR_up, TNR_up, PPV_up, NPV_up, FNR_up, FPR_up, FDR_up, FOR_up, ACC_up, F1_up,
@@ -240,6 +240,8 @@ function initializeThreeDimensionalConfusionMatricies()
                     FP_up = Int16[],
                     FN_up = Int16[],
                     TN_up = Int16[],
+		    P_up = Int16[],
+		    N_up = Int16[],
                     TPR_down = Float64[],
                     TNR_down = Float64[],
                     PPV_down = Float64[],
@@ -460,7 +462,7 @@ function analyzeResultsFull(results_folder, expected_results_folder, pathway_lis
     confusion_matrix_weighted = weightConfusionMatrix(confusion_matrix, total_down_expected, total_normal_expected, total_up_expected)
     addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies_weighted, 1, 1, confusion_matrix_weighted)
     CSV.write(joinpath(analysis_results_folder, "expectedVsExperimentalConfusionMatrixWeighted.tsv"), confusion_matricies_weighted, delim = '\t')
-    #=
+
     ### determine optimal lowerbound cutoff based on weighted average F1 score
     confusion_matricies = initializeThreeDimensionalConfusionMatricies()
     confusion_matricies_weighted = initializeThreeDimensionalConfusionMatricies()
@@ -496,6 +498,9 @@ function analyzeResultsFull(results_folder, expected_results_folder, pathway_lis
         end
     end
 
+    CSV.write(joinpath(analysis_results_folder, "experimentalVsPredictedWeightedConfusionMatrix-10-pathways.tsv"), confusion_matricies_weighted, delim = '\t')
+    CSV.write(joinpath(analysis_results_folder, "experimentalVsPredictedConfusionMatrix-10-pathways.tsv"), confusion_matricies, delim = '\t')
+
     down_confusion_matricies_weighted = @from i in confusion_matricies_weighted begin
             @where i.Upperbound == 1.05
             @select {i.Lowerbound,
@@ -506,22 +511,19 @@ function analyzeResultsFull(results_folder, expected_results_folder, pathway_lis
 
     sort!(down_confusion_matricies_weighted, (:F1), rev=(true))
     lowerbound = down_confusion_matricies_weighted[1,:Lowerbound]
-
     CSV.write(joinpath(analysis_results_folder, "experimentalVsPredictedWeightedConfusionMatrix-10-pathways-down-cutoff.tsv"), down_confusion_matricies_weighted, delim = '\t')
 
     up_confusion_matricies_weighted = @from i in confusion_matricies_weighted begin
             @where i.Lowerbound == 0.95
             @select {i.Upperbound,
-                     TP=i.TP_down, FP=i.FP_down, FN=i.FN_down, TN=i.TN_down, P=i.P_down, N=i.N_down, i.Total,
-                     TPR=i.TPR_down, TNR=i.TNR_down, PPV=i.PPV_down, NPV=i.NPV_down, FNR=i.FNR_down, FPR=i.FPR_down, FDR=i.FDR_down, FOR=i.FOR_down, ACC=i.ACC_down, F1=i.F1_down}
+                     TP=i.TP_up, FP=i.FP_up, FN=i.FN_up, TN=i.TN_up, P=i.P_up, N=i.N_up, i.Total,
+                     TPR=i.TPR_up, TNR=i.TNR_up, PPV=i.PPV_up, NPV=i.NPV_up, FNR=i.FNR_up, FPR=i.FPR_up, FDR=i.FDR_up, FOR=i.FOR_up, ACC=i.ACC_up, F1=i.F1_up}
             @collect DataFrame
        end
     sort!(up_confusion_matricies_weighted, (:F1), rev=(true))
-    CSV.write(joinpath(analysis_results_folder, "experimentalVsPredictedWeightedConfusionMatrix-10-pathways-down-cutoff.tsv"), up_confusion_matricies_weighted, delim = '\t')
+    CSV.write(joinpath(analysis_results_folder, "experimentalVsPredictedWeightedConfusionMatrix-10-pathways-up-cutoff.tsv"), up_confusion_matricies_weighted, delim = '\t')
     upperbound = up_confusion_matricies_weighted[1,:Upperbound]
 
-    CSV.write(joinpath(analysis_results_folder, "experimentalVsPredictedWeightedConfusionMatrix-10-pathways.tsv"), confusion_matricies_weighted, delim = '\t')
-    CSV.write(joinpath(analysis_results_folder, "experimentalVsPredictedConfusionMatrix-10-pathways.tsv"), confusion_matricies, delim = '\t')
 
     println("Ideal lowerbound calculated to be: $lowerbound")
     println("Ideal upperbound calculated to be: $upperbound")
@@ -559,9 +561,7 @@ function analyzeResultsFull(results_folder, expected_results_folder, pathway_lis
     end
     addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies, lowerbound, upperbound, confusion_matrix)
     CSV.write(joinpath(analysis_results_folder, "expectedVsPredictedConfusionMatrix-10-pathways.tsv"), confusion_matricies, delim = '\t')
-    =#
-    lowerbound = 0.83
-    upperbound = 1.08
+
     # create based on all patwhays
     confusion_matricies = initializeThreeDimensionalConfusionMatricies()
     confusion_matrix = zeros(UInt16, (3, 3))
