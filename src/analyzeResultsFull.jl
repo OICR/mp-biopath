@@ -1,6 +1,9 @@
 module AnalyzeResultsFull
 
+
+using CSV
 using DataFrames
+using Query
 include("valuetostate.jl")
 include("probability.jl")
 include("evidence.jl")
@@ -73,30 +76,241 @@ function addConfusionMatrixToDataFrame(df, cutoff, confusion_matrix)
        Fone = (2 * TP) / (2 * TP + FP + FN)
    end
    row = [cutoff, TP, FP, FN, TN, total, P, N, TPR, TNR, PPV, NPV, FNR, FPR, FDR, FOR, ACC, Fone]
-   #println(row)
-   #println(dFloat64#print(length(row))
    push!(df, row)
+end
+
+function get_TPR(TP, P)
+  if P != 0
+     return TP / P
+  end
+  return 0
+end
+
+function get_TNR(TN, N)
+  if N != 0
+     return TN / N
+  end
+  return 0
+end
+
+function get_PPV(TP, FP)
+   total = TP + FP
+   if total != 0
+      return TP / total
+   end
+   return 0
+end
+
+function get_NPV(TN, FN)
+   total = TN + FN
+   if total != 0
+       return TN / total
+   end
+   return 0
+end
+
+function get_FNR(TP, P)
+   return 1 - get_TPR(TP, P)
+end
+
+function get_FPR(TN, N)
+   return 1 - get_TNR(TN, N)
+end
+
+function get_FDR(TP, FP)
+   return 1 - get_PPV(TP, FP)
+end
+
+function get_FOR(TN, FN)
+   return 1 - get_NPV(TN, FN)
+end
+
+function get_ACC(TP, TN, total)
+   return (TP + TN) / total
+end
+
+function get_F1(TPR, PPV)
+   if (PPV + TPR) != 0
+       return 2 * ((PPV * TPR) / (PPV + TPR))
+   end
+   return 0
+end
+
+function addThreeDimensionalConfusionMatrixToDataFrame(df, Lowerbound, Upperbound, confusion_matrix)
+   TP_down = confusion_matrix[1,1]
+   FP_down = confusion_matrix[1,2] + confusion_matrix[1,3]
+   FN_down = confusion_matrix[2,1] + confusion_matrix[3,1]
+   TN_down = confusion_matrix[2,2] + confusion_matrix[2,3] + confusion_matrix[3,2] + confusion_matrix[3,3]
+
+   Total = TN_down + FP_down + FN_down + TP_down
+   P_down = TP_down + FN_down
+   N_down = TN_down + FP_down
+
+   TPR_down = get_TPR(TP_down, P_down)
+   TNR_down = get_TNR(TN_down, N_down)
+   PPV_down = get_PPV(TP_down, FP_down)
+   NPV_down = get_NPV(TN_down, FN_down)
+   FNR_down = get_FNR(TP_down, P_down)
+   FPR_down = get_FNR(TN_down, N_down)
+   FDR_down = get_FDR(TP_down, FP_down)
+   FOR_down = get_FOR(TN_down, FN_down)
+   ACC_down = get_ACC(TP_down, TN_down, Total)
+   F1_down = get_F1(TPR_down, PPV_down)
+
+   TP_normal = confusion_matrix[2,2]
+   FP_normal = confusion_matrix[2,1] + confusion_matrix[2,3]
+   FN_normal = confusion_matrix[1,2] + confusion_matrix[3,2]
+   TN_normal = confusion_matrix[1,1] + confusion_matrix[1,3] + confusion_matrix[3,1] + confusion_matrix[3,3]
+   P_normal = TP_normal + FN_normal
+   N_normal = TN_normal + FP_normal
+
+   TPR_normal = get_TPR(TP_normal, P_normal)
+   TNR_normal = get_TNR(TN_normal, N_normal)
+   PPV_normal = get_PPV(TP_normal, FP_normal)
+   NPV_normal = get_NPV(TN_normal, FN_normal)
+   FNR_normal = get_FNR(TP_normal, P_normal)
+   FPR_normal = get_FNR(TN_normal, N_normal)
+   FDR_normal = get_FDR(TP_normal, FP_normal)
+   FOR_normal = get_FOR(TN_normal, FN_normal)
+   ACC_normal = get_ACC(TP_normal, TN_normal, Total)
+   F1_normal = get_F1(TPR_normal, PPV_normal)
+
+   TP_up = confusion_matrix[3,3]
+   FP_up = confusion_matrix[3,1] + confusion_matrix[3,2]
+   FN_up = confusion_matrix[1,3] + confusion_matrix[2,3]
+   TN_up = confusion_matrix[1,1] + confusion_matrix[1,2] + confusion_matrix[2,1] + confusion_matrix[2,2]
+   P_up = TP_up + FN_up
+   N_up = TN_up + FP_up
+
+   TPR_up = get_TPR(TP_up, P_up)
+   TNR_up = get_TNR(TN_up, N_up)
+   PPV_up = get_PPV(TP_up, FP_up)
+   NPV_up = get_NPV(TN_up, FN_up)
+   FNR_up = get_FNR(TP_up, P_up)
+   FPR_up = get_FNR(TN_up, N_up)
+   FDR_up = get_FDR(TP_up, FP_up)
+   FOR_up = get_FOR(TN_up, FN_up)
+   ACC_up = get_ACC(TP_up, TN_up, Total)
+   F1_up = get_F1(TPR_up, PPV_up)
+
+   overall_ACC = (confusion_matrix[1,1] + confusion_matrix[2,2] + confusion_matrix[3,3]) / Total
+   average_F1 = (F1_down + F1_normal + F1_up) / 3
+   row = [Lowerbound, Upperbound,
+          confusion_matrix[1,1], confusion_matrix[1,2], confusion_matrix[1,3],
+          confusion_matrix[2,1], confusion_matrix[2,2], confusion_matrix[2,3],
+          confusion_matrix[3,1], confusion_matrix[3,2], confusion_matrix[3,3],
+          TP_down, FP_down, FN_down, TN_down, P_down, N_down, Total,
+          TP_normal, FP_normal, FN_normal, TN_normal, P_normal, N_normal,
+          TP_up, FP_up, FN_up, TN_up,
+          TPR_down, TNR_down, PPV_down, NPV_down, FNR_down, FPR_down, FDR_down, FOR_down, ACC_down, F1_down,
+          TPR_normal, TNR_normal, PPV_normal, NPV_normal, FNR_normal, FPR_normal, FDR_normal, FOR_normal, ACC_normal, F1_normal,
+          TPR_up, TNR_up, PPV_up, NPV_up, FNR_up, FPR_up, FDR_up, FOR_up, ACC_up, F1_up,
+	  overall_ACC,
+          average_F1]
+                    
+   push!(df, row)
+end
+
+function initializeThreeDimensionalConfusionMatricies()
+   return DataFrame(Lowerbound = Float64[],
+                    Upperbound = Float64[],
+		    ExpectedDownActualDown = Int16[],
+		    ExpectedDownActualNormal = Int16[],
+		    ExpectedDownActualUp = Int16[],
+		    ExpectedNormalActualDown = Int16[],
+		    ExpectedNormalActualNormal = Int16[],
+		    ExpectedNormalActualUp = Int16[],
+		    ExpectedUpActualDown = Int16[],
+		    ExpectedUpActualNormal = Int16[],
+		    ExpectedUpActualUp = Int16[],
+                    TP_down = Int16[],
+                    FP_down = Int16[],
+                    FN_down = Int16[],
+                    TN_down = Int16[],
+                    P_down = Int16[],
+                    N_down = Int16[],
+                    Total = Int16[],
+                    TP_normal = Int16[],
+                    FP_normal = Int16[],
+                    FN_normal = Int16[],
+                    TN_normal = Int16[],
+                    P_normal = Int16[],
+                    N_normal = Int16[],
+                    TP_up = Int16[],
+                    FP_up = Int16[],
+                    FN_up = Int16[],
+                    TN_up = Int16[],
+                    TPR_down = Float64[],
+                    TNR_down = Float64[],
+                    PPV_down = Float64[],
+                    NPV_down = Float64[],
+                    FNR_down = Float64[],
+                    FPR_down = Float64[],
+                    FDR_down = Float64[],
+                    FOR_down = Float64[],
+                    ACC_down = Float64[],
+                    F1_down = Float64[],
+                    TPR_normal = Float64[],
+                    TNR_normal = Float64[],
+                    PPV_normal = Float64[],
+                    NPV_normal = Float64[],
+                    FNR_normal = Float64[],
+                    FPR_normal = Float64[],
+                    FDR_normal = Float64[],
+                    FOR_normal = Float64[],
+                    ACC_normal = Float64[],
+                    F1_normal = Float64[],
+                    TPR_up = Float64[],
+                    TNR_up = Float64[],
+                    PPV_up = Float64[],
+                    NPV_up = Float64[],
+                    FNR_up = Float64[],
+                    FPR_up = Float64[],
+                    FDR_up = Float64[],
+                    FOR_up = Float64[],
+                    ACC_up = Float64[],
+                    F1_up = Float64[],
+		    Overall_ACC = Float64[],
+                    average_F1 = Float64[])
 end
 
 function initializeConfusionMatricies()
    return DataFrame(Cutoff = Float64[],
                     TP = Int16[],
-		    FP = Int16[],
-		    FN = Int16[],
-		    TN = Int16[],
-		    Total = Int16[],
-		    P = Int16[],
-		    N = Int16[],
-		    TPR = Float64[],
-		    TNR = Float64[],
-		    PPV = Float64[],
-		    NPV = Float64[],
-		    FNR = Float64[],
-		    FPR = Float64[],
-		    FDR = Float64[],
-		    FOR = Float64[],
-		    ACC = Float64[],
-		    F1 = Float64[])
+                    FP = Int16[],
+                    FN = Int16[],
+                    TN = Int16[],
+                    Total = Int16[],
+                    P = Int16[],
+                    N = Int16[],
+                    TPR = Float64[],
+                    TNR = Float64[],
+                    PPV = Float64[],
+                    NPV = Float64[],
+                    FNR = Float64[],
+                    FPR = Float64[],
+                    FDR = Float64[],
+                    FOR = Float64[],
+                    ACC = Float64[],
+                    F1 = Float64[])
+end
+
+function weightConfusionMatrix(confusion_matrix, total_down_expected, total_normal_expected, total_up_expected)
+    total_down = confusion_matrix[1,1] + confusion_matrix[1,2] + confusion_matrix[1,3]
+    total_normal = confusion_matrix[2,1] + confusion_matrix[2,2] + confusion_matrix[2,3]
+    total_up = confusion_matrix[3,1] + confusion_matrix[3,2] + confusion_matrix[3,3]
+
+    confusion_matrix_weighted = zeros(Float32, (4, 4))
+    confusion_matrix_weighted[1,1] = floor(Int, confusion_matrix[1,1] / total_down * total_down_expected)
+    confusion_matrix_weighted[1,2] = floor(Int, confusion_matrix[1,2] / total_down * total_down_expected)
+    confusion_matrix_weighted[1,3] = floor(Int, confusion_matrix[1,3] / total_down * total_down_expected)
+    confusion_matrix_weighted[2,1] = floor(Int, confusion_matrix[2,1] / total_normal * total_normal_expected)
+    confusion_matrix_weighted[2,2] = floor(Int, confusion_matrix[2,2] / total_normal * total_normal_expected)
+    confusion_matrix_weighted[2,3] = floor(Int, confusion_matrix[2,3] / total_normal * total_normal_expected)
+    confusion_matrix_weighted[3,1] = floor(Int, confusion_matrix[3,1] / total_up * total_up_expected)
+    confusion_matrix_weighted[3,2] = floor(Int, confusion_matrix[3,2] / total_up * total_up_expected)
+    confusion_matrix_weighted[3,3] = floor(Int, confusion_matrix[3,3] / total_up * total_up_expected)
+    return confusion_matrix_weighted
 end
 
 function analyzeResultsFull(results_folder, expected_results_folder, pathway_list_file, pathways_folder, db_id_name_mapping_file, analysis_results_folder, experimental_results_folder, verbose)
@@ -186,19 +400,19 @@ function analyzeResultsFull(results_folder, expected_results_folder, pathway_lis
         exit(7)
     end
 
-    total_zeros_expected = 0
-    total_ones_expected = 0
-    total_twos_expected = 0
+    total_down_expected = 0
+    total_normal_expected = 0
+    total_up_expected = 0
     for pathway_id in keys(expected_results)
         for scenario in keys(expected_results[pathway_id]["samplenodestate"])
             for keyoutput in keys(expected_results[pathway_id]["samplenodestate"][scenario])
                 value = expected_results[pathway_id]["samplenodestate"][scenario][keyoutput]
                 if value == "0" 
-                    total_zeros_expected += 1
+                    total_down_expected += 1
                 elseif value == "1"
-                    total_ones_expected += 1
+                    total_normal_expected += 1
                 elseif value == "2"
-                    total_twos_expected += 1
+                    total_up_expected += 1
                 else
                     println(value)
                     println(typeof(value))
@@ -208,8 +422,9 @@ function analyzeResultsFull(results_folder, expected_results_folder, pathway_lis
         end
     end
 
-    total_tests = total_zeros_expected + total_ones_expected + total_twos_expected
-    
+    total_tests = total_down_expected + total_normal_expected + total_up_expected
+    confusion_matricies = initializeThreeDimensionalConfusionMatricies()
+    confusion_matricies_weighted = initializeThreeDimensionalConfusionMatricies()
     confusion_matrix = zeros(Int16, (4, 4))
     for pathway_id in keys(experimental_results)
         for scenario in keys(experimental_results[pathway_id]["samplenodestate"])
@@ -239,292 +454,160 @@ function analyzeResultsFull(results_folder, expected_results_folder, pathway_lis
          end
     end
     
-    row_totals = sum(confusion_matrix, dims=2)
-    percent_zeros_expected = total_zeros_expected/row_totals[1] 
-    percent_ones_expected = total_ones_expected/row_totals[2] 
-    percent_twos_expected = total_twos_expected/row_totals[3] 
-    
-    biological_confusion_matrix = zeros(Float32, (4, 4))
-    biological_confusion_matrix[1,1] = confusion_matrix[1,1] * percent_zeros_expected
-    biological_confusion_matrix[1,2] = confusion_matrix[1,2] * percent_zeros_expected
-    biological_confusion_matrix[1,3] = confusion_matrix[1,3] * percent_zeros_expected
-    biological_confusion_matrix[2,1] = confusion_matrix[2,1] * percent_ones_expected
-    biological_confusion_matrix[2,2] = confusion_matrix[2,2] * percent_ones_expected
-    biological_confusion_matrix[2,3] = confusion_matrix[2,3] * percent_ones_expected
-    biological_confusion_matrix[3,1] = confusion_matrix[3,1] * percent_twos_expected
-    biological_confusion_matrix[3,2] = confusion_matrix[3,2] * percent_twos_expected
-    biological_confusion_matrix[3,3] = confusion_matrix[3,3] * percent_twos_expected
+    addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies, 1, 1, confusion_matrix)
+    CSV.write(joinpath(analysis_results_folder, "expectedVsExperimentalConfusionMatrix.tsv"), confusion_matricies, delim = '\t')
 
-
-    addTotalsToConfusionMatrix(confusion_matrix)
-    addTotalsToConfusionMatrix(biological_confusion_matrix)
-
-    writeMatrix(confusion_matrix, joinpath(analysis_results_folder, "expectedVsExperimentalConfusionMatrix.tsv"))
-    writeMatrix(biological_confusion_matrix, joinpath(analysis_results_folder, "expectedVsExperimentalBiologicalConfusionMatrix.tsv"))
-
-    ### determine optimal lowerbound cutoff based on F1 score
-    lowerbound_confusion_matricies = initializeConfusionMatricies()
-    
+    confusion_matrix_weighted = weightConfusionMatrix(confusion_matrix, total_down_expected, total_normal_expected, total_up_expected)
+    addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies_weighted, 1, 1, confusion_matrix_weighted)
+    CSV.write(joinpath(analysis_results_folder, "expectedVsExperimentalConfusionMatrixWeighted.tsv"), confusion_matricies_weighted, delim = '\t')
+    #=
+    ### determine optimal lowerbound cutoff based on weighted average F1 score
+    confusion_matricies = initializeThreeDimensionalConfusionMatricies()
+    confusion_matricies_weighted = initializeThreeDimensionalConfusionMatricies()
     for lowerbound in range(0,1, step=0.01)
-        confusion_matrix = zeros(Int16, (2, 2))
-        for pathway_id in keys(experimental_results)
-            for scenario in keys(experimental_results[pathway_id]["samplenodestate"])
-                for keyoutput in keys(experimental_results[pathway_id]["samplenodestate"][scenario])
-                    expected_value = expected_results[pathway_id]["samplenodestate"][scenario][keyoutput]
-                    results_value = parse(Float64, mp_biopath_results[pathway_id][scenario][keyoutput])
-                    if expected_value == "2" || expected_value == "1"
-                        if results_value > lowerbound
-                            confusion_matrix[2,2] = confusion_matrix[2,2] + 1
+        for upperbound in range(1,10, step=0.01)
+            confusion_matrix = zeros(UInt16, (3, 3))
+            for pathway_id in keys(experimental_results)
+                for scenario in keys(experimental_results[pathway_id]["samplenodestate"])
+                    for keyoutput in keys(experimental_results[pathway_id]["samplenodestate"][scenario])
+                        experimental_value = experimental_results[pathway_id]["samplenodestate"][scenario][keyoutput]
+                        result_value = parse(Float64, mp_biopath_results[pathway_id][scenario][keyoutput])
+                        if experimental_value == "0"
+                            row = 1
+                        elseif experimental_value == "1"
+                            row = 2
                         else
-                            confusion_matrix[2,1] = confusion_matrix[2,1] + 1
+                            row = 3
                         end
-                    else 
-                        if results_value > lowerbound
-                            confusion_matrix[1,2] = confusion_matrix[1,2] + 1
+                        if result_value < lowerbound
+                            confusion_matrix[row,1] = confusion_matrix[row,1] + 1
+                        elseif result_value > upperbound
+                            confusion_matrix[row,3] = confusion_matrix[row,3] + 1
                         else
-                            confusion_matrix[1,1] = confusion_matrix[1,1] + 1
-                        end
-                    end
-                end
-            end
-        end
-        addConfusionMatrixToDataFrame(lowerbound_confusion_matricies, lowerbound, confusion_matrix)
-    end
-    println(lowerbound_confusion_matricies)
-
-    upperbound_confusion_matricies = initializeConfusionMatricies()
-    for upperbound in range(1,10, step=0.01)
-        confusion_matrix = zeros(UInt16, (2, 2))
-        for pathway_id in keys(experimental_results)
-            for scenario in keys(experimental_results[pathway_id]["samplenodestate"])
-                for keyoutput in keys(experimental_results[pathway_id]["samplenodestate"][scenario])
-                    expected_value = expected_results[pathway_id]["samplenodestate"][scenario][keyoutput]
-                    results_value = parse(Float64, mp_biopath_results[pathway_id][scenario][keyoutput])
-                    if expected_value == "0" || expected_value == "1"
-                        if results_value < upperbound
-                            confusion_matrix[2,2] = confusion_matrix[2,2] + 1
-                        else
-                            confusion_matrix[2,1] = confusion_matrix[2,1] + 1
-                        end
-                    else 
-                        if results_value < upperbound
-                            confusion_matrix[1,2] = confusion_matrix[1,2] + 1
-                        else
-                            confusion_matrix[1,1] = confusion_matrix[1,1] + 1
+                            confusion_matrix[row,2] = confusion_matrix[row,2] + 1
                         end
                     end
                 end
             end
+
+            addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies, lowerbound, upperbound, confusion_matrix)
+            confusion_matrix_weighted = weightConfusionMatrix(confusion_matrix, total_down_expected, total_normal_expected, total_up_expected)
+            addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies_weighted, lowerbound, upperbound, confusion_matrix_weighted)
         end
-        addConfusionMatrixToDataFrame(upperbound_confusion_matricies, upperbound, confusion_matrix)
-    end
-    println(upperbound_confusion_matricies)
-    exit()
-
-
-    println(upperbound_confusion_matricies)
-    exit()
-    for index in 1:100
-        println(index)
-        lowerbound = 1 - index/100
-        println(lowerbound)
     end
 
+    down_confusion_matricies_weighted = @from i in confusion_matricies_weighted begin
+            @where i.Upperbound == 1.05
+            @select {i.Lowerbound,
+                     TP=i.TP_down, FP=i.FP_down, FN=i.FN_down, TN=i.TN_down, P=i.P_down, N=i.N_down, i.Total,
+                     TPR=i.TPR_down, TNR=i.TNR_down, PPV=i.PPV_down, NPV=i.NPV_down, FNR=i.FNR_down, FPR=i.FPR_down, FDR=i.FDR_down, FOR=i.FOR_down, ACC=i.ACC_down, F1=i.F1_down}
+            @collect DataFrame
+       end
 
-#    expected_data = Results.getExpected(expectedfile)
-#    expected = expected_data["samplenodestate"]
-#
-#    expected_zero_got_zero = 0
-#    expected_one_got_one = 0
-#    expected_two_got_two = 0
-#    expected_zero_got_one = 0
-#    expected_zero_got_two = 0
-#    expected_one_got_zero = 0
-#    expected_one_got_two = 0
-#    expected_two_got_one = 0
-#    expected_two_got_zero = 0
-#
-#    results = Results.getResults(resultsfile)
-#    probability = 1;
-#    errors = Dict()
-#    if full == true
-#        println("scenario\tkeyoutput\tpredictiveValue")
-#    end
-#    for patientname in keys(expected)
-#        expected_patient_nodes = expected[patientname]
-#        results_patient_nodes = results[patientname]
-#        for nodename in keys(expected_patient_nodes)
-#            expectedState = expected_patient_nodes[nodename]
-#            resultValue = results_patient_nodes[nodename]
-#
-#            resultState = ValueToState.getStateNumber(resultValue, downregulatedcutoff, upregulatedcutoff)
-#            if expectedState != resultState
-#                if haskey(errors, patientname) == false
-#                    errors[patientname] = Dict()
-#                end
-#                errors[patientname][nodename] = [expectedState, resultValue]
-#            end
-#
-#            if expectedState == "0" && resultState == "0"
-#                if full == true
-#                    println("$patientname\t$nodename\tTP")
-#                else
-#                    expected_zero_got_zero += 1
-#                end
-#            elseif expectedState == "1" && resultState == "1"
-#                if full == true
-#                    println("$patientname\t$nodename\tTN")
-#                else
-#                    expected_one_got_one += 1
-#                end
-#            elseif expectedState == "2" && resultState == "2"
-#                if full == true
-#                    println("$patientname\t$nodename\tTP")
-#                else
-#                    expected_two_got_two += 1
-#                end
-#            elseif expectedState == "0" && resultState == "1"
-#                if full == true
-#                    println("$patientname\t$nodename\tFN")
-#                else
-#                    expected_zero_got_one += 1
-#                end
-#            elseif expectedState == "0" && resultState == "2"
-#                if full == true
-#                    println("$patientname\t$nodename\tFP")
-#                else
-#                    expected_zero_got_two += 1
-#                end
-#            elseif expectedState == "1" && resultState == "0"
-#                if full == true
-#                    println("$patientname\t$nodename\tFP")
-#                else
-#                    expected_one_got_zero += 1
-#                end
-#            elseif expectedState == "1" && resultState == "2"
-#                if full == true
-#                    println("$patientname\t$nodename\tFP")
-#                else
-#                    expected_one_got_two += 1
-#                end
-#            elseif expectedState == "2" && resultState == "1"
-#                if full == true
-#                    println("$patientname\t$nodename\tFN")
-#                else
-#                    expected_two_got_one += 1
-#                end
-#            elseif expectedState == "2" && resultState == "0"
-#                if full == true
-#                    println("$patientname\t$nodename\tFP")
-#                else
-#                     expected_two_got_zero += 1
-#                end
-#            end
-#        end
-#    end
-#
-#    if full == true
-#        return
-#    end
-#
-#    TN = expected_one_got_one
-#    println("\ntrue negative (TN): $TN")
-#
-#    TP = expected_two_got_two + expected_zero_got_zero
-#    println("true positive (TP): $TP")
-#
-#    FP = expected_one_got_zero + expected_one_got_two + expected_two_got_zero + expected_zero_got_two
-#    println("false positive (FP): $FP")
-#
-#    FN = expected_two_got_one + expected_zero_got_one
-#    println("false negative (FN): $FN")
-#
-#    total = TN + FP + FN + TP
-#    println("Total number of cases: $total")
-#
-#    P = TP + FN 
-#    println("conditional positive (P): $P")    
-#
-#    N = TN + FP
-#    println("conditional negative (N): $N")
-#
-#    TPR = 0
-#    if P != 0
-#        TPR = TP / P
-#    end
-#    println("sensitivity, recall, hit rate, or true positive rate (TPR): $TPR")
-#
-#    TNR = 0
-#    if N != 0
-#        TNR = TN / N
-#    end
-#    println("specificity, selectivity or true negative rate (TNR): $TNR")
-#
-#    PPV = 0
-#    if (TP + FP) != 0
-#        PPV = TP / (TP + FP)
-#    end 
-#    println("precision or positive predictive value (PPV): $PPV")
-#
-#    NPV = 0
-#    if (TN + FN) != 0
-#       NPV = TN / (TN + FN)
-#    end
-#    println("negative predictive value (NPV): $NPV")
-#
-#    FNR = 1 - TPR
-#    println("miss rate or false negative rate (FNR): $FNR")
-#
-#    FPR = 1 - TNR
-#    println("Fall-out or false positive rate (FPR): $FPR")
-#
-#    FDR = 1 - PPV
-#    println("false discovery rate: $FDR")
-#
-#    FOR = 1 - NPV
-#    println("false omission rate: $FOR")
-#
-#    ACC = (TP + TN) / total
-#    println("accuracy: $ACC\n")
-#
-#    Fone = 0
-#    if (2 * TP + FP + FN) != 0
-#        Fone = (2 * TP) / (2 * TP + FP + FN)
-#    end
-#    println("F1 Score: $Fone")
-#   
-#    MCC = 0
-#    divideBy = ((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))^(1/2)
-#    if divideBy != 0
-#        MCC = ((TP * TN) - (FP * FN)) / divideBy
-#    end
-#    println("Mathews correlation coefficient (MCC): $MCC")
-#
-#    BM = TPR + TNR -1
-#    println("Informedness or Bookmaker Informedness (BM): $BM")
-#
-#    MK = PPV + NPV -1
-#    println("Markedness (MK): $MK\n")
-#
-#    println("Expected 0 predicted 0: $expected_zero_got_zero")
-#    println("Expected 0 predicted 1: $expected_zero_got_one")
-#    println("Expected 0 predicted 2: $expected_zero_got_two")
-#    println("Expected 1 predicted 0: $expected_one_got_zero")
-#    println("Expected 1 predicted 1: $expected_one_got_one")
-#    println("Expected 1 predicted 2: $expected_one_got_two")
-#    println("Expected 2 predicted 0: $expected_two_got_zero")
-#    println("Expected 2 predicted 1: $expected_two_got_one")
-#    println("Expected 2 predicted 2: $expected_two_got_two\n\n")
-#
-#
-#    println("Patient\tNode\tExpected\tActual\n")
-#    for patientname in keys(errors)
-#        patient = errors[patientname]
-#        for genename in keys(patient)
-#            values = errors[patientname][genename]
-#            println("$patientname\t$genename\t", values[1], "\t", values[2])
-#        end
-#    end
+    sort!(down_confusion_matricies_weighted, (:F1), rev=(true))
+    lowerbound = down_confusion_matricies_weighted[1,:Lowerbound]
+
+    CSV.write(joinpath(analysis_results_folder, "experimentalVsPredictedWeightedConfusionMatrix-10-pathways-down-cutoff.tsv"), down_confusion_matricies_weighted, delim = '\t')
+
+    up_confusion_matricies_weighted = @from i in confusion_matricies_weighted begin
+            @where i.Lowerbound == 0.95
+            @select {i.Upperbound,
+                     TP=i.TP_down, FP=i.FP_down, FN=i.FN_down, TN=i.TN_down, P=i.P_down, N=i.N_down, i.Total,
+                     TPR=i.TPR_down, TNR=i.TNR_down, PPV=i.PPV_down, NPV=i.NPV_down, FNR=i.FNR_down, FPR=i.FPR_down, FDR=i.FDR_down, FOR=i.FOR_down, ACC=i.ACC_down, F1=i.F1_down}
+            @collect DataFrame
+       end
+    sort!(up_confusion_matricies_weighted, (:F1), rev=(true))
+    CSV.write(joinpath(analysis_results_folder, "experimentalVsPredictedWeightedConfusionMatrix-10-pathways-down-cutoff.tsv"), up_confusion_matricies_weighted, delim = '\t')
+    upperbound = up_confusion_matricies_weighted[1,:Upperbound]
+
+    CSV.write(joinpath(analysis_results_folder, "experimentalVsPredictedWeightedConfusionMatrix-10-pathways.tsv"), confusion_matricies_weighted, delim = '\t')
+    CSV.write(joinpath(analysis_results_folder, "experimentalVsPredictedConfusionMatrix-10-pathways.tsv"), confusion_matricies, delim = '\t')
+
+    println("Ideal lowerbound calculated to be: $lowerbound")
+    println("Ideal upperbound calculated to be: $upperbound")
+
+    optimal_confusion_matrix_weighted = @from i in confusion_matricies_weighted begin
+            @where i.Lowerbound == lowerbound && i.Upperbound == upperbound
+            @select i
+            @collect DataFrame
+    end
+
+    #create based on experimental pathways
+    confusion_matricies = initializeThreeDimensionalConfusionMatricies()
+    confusion_matrix = zeros(UInt16, (3, 3))
+    for pathway_id in keys(experimental_results)
+        for scenario in keys(experimental_results[pathway_id]["samplenodestate"])
+            for keyoutput in keys(experimental_results[pathway_id]["samplenodestate"][scenario])
+                expected_value = expected_results[pathway_id]["samplenodestate"][scenario][keyoutput]
+                result_value = parse(Float64, mp_biopath_results[pathway_id][scenario][keyoutput])
+                if expected_value == "0"
+                    row = 1
+                elseif expected_value == "1"
+                    row = 2
+                else
+                    row = 3
+                end
+                if result_value < lowerbound
+                    confusion_matrix[row,1] = confusion_matrix[row,1] + 1
+                elseif result_value > upperbound
+                    confusion_matrix[row,3] = confusion_matrix[row,3] + 1
+                else
+                    confusion_matrix[row,2] = confusion_matrix[row,2] + 1
+                end
+            end
+        end
+    end
+    addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies, lowerbound, upperbound, confusion_matrix)
+    CSV.write(joinpath(analysis_results_folder, "expectedVsPredictedConfusionMatrix-10-pathways.tsv"), confusion_matricies, delim = '\t')
+    =#
+    lowerbound = 0.83
+    upperbound = 1.08
+    # create based on all patwhays
+    confusion_matricies = initializeThreeDimensionalConfusionMatricies()
+    confusion_matrix = zeros(UInt16, (3, 3))
+    for pathway_id in keys(expected_results)
+        for scenario in keys(expected_results[pathway_id]["samplenodestate"])
+            for keyoutput in keys(expected_results[pathway_id]["samplenodestate"][scenario])
+                expected_value = expected_results[pathway_id]["samplenodestate"][scenario][keyoutput]
+                result_value = parse(Float64, mp_biopath_results[pathway_id][scenario][keyoutput])
+                if expected_value == "0"
+                    row = 1
+                elseif expected_value == "1"
+                    row = 2
+                else
+                    row = 3
+                end
+                if result_value < lowerbound
+                    confusion_matrix[row,1] = confusion_matrix[row,1] + 1
+                elseif result_value > upperbound
+                    confusion_matrix[row,3] = confusion_matrix[row,3] + 1
+                else
+                    confusion_matrix[row,2] = confusion_matrix[row,2] + 1
+                end
+            end
+        end
+    end
+    addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies, lowerbound, upperbound, confusion_matrix)
+    CSV.write(joinpath(analysis_results_folder, "expectedVsPredictedConfusionMatrix-all-pathways.tsv"), confusion_matricies, delim = '\t')
+
+    pathway_tests = CSV.read("/data/MP_BioPathReactomePathwayAccuracy-Tests.tsv", delim="\t",copycols=true)
+    for pathway_id in keys(experimental_results)
+        for scenario in keys(expected_results[pathway_id]["samplenodestate"])
+            for keyoutput in keys(expected_results[pathway_id]["samplenodestate"][scenario])
+                #expected_value = expected_results[pathway_id]["samplenodestate"][scenario][keyoutput]
+                result_value = parse(Float64, mp_biopath_results[pathway_id][scenario][keyoutput])
+                result_state = "normal"
+                if result_value < lowerbound
+                    result_state = "down"
+                elseif result_value > upperbound
+                    result_state = "up"
+                end
+                pathway_tests[((pathway_tests[:scenario] .== scenario) .& (pathway_tests[:keyoutput_id] .== parse(Int64, keyoutput)) .& (pathway_tests[:pathway_id] .== parse(Int64, pathway_id))),:mp_biopath_state] = result_state
+                pathway_tests[((pathway_tests[:scenario] .== scenario) .& (pathway_tests[:keyoutput_id] .== parse(Int64, keyoutput)) .& (pathway_tests[:pathway_id] .== parse(Int64, pathway_id))),:mp_biopath_value] = result_value
+            end
+        end
+    end
+    CSV.write(joinpath(analysis_results_folder, "MP_BioPathReactomePathwayAccuracy-Tests-updated.tsv"), pathway_tests, delim = '\t')
 end
 
 end
