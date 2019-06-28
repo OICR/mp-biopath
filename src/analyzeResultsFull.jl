@@ -4,6 +4,7 @@ module AnalyzeResultsFull
 using CSV
 using DataFrames
 using Query
+using Statistics
 include("valuetostate.jl")
 include("probability.jl")
 include("evidence.jl")
@@ -11,73 +12,6 @@ include("results.jl")
 include("idMap.jl")
 include("pathwayList.jl")
 include("pi.jl")
-
-function addTotalsToConfusionMatrix(confusion_matrix)
-    confusion_matrix[1,4] = confusion_matrix[1,1] + confusion_matrix[1,2] + confusion_matrix[1,3] #first row total
-    confusion_matrix[2,4] = confusion_matrix[2,1] + confusion_matrix[2,2] + confusion_matrix[2,3]
-    confusion_matrix[3,4] = confusion_matrix[3,1] + confusion_matrix[3,2] + confusion_matrix[3,3]
-    
-
-    confusion_matrix[4,1] = confusion_matrix[1,1] + confusion_matrix[2,1] + confusion_matrix[3,1] #first column total
-    confusion_matrix[4,2] = confusion_matrix[1,2] + confusion_matrix[2,2] + confusion_matrix[3,2]
-    confusion_matrix[4,3] = confusion_matrix[1,3] + confusion_matrix[2,3] + confusion_matrix[3,3]
-
-    confusion_matrix[4,4] = confusion_matrix[1,4] + confusion_matrix[2,4] + confusion_matrix[3,4] #total of totals
-  
-    return confusion_matrix
-end
-
-function writeMatrix(matrix, filepath)
-    open(filepath, "w") do f
-         for row in eachrow(matrix)
-             write(f, join(row, "\t"))
-             write(f, "\n")
-         end
-    end
-end
-
-function addConfusionMatrixToDataFrame(df, cutoff, confusion_matrix)
-   TP = confusion_matrix[1,1]
-   FP = confusion_matrix[1,2]
-   FN = confusion_matrix[2,1]
-   TN = confusion_matrix[2,2]
-   total = TN + FP + FN + TP
-   P = TP + FN 
-   N = TN + FP
-
-   TPR = 0
-   if P != 0
-       TPR = TP / P
-   end
-
-   TNR = 0
-   if N != 0
-       TNR = TN / N
-   end
-
-   PPV = 0
-   if (TP + FP) != 0
-       PPV = TP / (TP + FP)
-   end 
-
-   NPV = 0
-   if (TN + FN) != 0
-       NPV = TN / (TN + FN)
-   end
-
-   FNR = 1 - TPR
-   FPR = 1 - TNR
-   FDR = 1 - PPV
-   FOR = 1 - NPV
-   ACC = (TP + TN) / total
-
-   Fone = 0
-   if (2 * TP + FP + FN) != 0
-       Fone = (2 * TP) / (2 * TP + FP + FN)
-   end
-   row = [cutoff, TP, FP, FN, TN, total, P, N, TPR, TNR, PPV, NPV, FNR, FPR, FDR, FOR, ACC, Fone]
-   push!(df, row)
-end
 
 function get_TPR(TP, P)
   if P != 0
@@ -195,6 +129,7 @@ function addThreeDimensionalConfusionMatrixToDataFrame(df, Lowerbound, Upperboun
 
    overall_ACC = (confusion_matrix[1,1] + confusion_matrix[2,2] + confusion_matrix[3,3]) / Total
    average_F1 = (F1_down + F1_normal + F1_up) / 3
+   weighted_F1 = (F1_down * P_down + F1_normal * P_normal + F1_up * P_up) / Total
    row = [Lowerbound, Upperbound,
           confusion_matrix[1,1], confusion_matrix[1,2], confusion_matrix[1,3],
           confusion_matrix[2,1], confusion_matrix[2,2], confusion_matrix[2,3],
@@ -206,7 +141,7 @@ function addThreeDimensionalConfusionMatrixToDataFrame(df, Lowerbound, Upperboun
           TPR_normal, TNR_normal, PPV_normal, NPV_normal, FNR_normal, FPR_normal, FDR_normal, FOR_normal, ACC_normal, F1_normal,
           TPR_up, TNR_up, PPV_up, NPV_up, FNR_up, FPR_up, FDR_up, FOR_up, ACC_up, F1_up,
 	  overall_ACC,
-          average_F1]
+          average_F1, weighted_F1]
                     
    push!(df, row)
 end
@@ -214,15 +149,15 @@ end
 function initializeThreeDimensionalConfusionMatricies()
    return DataFrame(Lowerbound = Float64[],
                     Upperbound = Float64[],
-		    ExpectedDownActualDown = Int16[],
-		    ExpectedDownActualNormal = Int16[],
-		    ExpectedDownActualUp = Int16[],
-		    ExpectedNormalActualDown = Int16[],
-		    ExpectedNormalActualNormal = Int16[],
-		    ExpectedNormalActualUp = Int16[],
-		    ExpectedUpActualDown = Int16[],
-		    ExpectedUpActualNormal = Int16[],
-		    ExpectedUpActualUp = Int16[],
+		    PredictedDownActualDown = Int16[],
+		    PredictedDownActualNormal = Int16[],
+		    PredictedDownActualUp = Int16[],
+		    PredictedNormalActualDown = Int16[],
+		    PredictedNormalActualNormal = Int16[],
+		    PredictedNormalActualUp = Int16[],
+		    PredictedUpActualDown = Int16[],
+		    PredictedUpActualNormal = Int16[],
+		    PredictedUpActualUp = Int16[],
                     TP_down = Int16[],
                     FP_down = Int16[],
                     FN_down = Int16[],
@@ -273,72 +208,144 @@ function initializeThreeDimensionalConfusionMatricies()
                     ACC_up = Float64[],
                     F1_up = Float64[],
 		    Overall_ACC = Float64[],
-                    average_F1 = Float64[])
+                    average_F1 = Float64[],
+                    weighted_F1 = Float64[])
 end
 
-function initializeConfusionMatricies()
-   return DataFrame(Cutoff = Float64[],
-                    TP = Int16[],
-                    FP = Int16[],
-                    FN = Int16[],
-                    TN = Int16[],
-                    Total = Int16[],
-                    P = Int16[],
-                    N = Int16[],
-                    TPR = Float64[],
-                    TNR = Float64[],
-                    PPV = Float64[],
-                    NPV = Float64[],
-                    FNR = Float64[],
-                    FPR = Float64[],
-                    FDR = Float64[],
-                    FOR = Float64[],
-                    ACC = Float64[],
-                    F1 = Float64[])
-end
-
-function weightConfusionMatrix(confusion_matrix, total_down_expected, total_normal_expected, total_up_expected)
+function weightConfusionMatrix(confusion_matrix, total_down_reactome_curator, total_normal_reactome_curator, total_up_reactome_curator)
     total_down = confusion_matrix[1,1] + confusion_matrix[1,2] + confusion_matrix[1,3]
     total_normal = confusion_matrix[2,1] + confusion_matrix[2,2] + confusion_matrix[2,3]
     total_up = confusion_matrix[3,1] + confusion_matrix[3,2] + confusion_matrix[3,3]
 
     confusion_matrix_weighted = zeros(Float32, (4, 4))
-    confusion_matrix_weighted[1,1] = floor(Int, confusion_matrix[1,1] / total_down * total_down_expected)
-    confusion_matrix_weighted[1,2] = floor(Int, confusion_matrix[1,2] / total_down * total_down_expected)
-    confusion_matrix_weighted[1,3] = floor(Int, confusion_matrix[1,3] / total_down * total_down_expected)
-    confusion_matrix_weighted[2,1] = floor(Int, confusion_matrix[2,1] / total_normal * total_normal_expected)
-    confusion_matrix_weighted[2,2] = floor(Int, confusion_matrix[2,2] / total_normal * total_normal_expected)
-    confusion_matrix_weighted[2,3] = floor(Int, confusion_matrix[2,3] / total_normal * total_normal_expected)
-    confusion_matrix_weighted[3,1] = floor(Int, confusion_matrix[3,1] / total_up * total_up_expected)
-    confusion_matrix_weighted[3,2] = floor(Int, confusion_matrix[3,2] / total_up * total_up_expected)
-    confusion_matrix_weighted[3,3] = floor(Int, confusion_matrix[3,3] / total_up * total_up_expected)
+    confusion_matrix_weighted[1,1] = floor(Int, confusion_matrix[1,1] / total_down * total_down_reactome_curator)
+    confusion_matrix_weighted[1,2] = floor(Int, confusion_matrix[1,2] / total_down * total_down_reactome_curator)
+    confusion_matrix_weighted[1,3] = floor(Int, confusion_matrix[1,3] / total_down * total_down_reactome_curator)
+    confusion_matrix_weighted[2,1] = floor(Int, confusion_matrix[2,1] / total_normal * total_normal_reactome_curator)
+    confusion_matrix_weighted[2,2] = floor(Int, confusion_matrix[2,2] / total_normal * total_normal_reactome_curator)
+    confusion_matrix_weighted[2,3] = floor(Int, confusion_matrix[2,3] / total_normal * total_normal_reactome_curator)
+    confusion_matrix_weighted[3,1] = floor(Int, confusion_matrix[3,1] / total_up * total_up_reactome_curator)
+    confusion_matrix_weighted[3,2] = floor(Int, confusion_matrix[3,2] / total_up * total_up_reactome_curator)
+    confusion_matrix_weighted[3,3] = floor(Int, confusion_matrix[3,3] / total_up * total_up_reactome_curator)
     return confusion_matrix_weighted
 end
 
-function analyzeResultsFull(results_folder, expected_results_folder, pathway_list_file, pathways_folder, db_id_name_mapping_file, analysis_results_folder, experimental_results_folder, verbose)
+function createConfusionMatrixFormatted(cm, actual_class, predicted_class, filepath)
+    predicted_down_total = cm[:PredictedDownActualDown] + cm[:PredictedDownActualNormal] + cm[:PredictedDownActualUp] 
+    predicted_normal_total = cm[:PredictedNormalActualDown] + cm[:PredictedNormalActualNormal] + cm[:PredictedNormalActualUp] 
+    predicted_up_total = cm[:PredictedUpActualDown] + cm[:PredictedUpActualNormal] + cm[:PredictedUpActualUp] 
+    actual_down_total = cm[:PredictedDownActualDown] + cm[:PredictedNormalActualDown] + cm[:PredictedUpActualDown] 
+    actual_normal_total = cm[:PredictedDownActualNormal] + cm[:PredictedNormalActualNormal] + cm[:PredictedUpActualNormal] 
+    actual_up_total = cm[:PredictedDownActualUp] + cm[:PredictedNormalActualUp] + cm[:PredictedUpActualUp] 
+    title =  string(predicted_class, " vs ", actual_class)
+    A = [title "" "" actual_class "" "" "Precision" "";
+         "" "" "Down" "Normal" "Up" "Total" "(PPV)" "F1";
+         "" "Down" cm[:PredictedDownActualDown] cm[:PredictedDownActualNormal] cm[:PredictedDownActualUp]  predicted_down_total cm[:PPV_down] cm[:F1_down];
+         predicted_class "Normal" cm[:PredictedNormalActualDown] cm[:PredictedNormalActualNormal] cm[:PredictedNormalActualUp]  predicted_normal_total cm[:PPV_normal] cm[:F1_normal];
+         "" "Up" cm[:PredictedUpActualDown] cm[:PredictedUpActualNormal] cm[:PredictedUpActualUp] predicted_up_total cm[:PPV_up] cm[:F1_up];
+         "" "Total" actual_down_total actual_normal_total actual_up_total cm[:Total] "" "";
+         "Sensitivity" "(TPR)" cm[:TPR_down] cm[:TPR_normal] cm[:TPR_up] "" cm[:Overall_ACC] cm[:average_F1];
+         "" "" "" "" "" "" "" "";
+         "Predicted Down" "" "Positive" "Negative" "ACC" "" "" "";
+         "" "Positive" cm[:TP_down] cm[:FP_down] cm[:ACC_down] "" "" "";
+         "" "Negative" cm[:FN_down] cm[:TN_down] "" "" "" "";
+         "" "" "" "" "" "" "" "";
+         "Predicted Normal" "" "Positive" "Negative" "ACC" "" "" "";
+         "" "Positive" cm[:TP_normal] cm[:FP_normal] cm[:ACC_normal] "" "" "";
+         "" "Negative" cm[:FN_normal] cm[:TN_normal] "" "" "" "";
+         "" "" "" "" "" "" "" "";
+         "Predicted Up" "" "Positive" "Negative" "ACC" "" "" "";
+         "" "Positive" cm[:TP_up] cm[:FP_up] cm[:ACC_up] "" "" "";
+         "" "Negative" cm[:FN_up] cm[:TN_up] "" "" "" ""
+         "" "" "" "" "" "" "" "";
+         "" "TP" "TN" "FP" "FN" "Total" "ACC" "";
+         "Up"  cm[:TP_up] cm[:TN_up] cm[:FP_up] cm[:FN_up] cm[:Total] cm[:ACC_up] "";
+         "Normal"  cm[:TP_normal] cm[:TN_normal] cm[:FP_normal] cm[:FN_normal] cm[:Total] cm[:ACC_normal] "";
+         "Down" cm[:TP_down] cm[:TN_down] cm[:FP_down] cm[:FN_down] cm[:Total] cm[:ACC_down] ""]
+
+    CSV.write(filepath,  DataFrame(A), writeheader=false)
+ end
+
+function getParents(pathway_network, node_id)
+    node = pathway_network[string(node_id)]
+
+    parents = []
+    if node.relation in ["AND", "NEG", "ANDNEG"]
+        parents = node.parents
+        node.parents
+    elseif node.relation == "OR"
+        parents = node.posParents
+    end
+    
+    non_pseudo_parents = Set()
+    for parent_id in parents
+       if occursin("PSEUDONODE", parent_id) == true
+           non_pseudo_parents_of_parents = getParents(pathway_network, parent_id)
+           union!(non_pseudo_parents, non_pseudo_parents_of_parents)
+       else
+           push!(non_pseudo_parents, parent_id)
+       end
+    end
+    return non_pseudo_parents
+end
+
+function findDistanceToInput(pathway_network, output_node_id, input_id)
+    distance = 0
+    first_iteration = true
+    parents = Set()
+    visited = Set([input_id])
+    while first_iteration == true || length(parents) != 0
+        if output_node_id == input_id
+            return distance
+        end
+        if first_iteration == true
+            parents = Set(getParents(pathway_network, output_node_id))
+        end
+        distance += 1
+        new_parents = Set()
+        for parent_id in parents
+             if parent_id == input_id
+                 return distance
+             elseif in(parent_id, visited) == false
+                 push!(visited, parent_id)
+                 union!(new_parents, getParents(pathway_network, parent_id))
+             end
+        end
+               
+        parents = new_parents
+        first_iteration = false
+    end
+    return -1
+end
+
+function analyzeResultsFull(results_folder, reactome_curator_results_folder, pathway_list_file, pathways_folder, db_id_name_mapping_file, analysis_results_folder, experimental_results_folder, verbose)
     if isfile(pathway_list_file)
-       pathway_name_to_id_map = PathwayList.getPathwayNameToIdMap(pathway_list_file)
+        pathway_name_to_id_map = PathwayList.getPathwayNameToIdMap(pathway_list_file)
     else
-       println("ERROR pathway list file does not exists: $pathway_list")
+        println("ERROR pathway list file does not exists: $pathway_list")
+        exit(2)
     end
 
     if isfile(db_id_name_mapping_file)
-         id_map = IdMap.getIDmap(db_id_name_mapping_file)
+        id_map = IdMap.getIDmap(db_id_name_mapping_file)
+    else
+        println("ERROR db_id_name_mapping_file does not exist: $db_id_name_mapping_file")
+        exit(3)
     end
-
-    expected_results = Dict()
-    if isdir(expected_results_folder)
-        for expected_results_filename in readdir(expected_results_folder)
-            if endswith(expected_results_filename, "_expected_results.tsv")
-                expected_results_filepath = joinpath(expected_results_folder, expected_results_filename)
-                pathway_expected_results = Results.getExpected(expected_results_filepath)
-                pathway_name = expected_results_filename[1:end - 21]
+    reactome_curator_results_file_ending = "_reactome_curator_results.tsv"
+    reactome_curator_results = Dict()
+    if isdir(reactome_curator_results_folder)
+        for reactome_curator_results_filename in readdir(reactome_curator_results_folder)
+            if endswith(reactome_curator_results_filename, reactome_curator_results_file_ending)
+                reactome_curator_results_filepath = joinpath(reactome_curator_results_folder, reactome_curator_results_filename)
+                pathway_reactome_curator_results = Results.getExpected(reactome_curator_results_filepath)
+                pathway_name = reactome_curator_results_filename[1:end - lastindex(reactome_curator_results_file_ending)]
                 pathway_id = pathway_name_to_id_map[pathway_name]
-                expected_results[pathway_id] = pathway_expected_results
+                reactome_curator_results[pathway_id] = pathway_reactome_curator_results
              end
         end
     else
-        println("ERROR: Folder does not exist $expected_results_folder")
+        println("ERROR: Folder does not exist $reactome_curator_results_folder")
     end
 
     experimental_results = Dict()
@@ -355,7 +362,68 @@ function analyzeResultsFull(results_folder, expected_results_folder, pathway_lis
     else
         println("ERROR: Folder does not exist $experimental_results_folder")
     end
-    
+    pathway_networks = Dict()
+    if isdir(pathways_folder)
+        for pi_file in readdir(pathways_folder)
+             if endswith(pi_file, ".tsv")
+                 pathway_name = pi_file[1:end - 4]
+                 pathway_id = pathway_name_to_id_map[pathway_name]
+                 pathway_networks[pathway_id] = Pi.readFile(joinpath(pathways_folder, pi_file))
+             end
+        end
+    else
+        println("ERROR: pathway folder does not exist: $pathways_folder")
+        exit(7)
+    end
+ 
+    pathway_tests = CSV.read("/data/MP_BioPathReactomePathwayAccuracy-Tests.tsv", delim="\t",copycols=true)
+    input_to_output_distance = DataFrame(pathway_id = String[],
+	                                 input_name = String[],
+					 input_id = String[],
+					 keyoutput_id = String[],
+					 distance = String[])
+    for i in 1:size(pathway_tests,1)
+        pathway_id = pathway_tests[i,:pathway_id]
+        pathway_network = pathway_networks[string(pathway_id)]
+        scenario = pathway_tests[i,:scenario]
+        keyoutput_id = pathway_tests[i,:keyoutput_id]
+        experimental_value = pathway_tests[i,:experimental_value]
+
+        expected_value = pathway_tests[i,:expected_value]
+
+        reactome_curator_result = reactome_curator_results[string(pathway_id)]["samplenodestate"][scenario][string(keyoutput_id)]
+
+        if reactome_curator_result != string(expected_value)
+            println("Curator expected value does not match for pathway $pathway_id, scenario $scenario, keyoutput_id $keyoutput_id: reactome_curator: $reactome_curator_result, from_old_file: $expected_value")
+        end
+
+        if experimental_value != "NA"
+            experimental_result = experimental_results[string(pathway_id)]["samplenodestate"][scenario][string(keyoutput_id)]
+            if experimental_result != experimental_value
+                println("Experimental value does not match for pathway $pathway_id, scenario $scenario, keyoutput_id $keyoutput_id: experimental value: $experimental_result, from_old_file: $experimental_value")
+            end
+        end
+        input_name = scenario[1:end-2]
+        for id_map_row in id_map[input_name]
+            input_id = id_map_row[:Database_Identifier]
+            if input_id in keys(pathway_network) && pathway_network[string(input_id)].relation == "ROOT"
+                distance_rows = @from i in input_to_output_distance begin
+                                    @where i.pathway_id == string(pathway_id) && i.input_name == string(input_name) && i.keyoutput_id == string(keyoutput_id)
+                                    @select i
+                                    @collect DataFrame
+                                end
+                if (length(distance_rows[:,1]) == 0)
+                    distance = findDistanceToInput(pathway_network, keyoutput_id, input_id)
+                    if distance != -1
+                        distance_str = string(distance)
+                        push!(input_to_output_distance, [string(pathway_id), string(input_name), string(input_id), string(keyoutput_id), distance_str])
+                    end
+		end
+	    end
+        end
+    end
+    CSV.write(joinpath(analysis_results_folder, "input_to_keyoutput_distance.tsv"), input_to_output_distance, delim = '\t')
+
     mp_biopath_results = Dict()
     if isdir(results_folder)
          main_tests_folder = joinpath(results_folder, "main-tests")
@@ -388,33 +456,22 @@ function analyzeResultsFull(results_folder, expected_results_folder, pathway_lis
          exit(1)
     end
 
-    pathway_networks = Dict()
-    if isdir(pathways_folder)
-        for pi_file in readdir(pathways_folder)
-             if endswith(pi_file, ".tsv")
-                 pathway_name = pi_file[1:end - 4]
-                 pathway_id = pathway_name_to_id_map[pathway_name]
-                 pathway_networks[pathway_id] = Pi.readFile(joinpath(pathways_folder, pi_file))
-             end
-        end
-    else
-        println("ERROR: pathway folder does not exist: $pathways_folder")
-        exit(7)
-    end
-
-    total_down_expected = 0
-    total_normal_expected = 0
-    total_up_expected = 0
-    for pathway_id in keys(expected_results)
-        for scenario in keys(expected_results[pathway_id]["samplenodestate"])
-            for keyoutput in keys(expected_results[pathway_id]["samplenodestate"][scenario])
-                value = expected_results[pathway_id]["samplenodestate"][scenario][keyoutput]
+    total_down_reactome_curator = 0
+    total_normal_reactome_curator = 0
+    total_up_reactome_curator = 0
+    for pathway_id in keys(reactome_curator_results)
+        for scenario in keys(reactome_curator_results[pathway_id]["samplenodestate"])
+            if scenario == "control"
+                continue
+            end
+            for keyoutput in keys(reactome_curator_results[pathway_id]["samplenodestate"][scenario])
+                value = reactome_curator_results[pathway_id]["samplenodestate"][scenario][keyoutput]
                 if value == "0" 
-                    total_down_expected += 1
+                    total_down_reactome_curator += 1
                 elseif value == "1"
-                    total_normal_expected += 1
+                    total_normal_reactome_curator += 1
                 elseif value == "2"
-                    total_up_expected += 1
+                    total_up_reactome_curator += 1
                 else
                     println(value)
                     println(typeof(value))
@@ -424,190 +481,327 @@ function analyzeResultsFull(results_folder, expected_results_folder, pathway_lis
         end
     end
 
-    total_tests = total_down_expected + total_normal_expected + total_up_expected
-    confusion_matricies = initializeThreeDimensionalConfusionMatricies()
-    confusion_matricies_weighted = initializeThreeDimensionalConfusionMatricies()
-    confusion_matrix = zeros(Int16, (4, 4))
-    for pathway_id in keys(experimental_results)
-        for scenario in keys(experimental_results[pathway_id]["samplenodestate"])
-            for keyoutput in keys(experimental_results[pathway_id]["samplenodestate"][scenario])
-                  expected_value = expected_results[pathway_id]["samplenodestate"][scenario][keyoutput]
-                  experimental_value = experimental_results[pathway_id]["samplenodestate"][scenario][keyoutput]
-                  if expected_value == "0" &&experimental_value == "0"
-                      confusion_matrix[1,1] = confusion_matrix[1,1] + 1
-                  elseif expected_value == "1" && experimental_value == "0"
-                      confusion_matrix[2,1] = confusion_matrix[2,1] + 1
-                  elseif expected_value == "2" && experimental_value == "0"
-                      confusion_matrix[3,1] = confusion_matrix[3,1] + 1
-                  elseif expected_value == "0" && experimental_value == "1"
-                      confusion_matrix[1,2] = confusion_matrix[1,2] + 1
-                  elseif expected_value == "1" && experimental_value == "1"
-                      confusion_matrix[2,2] = confusion_matrix[2,2] + 1
-                  elseif expected_value == "2" && experimental_value == "1"
-                      confusion_matrix[3,2] = confusion_matrix[3,2] + 1
-                  elseif expected_value == "0" && experimental_value == "2"
-                      confusion_matrix[1,3] = confusion_matrix[1,3] + 1
-                  elseif expected_value == "1" && experimental_value == "2"
-                      confusion_matrix[2,3] = confusion_matrix[2,3] + 1
-                  elseif expected_value == "2" && experimental_value == "2"
-                      confusion_matrix[3,3] = confusion_matrix[3,3] + 1
-                  end
-             end
-         end
-    end
-    
-    addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies, 1, 1, confusion_matrix)
-    CSV.write(joinpath(analysis_results_folder, "expectedVsExperimentalConfusionMatrix.tsv"), confusion_matricies, delim = '\t')
+    total_tests = total_down_reactome_curator + total_normal_reactome_curator + total_up_reactome_curator
+#    confusion_matricies = initializeThreeDimensionalConfusionMatricies()
+#    confusion_matricies_weighted = initializeThreeDimensionalConfusionMatricies()
+#    confusion_matrix = zeros(Int16, (4, 4))
+#    for pathway_id in keys(experimental_results)
+#        for scenario in keys(experimental_results[pathway_id]["samplenodestate"])
+#            for keyoutput in keys(experimental_results[pathway_id]["samplenodestate"][scenario])
+#                  reactome_curator_value = reactome_curator_results[pathway_id]["samplenodestate"][scenario][keyoutput]
+#                  experimental_value = experimental_results[pathway_id]["samplenodestate"][scenario][keyoutput]
+#                  if reactome_curator_value == "0" &&experimental_value == "0"
+#                      confusion_matrix[1,1] = confusion_matrix[1,1] + 1
+#                  elseif reactome_curator_value == "1" && experimental_value == "0"
+#                      confusion_matrix[2,1] = confusion_matrix[2,1] + 1
+#                  elseif reactome_curator_value == "2" && experimental_value == "0"
+#                      confusion_matrix[3,1] = confusion_matrix[3,1] + 1
+#                  elseif reactome_curator_value == "0" && experimental_value == "1"
+#                      confusion_matrix[1,2] = confusion_matrix[1,2] + 1
+#                  elseif reactome_curator_value == "1" && experimental_value == "1"
+#                      confusion_matrix[2,2] = confusion_matrix[2,2] + 1
+#                  elseif reactome_curator_value == "2" && experimental_value == "1"
+#                      confusion_matrix[3,2] = confusion_matrix[3,2] + 1
+#                  elseif reactome_curator_value == "0" && experimental_value == "2"
+#                      confusion_matrix[1,3] = confusion_matrix[1,3] + 1
+#                  elseif reactome_curator_value == "1" && experimental_value == "2"
+#                      confusion_matrix[2,3] = confusion_matrix[2,3] + 1
+#                  elseif reactome_curator_value == "2" && experimental_value == "2"
+#                      confusion_matrix[3,3] = confusion_matrix[3,3] + 1
+#                  end
+#             end
+#         end
+#    end
+#    
+#    addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies, 1, 1, confusion_matrix)
+#    createConfusionMatrixFormatted(confusion_matricies, "Experimental", "Reactome Curator", joinpath(analysis_results_folder, "reactomeCuratorVsExperimentalConfusionMatrix.csv"))
+#
+#    confusion_matrix_weighted = weightConfusionMatrix(confusion_matrix, total_down_reactome_curator, total_normal_reactome_curator, total_up_reactome_curator)
+#    addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies_weighted, 1, 1, confusion_matrix_weighted)
+#    createConfusionMatrixFormatted(confusion_matricies_weighted, "Experimental", "Reactome Curator", joinpath(analysis_results_folder, "reactomeCuratorVsExperimentalConfusionMatrixWeighted.csv"))
+#
+#    ### determine optimal lowerbound cutoff based on weighted average F1 score
+#    confusion_matricies = initializeThreeDimensionalConfusionMatricies()
+#    confusion_matricies_weighted = initializeThreeDimensionalConfusionMatricies()
+#    for lowerbound in range(0.1,1, step=0.01)
+#        for upperbound in range(1.01,10, step=0.01)
+#            confusion_matrix = zeros(UInt16, (3, 3))
+#            for pathway_id in keys(experimental_results)
+#                for scenario in keys(experimental_results[pathway_id]["samplenodestate"])
+#                    for keyoutput in keys(experimental_results[pathway_id]["samplenodestate"][scenario])
+#                        experimental_value = experimental_results[pathway_id]["samplenodestate"][scenario][keyoutput]
+#                        result_value = parse(Float64, mp_biopath_results[pathway_id][scenario][keyoutput])
+#                        if experimental_value == "0"
+#                            column = 1
+#                        elseif experimental_value == "1"
+#                            column = 2
+#                        else
+#                            column = 3
+#                        end
+#                        if result_value < lowerbound
+#                            confusion_matrix[1,column] = confusion_matrix[1,column] + 1
+#                        elseif result_value > upperbound
+#                            confusion_matrix[3,column] = confusion_matrix[3,column] + 1
+#                        else
+#                            confusion_matrix[2,column] = confusion_matrix[2,column] + 1
+#                        end
+#                    end
+#                end
+#            end
+#
+#            addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies, lowerbound, upperbound, confusion_matrix)
+#            confusion_matrix_weighted = weightConfusionMatrix(confusion_matrix, total_down_reactome_curator, total_normal_reactome_curator, total_up_reactome_curator)
+#            addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies_weighted, lowerbound, upperbound, confusion_matrix_weighted)
+#        end
+#    end
+#
+#    CSV.write(joinpath(analysis_results_folder, "experimentalVsMP-BioPathWeightedConfusionMatricies-10-pathways.tsv"), confusion_matricies_weighted, delim = '\t')
+#    CSV.write(joinpath(analysis_results_folder, "experimentalVsMP-BioPathConfusionMatricies-10-pathways.tsv"), confusion_matricies, delim = '\t')
+#
+#    down_confusion_matricies_weighted = @from i in confusion_matricies_weighted begin
+#            @where i.Upperbound == 1.05
+#            @select {i.Lowerbound,
+#                     TP=i.TP_down, FP=i.FP_down, FN=i.FN_down, TN=i.TN_down, P=i.P_down, N=i.N_down, i.Total,
+#                     TPR=i.TPR_down, TNR=i.TNR_down, PPV=i.PPV_down, NPV=i.NPV_down, FNR=i.FNR_down, FPR=i.FPR_down, FDR=i.FDR_down, FOR=i.FOR_down, ACC=i.ACC_down, F1=i.F1_down}
+#            @collect DataFrame
+#       end
+#
+#    sort!(down_confusion_matricies_weighted, (:F1), rev=(true))
+#    lowerbound = down_confusion_matricies_weighted[1,:Lowerbound]
+#    CSV.write(joinpath(analysis_results_folder, "MP-BioPathWeightedVsExperimentalConfusionMatricies-10-pathways-down-cutoff.tsv"), down_confusion_matricies_weighted, delim = '\t')
+#
+#    up_confusion_matricies_weighted = @from i in confusion_matricies_weighted begin
+#            @where i.Lowerbound == 0.95
+#            @select {i.Upperbound,
+#                     TP=i.TP_up, FP=i.FP_up, FN=i.FN_up, TN=i.TN_up, P=i.P_up, N=i.N_up, i.Total,
+#                     TPR=i.TPR_up, TNR=i.TNR_up, PPV=i.PPV_up, NPV=i.NPV_up, FNR=i.FNR_up, FPR=i.FPR_up, FDR=i.FDR_up, FOR=i.FOR_up, ACC=i.ACC_up, F1=i.F1_up}
+#            @collect DataFrame
+#       end
+#    sort!(up_confusion_matricies_weighted, (:F1), rev=(true))
+#    CSV.write(joinpath(analysis_results_folder, "experimentalVsMP-BioPathWeightedConfusionMatricies-10-pathways-up-cutoff.tsv"), up_confusion_matricies_weighted, delim = '\t')
+#    upperbound = up_confusion_matricies_weighted[1,:Upperbound]
 
-    confusion_matrix_weighted = weightConfusionMatrix(confusion_matrix, total_down_expected, total_normal_expected, total_up_expected)
-    addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies_weighted, 1, 1, confusion_matrix_weighted)
-    CSV.write(joinpath(analysis_results_folder, "expectedVsExperimentalConfusionMatrixWeighted.tsv"), confusion_matricies_weighted, delim = '\t')
-
-    ### determine optimal lowerbound cutoff based on weighted average F1 score
-    confusion_matricies = initializeThreeDimensionalConfusionMatricies()
-    confusion_matricies_weighted = initializeThreeDimensionalConfusionMatricies()
-    for lowerbound in range(0,1, step=0.01)
-        for upperbound in range(1,10, step=0.01)
-            confusion_matrix = zeros(UInt16, (3, 3))
-            for pathway_id in keys(experimental_results)
-                for scenario in keys(experimental_results[pathway_id]["samplenodestate"])
-                    for keyoutput in keys(experimental_results[pathway_id]["samplenodestate"][scenario])
-                        experimental_value = experimental_results[pathway_id]["samplenodestate"][scenario][keyoutput]
-                        result_value = parse(Float64, mp_biopath_results[pathway_id][scenario][keyoutput])
-                        if experimental_value == "0"
-                            row = 1
-                        elseif experimental_value == "1"
-                            row = 2
-                        else
-                            row = 3
-                        end
-                        if result_value < lowerbound
-                            confusion_matrix[row,1] = confusion_matrix[row,1] + 1
-                        elseif result_value > upperbound
-                            confusion_matrix[row,3] = confusion_matrix[row,3] + 1
-                        else
-                            confusion_matrix[row,2] = confusion_matrix[row,2] + 1
-                        end
-                    end
-                end
-            end
-
-            addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies, lowerbound, upperbound, confusion_matrix)
-            confusion_matrix_weighted = weightConfusionMatrix(confusion_matrix, total_down_expected, total_normal_expected, total_up_expected)
-            addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies_weighted, lowerbound, upperbound, confusion_matrix_weighted)
-        end
-    end
-
-    CSV.write(joinpath(analysis_results_folder, "experimentalVsPredictedWeightedConfusionMatrix-10-pathways.tsv"), confusion_matricies_weighted, delim = '\t')
-    CSV.write(joinpath(analysis_results_folder, "experimentalVsPredictedConfusionMatrix-10-pathways.tsv"), confusion_matricies, delim = '\t')
-
-    down_confusion_matricies_weighted = @from i in confusion_matricies_weighted begin
-            @where i.Upperbound == 1.05
-            @select {i.Lowerbound,
-                     TP=i.TP_down, FP=i.FP_down, FN=i.FN_down, TN=i.TN_down, P=i.P_down, N=i.N_down, i.Total,
-                     TPR=i.TPR_down, TNR=i.TNR_down, PPV=i.PPV_down, NPV=i.NPV_down, FNR=i.FNR_down, FPR=i.FPR_down, FDR=i.FDR_down, FOR=i.FOR_down, ACC=i.ACC_down, F1=i.F1_down}
-            @collect DataFrame
-       end
-
-    sort!(down_confusion_matricies_weighted, (:F1), rev=(true))
-    lowerbound = down_confusion_matricies_weighted[1,:Lowerbound]
-    CSV.write(joinpath(analysis_results_folder, "experimentalVsPredictedWeightedConfusionMatrix-10-pathways-down-cutoff.tsv"), down_confusion_matricies_weighted, delim = '\t')
-
-    up_confusion_matricies_weighted = @from i in confusion_matricies_weighted begin
-            @where i.Lowerbound == 0.95
-            @select {i.Upperbound,
-                     TP=i.TP_up, FP=i.FP_up, FN=i.FN_up, TN=i.TN_up, P=i.P_up, N=i.N_up, i.Total,
-                     TPR=i.TPR_up, TNR=i.TNR_up, PPV=i.PPV_up, NPV=i.NPV_up, FNR=i.FNR_up, FPR=i.FPR_up, FDR=i.FDR_up, FOR=i.FOR_up, ACC=i.ACC_up, F1=i.F1_up}
-            @collect DataFrame
-       end
-    sort!(up_confusion_matricies_weighted, (:F1), rev=(true))
-    CSV.write(joinpath(analysis_results_folder, "experimentalVsPredictedWeightedConfusionMatrix-10-pathways-up-cutoff.tsv"), up_confusion_matricies_weighted, delim = '\t')
-    upperbound = up_confusion_matricies_weighted[1,:Upperbound]
-
+    lowerbound = 0.92
+    upperbound = 1.03
 
     println("Ideal lowerbound calculated to be: $lowerbound")
     println("Ideal upperbound calculated to be: $upperbound")
 
-    optimal_confusion_matrix_weighted = @from i in confusion_matricies_weighted begin
-            @where i.Lowerbound == lowerbound && i.Upperbound == upperbound
-            @select i
-            @collect DataFrame
-    end
-
+#    optimal_confusion_matrix = @from i in confusion_matricies begin
+#            @where i.Lowerbound == lowerbound && i.Upperbound == upperbound
+#            @select i
+#            @collect DataFrame
+#    end
+#
+#    createConfusionMatrixFormatted(optimal_confusion_matrix,
+#				   "Experimental",
+#				   "MP-BioPath",
+#				   joinpath(analysis_results_folder, "MP-BioPathVsExperimentalConfusionMatrix.csv"))
+#
+#    optimal_confusion_matrix_weighted = @from i in confusion_matricies_weighted begin
+#            @where i.Lowerbound == lowerbound && i.Upperbound == upperbound
+#            @select i
+#            @collect DataFrame
+#    end
+#
+#    createConfusionMatrixFormatted(optimal_confusion_matrix_weighted,
+#				   "Experimental",
+#				   "MP-BioPath Weighted",
+#				   joinpath(analysis_results_folder, "MP-BioPathWeightedVsExperimentalConfusionMatrix.csv"))
+#
     #create based on experimental pathways
     confusion_matricies = initializeThreeDimensionalConfusionMatricies()
     confusion_matrix = zeros(UInt16, (3, 3))
     for pathway_id in keys(experimental_results)
         for scenario in keys(experimental_results[pathway_id]["samplenodestate"])
             for keyoutput in keys(experimental_results[pathway_id]["samplenodestate"][scenario])
-                expected_value = expected_results[pathway_id]["samplenodestate"][scenario][keyoutput]
+                reactome_curator_value = reactome_curator_results[pathway_id]["samplenodestate"][scenario][keyoutput]
                 result_value = parse(Float64, mp_biopath_results[pathway_id][scenario][keyoutput])
-                if expected_value == "0"
-                    row = 1
-                elseif expected_value == "1"
-                    row = 2
+                if reactome_curator_value == "0"
+                    column = 1
+                elseif reactome_curator_value == "1"
+                    column = 2
                 else
-                    row = 3
+                    column = 3
                 end
                 if result_value < lowerbound
-                    confusion_matrix[row,1] = confusion_matrix[row,1] + 1
+                    confusion_matrix[1,column] = confusion_matrix[1,column] + 1
                 elseif result_value > upperbound
-                    confusion_matrix[row,3] = confusion_matrix[row,3] + 1
+                    confusion_matrix[3,column] = confusion_matrix[3,column] + 1
                 else
-                    confusion_matrix[row,2] = confusion_matrix[row,2] + 1
+                    confusion_matrix[2,column] = confusion_matrix[2,column] + 1
                 end
             end
         end
     end
     addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies, lowerbound, upperbound, confusion_matrix)
-    CSV.write(joinpath(analysis_results_folder, "expectedVsPredictedConfusionMatrix-10-pathways.tsv"), confusion_matricies, delim = '\t')
+    CSV.write(joinpath(analysis_results_folder, "reactomeCuratorVsMP-BioPathConfusionMatrix-10-pathways-with-tests-with-experimental-evidence.tsv"), confusion_matricies, delim = '\t')
+    createConfusionMatrixFormatted(confusion_matricies,
+				   "MP-BioPath",
+				   "Reactome Curator",
+				   joinpath(analysis_results_folder, "MP-BioPathVsReactomeCurator-10-pathways-with-tests-with-experimental-evidenceConfusionMatrix.csv"))
+
+    confusion_matricies = initializeThreeDimensionalConfusionMatricies()
+    confusion_matrix = zeros(UInt16, (3, 3))
+    for pathway_id in keys(experimental_results)
+        for scenario in keys(reactome_curator_results[pathway_id]["samplenodestate"])
+            if scenario == "control"
+                continue
+            end
+            for keyoutput in keys(reactome_curator_results[pathway_id]["samplenodestate"][scenario])
+                reactome_curator_value = reactome_curator_results[pathway_id]["samplenodestate"][scenario][keyoutput]
+                result_value = parse(Float64, mp_biopath_results[pathway_id][scenario][keyoutput])
+                if reactome_curator_value == "0"
+                    column = 1
+                elseif reactome_curator_value == "1"
+                    column = 2
+                else
+                    column = 3
+                end
+                if result_value < lowerbound
+                    confusion_matrix[1,column] = confusion_matrix[1,column] + 1
+                elseif result_value > upperbound
+                    confusion_matrix[3,column] = confusion_matrix[3,column] + 1
+                else
+                    confusion_matrix[2,column] = confusion_matrix[2,column] + 1
+                end
+            end
+        end
+    end
+    addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies, lowerbound, upperbound, confusion_matrix)
+    createConfusionMatrixFormatted(confusion_matricies,
+				   "Reactome Curator",
+				   "MP-BioPath",
+				   joinpath(analysis_results_folder, "MP-BioPathVsReactomeCurator-10-pathways-with-all-tests-ConfusionMatrix.csv"))
 
     # create based on all patwhays
     confusion_matricies = initializeThreeDimensionalConfusionMatricies()
     confusion_matrix = zeros(UInt16, (3, 3))
-    for pathway_id in keys(expected_results)
-        for scenario in keys(expected_results[pathway_id]["samplenodestate"])
-            for keyoutput in keys(expected_results[pathway_id]["samplenodestate"][scenario])
-                expected_value = expected_results[pathway_id]["samplenodestate"][scenario][keyoutput]
+    for pathway_id in keys(reactome_curator_results)
+        for scenario in keys(reactome_curator_results[pathway_id]["samplenodestate"])
+            if scenario == "control"
+                continue
+            end
+            for keyoutput in keys(reactome_curator_results[pathway_id]["samplenodestate"][scenario])
+                reactome_curator_value = reactome_curator_results[pathway_id]["samplenodestate"][scenario][keyoutput]
                 result_value = parse(Float64, mp_biopath_results[pathway_id][scenario][keyoutput])
-                if expected_value == "0"
-                    row = 1
-                elseif expected_value == "1"
-                    row = 2
+                if reactome_curator_value == "0"
+                    column = 1
+                elseif reactome_curator_value == "1"
+                    column = 2
                 else
-                    row = 3
+                    column = 3
                 end
                 if result_value < lowerbound
-                    confusion_matrix[row,1] = confusion_matrix[row,1] + 1
+                    confusion_matrix[1,column] = confusion_matrix[1,column] + 1
                 elseif result_value > upperbound
-                    confusion_matrix[row,3] = confusion_matrix[row,3] + 1
+                    confusion_matrix[3,column] = confusion_matrix[3,column] + 1
                 else
-                    confusion_matrix[row,2] = confusion_matrix[row,2] + 1
+                    confusion_matrix[2,column] = confusion_matrix[2,column] + 1
                 end
             end
         end
     end
     addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies, lowerbound, upperbound, confusion_matrix)
-    CSV.write(joinpath(analysis_results_folder, "expectedVsPredictedConfusionMatrix-all-pathways.tsv"), confusion_matricies, delim = '\t')
+    createConfusionMatrixFormatted(confusion_matricies,
+				   "Reactome Curator",
+				   "MP-BioPath",
+				   joinpath(analysis_results_folder, "MP-BioPathVsReactomeCurator-all-pathways-ConfusionMatrix.csv"))
 
-    pathway_tests = CSV.read("/data/MP_BioPathReactomePathwayAccuracy-Tests.tsv", delim="\t",copycols=true)
+    pathway_tests[:computed_distance] = -1
     for pathway_id in keys(experimental_results)
-        for scenario in keys(expected_results[pathway_id]["samplenodestate"])
-            for keyoutput in keys(expected_results[pathway_id]["samplenodestate"][scenario])
-                #expected_value = expected_results[pathway_id]["samplenodestate"][scenario][keyoutput]
+        for scenario in keys(reactome_curator_results[pathway_id]["samplenodestate"])
+            for keyoutput in keys(reactome_curator_results[pathway_id]["samplenodestate"][scenario])
                 result_value = parse(Float64, mp_biopath_results[pathway_id][scenario][keyoutput])
-                result_state = "normal"
+                result_state = 1
                 if result_value < lowerbound
-                    result_state = "down"
+                    result_state = 0
                 elseif result_value > upperbound
-                    result_state = "up"
+                    result_state = 2
                 end
+                input_name = scenario[1:end-2]
                 pathway_tests[((pathway_tests[:scenario] .== scenario) .& (pathway_tests[:keyoutput_id] .== parse(Int64, keyoutput)) .& (pathway_tests[:pathway_id] .== parse(Int64, pathway_id))),:mp_biopath_state] = result_state
                 pathway_tests[((pathway_tests[:scenario] .== scenario) .& (pathway_tests[:keyoutput_id] .== parse(Int64, keyoutput)) .& (pathway_tests[:pathway_id] .== parse(Int64, pathway_id))),:mp_biopath_value] = result_value
+                distance_rows = @from i in input_to_output_distance begin
+                                    @where i.pathway_id == pathway_id && i.input_name == input_name && i.keyoutput_id == keyoutput
+                                    @select i
+                                    @collect DataFrame
+                                end
+                distances = []
+                for x = 1:length(distance_rows[:,1])
+                    distance = distance_rows[x,:distance]
+                    if distance != "NA"
+                        push!(distances, parse(Int64, distance))
+                    end
+                end
+                if length(distances) == 0
+                   distance = -1
+                else
+                   distance = mean(distances)
+                end
+                pathway_tests[((pathway_tests[:scenario] .== scenario) .& (pathway_tests[:keyoutput_id] .== parse(Int64, keyoutput)) .& (pathway_tests[:pathway_id] .== parse(Int64, pathway_id))),:computed_distance] = distance
             end
         end
     end
     CSV.write(joinpath(analysis_results_folder, "MP_BioPathReactomePathwayAccuracy-Tests-updated.tsv"), pathway_tests, delim = '\t')
+
+    #Create tables for pathway_distance 
+    ## MP-Biopath vs Experimental
+    ## Reactome Curator vs Experimental
+    expected_vs_actual_distances = DataFrame(expected_state = Int64[],
+                                             actual_state = String[],
+                                             count_with_path_mp_biopath = Int64[],
+                                             count_no_path_mp_biopath = Int64[],
+                                             mean_distance_mp_biopath = Float64[],
+                                             variance_distance_mp_biopath = Float64[],
+                                             count_with_path_reactome_curator = Int64[],
+                                             count_no_path_reactome_curator = Int64[],
+                                             mean_distance_reactome_curator = Float64[],
+                                             variance_distance_reactome_curator = Float64[])
+    for actual_state in ["0","1", "2", "NA"]
+        for expected_state in [0, 1, 2] #&& i.experimental_value == actual && i.distance == "NA"
+            reactome_curator_no_path = @from i in pathway_tests begin
+                                           @where i.expected_value == expected_state && i.experimental_value == actual_state && i.computed_distance == -1
+                                           @select i
+                                           @collect DataFrame
+                                       end
+            count_no_path_reactome_curator = length(reactome_curator_no_path[:,1])
+            reactome_curator_with_path = @from i in pathway_tests begin
+                                             @where i.expected_value == expected_state && i.experimental_value == actual_state && i.computed_distance != -1
+                                             @select i
+                                             @collect DataFrame
+                                         end
+            count_with_path_reactome_curator = length(reactome_curator_with_path[:,1])
+            mean_distance_reactome_curator = mean(reactome_curator_with_path[:computed_distance])
+            variance_distance_reactome_curator = var(reactome_curator_with_path[:computed_distance])
+
+            mp_biopath_no_path = @from i in pathway_tests begin
+                                           @where i.mp_biopath_state == expected_state && i.experimental_value == actual_state && i.computed_distance == -1
+                                           @select i
+                                           @collect DataFrame
+                                       end
+            count_no_path_mp_biopath = length(mp_biopath_no_path[:,1])
+            mp_biopath_with_path = @from i in pathway_tests begin
+                                             @where i.mp_biopath_state == expected_state && i.experimental_value == actual_state && i.computed_distance != -1
+                                             @select i
+                                             @collect DataFrame
+                                         end
+            count_with_path_mp_biopath = length(mp_biopath_with_path[:,1])
+            mean_distance_mp_biopath = mean(mp_biopath_with_path[:computed_distance])
+            variance_distance_mp_biopath = var(mp_biopath_with_path[:computed_distance])
+            push!(expected_vs_actual_distances, [expected_state,
+			 		         actual_state,
+						 count_with_path_mp_biopath,
+						 count_no_path_mp_biopath,
+						 mean_distance_mp_biopath,
+						 variance_distance_mp_biopath,
+						 count_with_path_reactome_curator,
+						 count_no_path_reactome_curator,
+						 mean_distance_reactome_curator,
+						 variance_distance_reactome_curator])
+        end
+    end
+    CSV.write(joinpath(analysis_results_folder, "expected_vs_actual_distances.tsv"), expected_vs_actual_distances, delim = '\t')
 end
 
 end

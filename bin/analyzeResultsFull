@@ -5,7 +5,7 @@ using ArgParse
 include("../src/analyzeResultsFull.jl")
 
 function parse_commandline()
-    s = ArgParseSettings("This interface is for analyzing the results files produced by running inference with respect to a expected results file.",
+    s = ArgParseSettings("This interface is for analyzing the results files produced by running inference with respect to a Reactome curator results file.",
                          version = "1.0",
                          add_version = true)
 
@@ -16,8 +16,8 @@ function parse_commandline()
         "--results-folder"
             help = "This the location of the results from MP-BioPath analysis"
             required = true
-        "--expected-results-folder"
-            help = "Folder containing all the expected results based on Reactome pathways"
+        "--reactome-curator-results-folder"
+            help = "Folder containing all the results based on Reactome pathways by curators"
             required = true
         "--pathway-list-file"
             help = "File conataining mapping of pathaway file name to Reactome pathway ID"
@@ -51,7 +51,7 @@ function main()
     end
 
     AnalyzeResultsFull.analyzeResultsFull(parsed_args["results-folder"],
-                             parsed_args["expected-results-folder"],
+                             parsed_args["reactome-curator-results-folder"],
                              parsed_args["pathway-list-file"],
                              parsed_args["pathways-folder"],
                              parsed_args["db-id-name-mapping-file"],
