@@ -15,3 +15,5 @@ Pkg.add("DocOpt")
 Pkg.add("DataFrames")
 Pkg.add("Query")
 Pkg.add("CSVFiles")
+
+Pkg.add("HypothesisTests")

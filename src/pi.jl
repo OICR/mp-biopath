@@ -134,4 +134,45 @@ function readFile(fname)
     return nodes
 end
 
+function get_nodes(pi_network)
+    nodes = Set{String}()
+    for node in keys(pi_network)
+        if !occursin("PSEUDONODE", node)
+            push!(nodes, node)
+        end
+    end
+    return nodes
+end
+
+function get_num_edges(pi_network)
+    number_of_edges = 0
+    for node in keys(pi_network)
+        node_obj = pi_network[node]
+        node_type = typeof(node_obj)
+        for field in fieldnames(node_type)
+           if field == :parents
+               for node in node_obj.parents
+                   if !occursin("PSEUDONODE", node)
+                       number_of_edges += 1
+                   end                   
+               end
+           end
+           if field == :posParents
+               for node in node_obj.posParents
+                   if !occursin("PSEUDONODE", node)
+                       number_of_edges += 1
+                   end                   
+               end
+           end
+           if field == :negParents
+               for node in node_obj.negParents
+                   if !occursin("PSEUDONODE", node)
+                       number_of_edges += 1
+                   end                   
+               end
+           end
+        end
+    end
+    return number_of_edges
+end
 end
