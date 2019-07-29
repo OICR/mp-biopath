@@ -102,23 +102,23 @@ function addThreeDimensionalConfusionMatrixToDataFrame(df, Lowerbound, Upperboun
    ACC_down = get_ACC(TP_down, TN_down, Total)
    F1_down = get_F1(TPR_down, PPV_down)
 
-   TP_normal = confusion_matrix[2,2]
-   FP_normal = confusion_matrix[2,1] + confusion_matrix[2,3]
-   FN_normal = confusion_matrix[1,2] + confusion_matrix[3,2]
-   TN_normal = confusion_matrix[1,1] + confusion_matrix[1,3] + confusion_matrix[3,1] + confusion_matrix[3,3]
-   P_normal = TP_normal + FN_normal
-   N_normal = TN_normal + FP_normal
+   TP_no_change = confusion_matrix[2,2]
+   FP_no_change = confusion_matrix[2,1] + confusion_matrix[2,3]
+   FN_no_change = confusion_matrix[1,2] + confusion_matrix[3,2]
+   TN_no_change = confusion_matrix[1,1] + confusion_matrix[1,3] + confusion_matrix[3,1] + confusion_matrix[3,3]
+   P_no_change = TP_no_change + FN_no_change
+   N_no_change = TN_no_change + FP_no_change
 
-   TPR_normal = get_TPR(TP_normal, P_normal)
-   TNR_normal = get_TNR(TN_normal, N_normal)
-   PPV_normal = get_PPV(TP_normal, FP_normal)
-   NPV_normal = get_NPV(TN_normal, FN_normal)
-   FNR_normal = get_FNR(TP_normal, P_normal)
-   FPR_normal = get_FNR(TN_normal, N_normal)
-   FDR_normal = get_FDR(TP_normal, FP_normal)
-   FOR_normal = get_FOR(TN_normal, FN_normal)
-   ACC_normal = get_ACC(TP_normal, TN_normal, Total)
-   F1_normal = get_F1(TPR_normal, PPV_normal)
+   TPR_no_change = get_TPR(TP_no_change, P_no_change)
+   TNR_no_change = get_TNR(TN_no_change, N_no_change)
+   PPV_no_change = get_PPV(TP_no_change, FP_no_change)
+   NPV_no_change = get_NPV(TN_no_change, FN_no_change)
+   FNR_no_change = get_FNR(TP_no_change, P_no_change)
+   FPR_no_change = get_FNR(TN_no_change, N_no_change)
+   FDR_no_change = get_FDR(TP_no_change, FP_no_change)
+   FOR_no_change = get_FOR(TN_no_change, FN_no_change)
+   ACC_no_change = get_ACC(TP_no_change, TN_no_change, Total)
+   F1_no_change = get_F1(TPR_no_change, PPV_no_change)
 
    TP_up = confusion_matrix[3,3]
    FP_up = confusion_matrix[3,1] + confusion_matrix[3,2]
@@ -139,8 +139,8 @@ function addThreeDimensionalConfusionMatrixToDataFrame(df, Lowerbound, Upperboun
    F1_up = get_F1(TPR_up, PPV_up)
 
    overall_ACC = (confusion_matrix[1,1] + confusion_matrix[2,2] + confusion_matrix[3,3]) / Total
-   average_F1 = (F1_down + F1_normal + F1_up) / 3
-   weighted_F1 = (F1_down * P_down + F1_normal * P_normal + F1_up * P_up) / Total
+   average_F1 = (F1_down + F1_no_change + F1_up) / 3
+   weighted_F1 = (F1_down * P_down + F1_no_change * P_no_change + F1_up * P_up) / Total
 
    # using even distribution for instead of null error rate as the dominant class varys greatly depending on what we are looking at.
    expected_accuracy =  1/3
@@ -150,10 +150,10 @@ function addThreeDimensionalConfusionMatrixToDataFrame(df, Lowerbound, Upperboun
           confusion_matrix[2,1], confusion_matrix[2,2], confusion_matrix[2,3],
           confusion_matrix[3,1], confusion_matrix[3,2], confusion_matrix[3,3],
           TP_down, FP_down, FN_down, TN_down, P_down, N_down, Total,
-          TP_normal, FP_normal, FN_normal, TN_normal, P_normal, N_normal,
+          TP_no_change, FP_no_change, FN_no_change, TN_no_change, P_no_change, N_no_change,
           TP_up, FP_up, FN_up, TN_up, P_up, N_up,
           TPR_down, TNR_down, PPV_down, NPV_down, FNR_down, FPR_down, FDR_down, FOR_down, ACC_down, F1_down,
-          TPR_normal, TNR_normal, PPV_normal, NPV_normal, FNR_normal, FPR_normal, FDR_normal, FOR_normal, ACC_normal, F1_normal,
+          TPR_no_change, TNR_no_change, PPV_no_change, NPV_no_change, FNR_no_change, FPR_no_change, FDR_no_change, FOR_no_change, ACC_no_change, F1_no_change,
           TPR_up, TNR_up, PPV_up, NPV_up, FNR_up, FPR_up, FDR_up, FOR_up, ACC_up, F1_up,
 	  overall_ACC,
           average_F1, weighted_F1,
@@ -167,13 +167,13 @@ function initializeThreeDimensionalConfusionMatricies()
    return DataFrame(Lowerbound = Float64[],
                     Upperbound = Float64[],
 		    PredictedDownActualDown = Int16[],
-		    PredictedDownActualNormal = Int16[],
+		    PredictedDownActualNoChange = Int16[],
 		    PredictedDownActualUp = Int16[],
-		    PredictedNormalActualDown = Int16[],
-		    PredictedNormalActualNormal = Int16[],
-		    PredictedNormalActualUp = Int16[],
+		    PredictedNoChangeActualDown = Int16[],
+		    PredictedNoChangeActualNoChange = Int16[],
+		    PredictedNoChangeActualUp = Int16[],
 		    PredictedUpActualDown = Int16[],
-		    PredictedUpActualNormal = Int16[],
+		    PredictedUpActualNoChange = Int16[],
 		    PredictedUpActualUp = Int16[],
                     TP_down = Int16[],
                     FP_down = Int16[],
@@ -182,12 +182,12 @@ function initializeThreeDimensionalConfusionMatricies()
                     P_down = Int16[],
                     N_down = Int16[],
                     Total = Int16[],
-                    TP_normal = Int16[],
-                    FP_normal = Int16[],
-                    FN_normal = Int16[],
-                    TN_normal = Int16[],
-                    P_normal = Int16[],
-                    N_normal = Int16[],
+                    TP_no_change = Int16[],
+                    FP_no_change = Int16[],
+                    FN_no_change = Int16[],
+                    TN_no_change = Int16[],
+                    P_no_change = Int16[],
+                    N_no_change = Int16[],
                     TP_up = Int16[],
                     FP_up = Int16[],
                     FN_up = Int16[],
@@ -204,16 +204,16 @@ function initializeThreeDimensionalConfusionMatricies()
                     FOR_down = Float64[],
                     ACC_down = Float64[],
                     F1_down = Float64[],
-                    TPR_normal = Float64[],
-                    TNR_normal = Float64[],
-                    PPV_normal = Float64[],
-                    NPV_normal = Float64[],
-                    FNR_normal = Float64[],
-                    FPR_normal = Float64[],
-                    FDR_normal = Float64[],
-                    FOR_normal = Float64[],
-                    ACC_normal = Float64[],
-                    F1_normal = Float64[],
+                    TPR_no_change = Float64[],
+                    TNR_no_change = Float64[],
+                    PPV_no_change = Float64[],
+                    NPV_no_change = Float64[],
+                    FNR_no_change = Float64[],
+                    FPR_no_change = Float64[],
+                    FDR_no_change = Float64[],
+                    FOR_no_change = Float64[],
+                    ACC_no_change = Float64[],
+                    F1_no_change = Float64[],
                     TPR_up = Float64[],
                     TNR_up = Float64[],
                     PPV_up = Float64[],
@@ -231,18 +231,18 @@ function initializeThreeDimensionalConfusionMatricies()
 end
 
 
-function weightConfusionMatrix(confusion_matrix, total_down_reactome_curator, total_normal_reactome_curator, total_up_reactome_curator)
+function weightConfusionMatrix(confusion_matrix, total_down_reactome_curator, total_no_change_reactome_curator, total_up_reactome_curator)
     total_down = confusion_matrix[1,1] + confusion_matrix[1,2] + confusion_matrix[1,3]
-    total_normal = confusion_matrix[2,1] + confusion_matrix[2,2] + confusion_matrix[2,3]
+    total_no_change = confusion_matrix[2,1] + confusion_matrix[2,2] + confusion_matrix[2,3]
     total_up = confusion_matrix[3,1] + confusion_matrix[3,2] + confusion_matrix[3,3]
 
     confusion_matrix_weighted = zeros(Float32, (4, 4))
     confusion_matrix_weighted[1,1] = floor(Int, confusion_matrix[1,1] / total_down * total_down_reactome_curator)
     confusion_matrix_weighted[1,2] = floor(Int, confusion_matrix[1,2] / total_down * total_down_reactome_curator)
     confusion_matrix_weighted[1,3] = floor(Int, confusion_matrix[1,3] / total_down * total_down_reactome_curator)
-    confusion_matrix_weighted[2,1] = floor(Int, confusion_matrix[2,1] / total_normal * total_normal_reactome_curator)
-    confusion_matrix_weighted[2,2] = floor(Int, confusion_matrix[2,2] / total_normal * total_normal_reactome_curator)
-    confusion_matrix_weighted[2,3] = floor(Int, confusion_matrix[2,3] / total_normal * total_normal_reactome_curator)
+    confusion_matrix_weighted[2,1] = floor(Int, confusion_matrix[2,1] / total_no_change * total_no_change_reactome_curator)
+    confusion_matrix_weighted[2,2] = floor(Int, confusion_matrix[2,2] / total_no_change * total_no_change_reactome_curator)
+    confusion_matrix_weighted[2,3] = floor(Int, confusion_matrix[2,3] / total_no_change * total_no_change_reactome_curator)
     confusion_matrix_weighted[3,1] = floor(Int, confusion_matrix[3,1] / total_up * total_up_reactome_curator)
     confusion_matrix_weighted[3,2] = floor(Int, confusion_matrix[3,2] / total_up * total_up_reactome_curator)
     confusion_matrix_weighted[3,3] = floor(Int, confusion_matrix[3,3] / total_up * total_up_reactome_curator)
@@ -251,28 +251,28 @@ end
 
 
 function createConfusionMatrixFormatted(cm, actual_class, predicted_class, filepath)
-    predicted_down_total = cm[!, :PredictedDownActualDown] + cm[!, :PredictedDownActualNormal] + cm[!, :PredictedDownActualUp] 
-    predicted_normal_total = cm[!, :PredictedNormalActualDown] + cm[!, :PredictedNormalActualNormal] + cm[!, :PredictedNormalActualUp] 
-    predicted_up_total = cm[!, :PredictedUpActualDown] + cm[!, :PredictedUpActualNormal] + cm[!, :PredictedUpActualUp] 
-    actual_down_total = cm[!, :PredictedDownActualDown] + cm[!, :PredictedNormalActualDown] + cm[!, :PredictedUpActualDown] 
-    actual_normal_total = cm[!, :PredictedDownActualNormal] + cm[!, :PredictedNormalActualNormal] + cm[!, :PredictedUpActualNormal] 
-    actual_up_total = cm[!, :PredictedDownActualUp] + cm[!, :PredictedNormalActualUp] + cm[!, :PredictedUpActualUp] 
+    predicted_down_total = cm[!, :PredictedDownActualDown] + cm[!, :PredictedDownActualNoChange] + cm[!, :PredictedDownActualUp] 
+    predicted_no_change_total = cm[!, :PredictedNoChangeActualDown] + cm[!, :PredictedNoChangeActualNoChange] + cm[!, :PredictedNoChangeActualUp] 
+    predicted_up_total = cm[!, :PredictedUpActualDown] + cm[!, :PredictedUpActualNoChange] + cm[!, :PredictedUpActualUp] 
+    actual_down_total = cm[!, :PredictedDownActualDown] + cm[!, :PredictedNoChangeActualDown] + cm[!, :PredictedUpActualDown] 
+    actual_no_change_total = cm[!, :PredictedDownActualNoChange] + cm[!, :PredictedNoChangeActualNoChange] + cm[!, :PredictedUpActualNoChange] 
+    actual_up_total = cm[!, :PredictedDownActualUp] + cm[!, :PredictedNoChangeActualUp] + cm[!, :PredictedUpActualUp] 
     title =  string(predicted_class, " vs ", actual_class)
     A = [title "" "" "" "" actual_class "" "";
-         "" "" "Down" "Normal" "Up" "Total" "PPV" "F1";
-         "" "Down" cm[!, :PredictedDownActualDown] cm[!, :PredictedDownActualNormal] cm[!, :PredictedDownActualUp]  predicted_down_total cm[!, :PPV_down] cm[!, :F1_down];
-         predicted_class "Normal" cm[!, :PredictedNormalActualDown] cm[!, :PredictedNormalActualNormal] cm[!, :PredictedNormalActualUp]  predicted_normal_total cm[!, :PPV_normal] cm[!, :F1_normal];
-         "predicted_class" "Up" cm[!, :PredictedUpActualDown] cm[!, :PredictedUpActualNormal] cm[!, :PredictedUpActualUp] predicted_up_total cm[!, :PPV_up] cm[!, :F1_up];
-         "" "Total" actual_down_total actual_normal_total actual_up_total cm[!, :Total] "" "";
-         "" "TPR" cm[!, :TPR_down] cm[!, :TPR_normal] cm[!, :TPR_up] "" cm[!, :Overall_ACC] cm[!, :average_F1];
+         "" "" "Down" "No Change" "Up" "Total" "PPV" "F1";
+         "" "Down" cm[!, :PredictedDownActualDown] cm[!, :PredictedDownActualNoChange] cm[!, :PredictedDownActualUp]  predicted_down_total cm[!, :PPV_down] cm[!, :F1_down];
+         predicted_class "No Change" cm[!, :PredictedNoChangeActualDown] cm[!, :PredictedNoChangeActualNoChange] cm[!, :PredictedNoChangeActualUp]  predicted_no_change_total cm[!, :PPV_no_change] cm[!, :F1_no_change];
+         "predicted_class" "Up" cm[!, :PredictedUpActualDown] cm[!, :PredictedUpActualNoChange] cm[!, :PredictedUpActualUp] predicted_up_total cm[!, :PPV_up] cm[!, :F1_up];
+         "" "Total" actual_down_total actual_no_change_total actual_up_total cm[!, :Total] "" "";
+         "" "TPR" cm[!, :TPR_down] cm[!, :TPR_no_change] cm[!, :TPR_up] "" cm[!, :Overall_ACC] cm[!, :average_F1];
          "Cohen's Kappa" cm[!, :cohen_kappa] "" "" "" "" "" "";
          "Predicted Down" "" "Positive" "Negative" "ACC" "" "" "";
          "" "Positive" cm[!, :TP_down] cm[!, :FP_down] cm[!, :ACC_down] "" "" "";
          "" "Negative" cm[!, :FN_down] cm[!, :TN_down] "" "" "" "";
          "" "" "" "" "" "" "" "";
-         "Predicted Normal" "" "Positive" "Negative" "ACC" "" "" "";
-         "" "Positive" cm[!, :TP_normal] cm[!, :FP_normal] cm[!, :ACC_normal] "" "" "";
-         "" "Negative" cm[!, :FN_normal] cm[!, :TN_normal] "" "" "" "";
+         "Predicted NoChange" "" "Positive" "Negative" "ACC" "" "" "";
+         "" "Positive" cm[!, :TP_no_change] cm[!, :FP_no_change] cm[!, :ACC_no_change] "" "" "";
+         "" "Negative" cm[!, :FN_no_change] cm[!, :TN_no_change] "" "" "" "";
          "" "" "" "" "" "" "" "";
          "Predicted Up" "" "Positive" "Negative" "ACC" "" "" "";
          "" "Positive" cm[!, :TP_up] cm[!, :FP_up] cm[!, :ACC_up] "" "" "";
@@ -280,7 +280,7 @@ function createConfusionMatrixFormatted(cm, actual_class, predicted_class, filep
          "" "" "" "" "" "" "" "";
          "" "TP" "TN" "FP" "FN" "Total" "ACC" "";
          "Up"  cm[!, :TP_up] cm[!, :TN_up] cm[!, :FP_up] cm[!, :FN_up] cm[!, :Total] cm[!, :ACC_up] "";
-         "Normal"  cm[!, :TP_normal] cm[!, :TN_normal] cm[!, :FP_normal] cm[!, :FN_normal] cm[!, :Total] cm[!, :ACC_normal] "";
+         "NoChange"  cm[!, :TP_no_change] cm[!, :TN_no_change] cm[!, :FP_no_change] cm[!, :FN_no_change] cm[!, :Total] cm[!, :ACC_no_change] "";
          "Down" cm[!, :TP_down] cm[!, :TN_down] cm[!, :FP_down] cm[!, :FN_down] cm[!, :Total] cm[!, :ACC_down] ""]
 
     CSV.write(filepath,  DataFrame(A), writeheader=false)
@@ -562,7 +562,7 @@ function analyzeResultsFull(results_folder, reactome_curator_results_folder, pat
     mp_biopath_results = getMpBioPathResults(results_folder, pathway_name_to_id_map)
 
     total_down_reactome_curator = 0
-    total_normal_reactome_curator = 0
+    total_no_change_reactome_curator = 0
     total_up_reactome_curator = 0
     for pathway_id in keys(reactome_curator_results)
         for scenario in keys(reactome_curator_results[pathway_id]["samplenodestate"])
@@ -574,7 +574,7 @@ function analyzeResultsFull(results_folder, reactome_curator_results_folder, pat
                 if value == "0" 
                     total_down_reactome_curator += 1
                 elseif value == "1"
-                    total_normal_reactome_curator += 1
+                    total_no_change_reactome_curator += 1
                 elseif value == "2"
                     total_up_reactome_curator += 1
                 else
@@ -586,7 +586,7 @@ function analyzeResultsFull(results_folder, reactome_curator_results_folder, pat
         end
     end
 
-    total_tests = total_down_reactome_curator + total_normal_reactome_curator + total_up_reactome_curator
+    total_tests = total_down_reactome_curator + total_no_change_reactome_curator + total_up_reactome_curator
     confusion_matricies = initializeThreeDimensionalConfusionMatricies()
     confusion_matricies_weighted = initializeThreeDimensionalConfusionMatricies()
     confusion_matrix = zeros(Int16, (4, 4))
@@ -637,7 +637,7 @@ function analyzeResultsFull(results_folder, reactome_curator_results_folder, pat
     addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies, 1, 1, confusion_matrix)
     createConfusionMatrixFormatted(confusion_matricies, "Experimental", "Reactome Curator", joinpath(analysis_results_folder, "reactomeCuratorVsExperimentalConfusionMatrix.csv"))
 
-    confusion_matrix_weighted = weightConfusionMatrix(confusion_matrix, total_down_reactome_curator, total_normal_reactome_curator, total_up_reactome_curator)
+    confusion_matrix_weighted = weightConfusionMatrix(confusion_matrix, total_down_reactome_curator, total_no_change_reactome_curator, total_up_reactome_curator)
     addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies_weighted, 1, 1, confusion_matrix_weighted)
     createConfusionMatrixFormatted(confusion_matricies_weighted, "Experimental", "Reactome Curator", joinpath(analysis_results_folder, "reactomeCuratorVsExperimentalConfusionMatrixWeighted.csv"))
 
@@ -671,7 +671,7 @@ function analyzeResultsFull(results_folder, reactome_curator_results_folder, pat
             end
 
             addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies, lowerbound, upperbound, confusion_matrix)
-            confusion_matrix_weighted = weightConfusionMatrix(confusion_matrix, total_down_reactome_curator, total_normal_reactome_curator, total_up_reactome_curator)
+            confusion_matrix_weighted = weightConfusionMatrix(confusion_matrix, total_down_reactome_curator, total_no_change_reactome_curator, total_up_reactome_curator)
             addThreeDimensionalConfusionMatrixToDataFrame(confusion_matricies_weighted, lowerbound, upperbound, confusion_matrix_weighted)
         end
     end
