@@ -60,10 +60,7 @@ pathways:
 #
 # #############################################################################
 
-evidence:
-  dna:
-    genomic: 
-      tests/files/evidence/posLoop.tsv
+evidence: tests/files/evidence/posLoop.tsv
 
 # #############################################################################
 #

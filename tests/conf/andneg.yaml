@@ -60,10 +60,7 @@ pathways:
 #
 # #############################################################################
 
-evidence:
-  dna:
-    genomic: 
-      tests/files/evidence/andneg.tsv
+evidence: tests/files/evidence/andneg.tsv
 
 # #############################################################################
 #

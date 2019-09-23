@@ -60,10 +60,7 @@ pathways:
 #
 # #############################################################################
 
-evidence:
-  dna:
-    genomic: 
-      tests/files/evidence/negLoop.tsv
+evidence: tests/files/evidence/negLoop.tsv
 
 # #############################################################################
 #
