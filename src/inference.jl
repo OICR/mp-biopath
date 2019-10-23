@@ -51,9 +51,9 @@ function run(configFile, config, verbose)
 
     runID = haskey(config, "id") ? config["id"] : Base.Random.uuid4()
     println("runID: $runID")
-
-    if haskey(config, "outputs")
-        resultsConfig = config["outputs"]
+      
+    if haskey(config, "results")
+        resultsConfig = config["results"]
         if haskey(resultsConfig, "directory")
              dir = resultsConfig["directory"]
              resultsDir = endswith(dir, "/") ? "$dir$runID" : "$dir/$runID"
@@ -62,7 +62,7 @@ function run(configFile, config, verbose)
             error("Need to specify directory in results section of config")
         end
     else
-        error("Results section in config required")
+        error("Result section in config required")
     end
 
     mkpath(resultsDir)
@@ -140,7 +140,7 @@ function runPathway(file, expression, IDMap, evidence, tissue, pathwayDir, verbo
         end
 
         nodeState = evidence[sample]
-        println(nodeState)
+
         if haskey(basePathwayTissueResults, tissueType) == false
             controlNodeState = Dict()
             for (k, v) in nodeState
@@ -148,7 +148,6 @@ function runPathway(file, expression, IDMap, evidence, tissue, pathwayDir, verbo
                   controlNodeState[k] = v
                end
             end
-            println(controlNodeState)
             (basePathwayResults, x, x_bar) = NLmodel.runModel(pinodes,
                                                               controlNodeState,
                                                               expressionMap,

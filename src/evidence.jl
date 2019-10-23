@@ -7,6 +7,7 @@ using CSV
 function getEvidence(evidence, idMapping, runDir)
     evidenceMapFile = "$runDir/evidenceIDMapping.tsv"
     sampleNodeValue = Dict()
+
     genomicEvidence = getGenomic(evidence, idMapping)
     sampleNodeValue = genomicEvidence["sampleNodeValue"]
     outputToEvidenceMap("genomic", evidenceMapFile, genomicEvidence["geneNodesMap"])
