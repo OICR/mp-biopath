@@ -1,4 +1,3 @@
-[![Build Status](https://travis-ci.org/OICR/mp-biopath.svg?branch=develop)](https://travis-ci.org/OICR/mp-biopath)
 
 ![logo](/mp-biopath-logo.png?raw=true)
 
