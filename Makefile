@@ -1,4 +1,4 @@
-DATA_DIR=../PathwayAnalysis
+DATA_DIR=../mp-biopath-pathways
 MP_BIOPATH_RELEASE="1.0.4"
 
 .PHONY: build-env

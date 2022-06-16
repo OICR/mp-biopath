@@ -6,7 +6,6 @@ Pkg.add("ArgParse")
 Pkg.add("Nullables")
 
 Pkg.add("Ipopt")
-#Pkg.add("Requests")
 Pkg.add("CSV")
 Pkg.add("YAML")
 Pkg.add("JSON")
@@ -17,3 +16,4 @@ Pkg.add("Query")
 Pkg.add("CSVFiles")
 
 Pkg.add("HypothesisTests")
+Pkg.add("https://github.com/virtualgraham/Neo4jBolt.jl")

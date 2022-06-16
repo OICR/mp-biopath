@@ -29,45 +29,54 @@ end
 function readFile(fname)
     df = CSV.read(fname,
                   delim="\t",
-                  header=["parentName", "childName", "posneg", "andor"],
+		  header=["parent_id",
+			  "parent_reactome_id",
+			  "parent_name",
+			  "parent_type",
+			  "child_id",
+			  "child_reactome_id",
+			  "child_name",
+			  "child_type",
+			  "polarity",
+			  "type"]
                   types=[String, String, Int, Int])
 
     PIs = Dict{AbstractString,Any}()
 
     for row in eachrow(df)
-        posnegbool = row[:posneg] == 1 ? true : false
-        andBool = row[:andor] == 0 ? true : false
-        if haskey(PIs, row[:childName])
+        posnegbool = row[:polarity] == "POS" ? true : false
+        andBool = row[:type] == "AND" ? true : false
+        if haskey(PIs, row[:child_id])
             if posnegbool
                 parents = andBool ?
-                             PIs[row[:childName]].andPosParents :
-                             PIs[row[:childName]].orPosParents
+                             PIs[row[:child_id]].andPosParents :
+                             PIs[row[:child_id]].orPosParents
             else
                 parents = andBool ?
-                             PIs[row[:childName]].andNegParents :
-                             PIs[row[:childName]].orNegParents
+                             PIs[row[:child_id]].andNegParents :
+                             PIs[row[:child_id]].orNegParents
             end
-            push!(parents, row[:parentName])
+            push!(parents, row[:parent_id])
         else
             posParents = AbstractString[]
             negParents = AbstractString[]
             if posnegbool
-                push!(posParents, row[:parentName])
+                push!(posParents, row[:parent_id])
             else
-                push!(negParents, row[:parentName])
+                push!(negParents, row[:parent_id])
             end
 
             node = PIparents(andBool ? posParents : AbstractString[],
                              andBool ? negParents : AbstractString[],
                              andBool ? AbstractString[] : posParents,
                              andBool ? AbstractString[] : negParents)
-            PIs[row[:childName]] = node
+            PIs[row[:child_id]] = node
         end
     end
 
     for row in eachrow(df)
-        if !haskey(PIs, row[:parentName])
-            PIs[row[:parentName]] = PIparents(AbstractString[],AbstractString[],AbstractString[],AbstractString[])
+        if !haskey(PIs, row[:parent_id])
+            PIs[row[:parent_id]] = PIparents(AbstractString[],AbstractString[],AbstractString[],AbstractString[])
         end
     end
 

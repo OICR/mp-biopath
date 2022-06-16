@@ -29,7 +29,7 @@ function parse_commandline()
             help = "File containing map of IDs to Reactome IDs"
             required = true
         "--analysis-results-folder"
-            help = "Folder where all productions from analysis will be stored"
+            help = "Folder where all products from analysis will be stored"
             required = true
         "--experimental-results-folder"
             help = "Folder containing expected results"
