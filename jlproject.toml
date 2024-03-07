@@ -1,0 +1,11 @@
+[deps]
+ArgParse = "0.6"
+CSV = "0.5"
+DataFrames = "0.18"
+DocOpt = "0.4"
+Ipopt = "0.5"
+JSON = "0.20"
+JuMP = "0.19"
+Nullables = "0.0"
+YAML = "0.3"
+
