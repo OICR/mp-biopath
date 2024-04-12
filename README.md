@@ -2,7 +2,7 @@
 
 # Description
 
-A command line tool for modelling the effects of perterbations on biological pathways.
+A command line tool for modelling the effects of perturbations on biological pathways.
 
 For a full user guide please refer to the following [document](https://oicr.gitbooks.io/mp-biopath-documentation/content/)
 
