@@ -2,11 +2,11 @@ using Test
 
 @testset "Interaction Types" begin
 
-    tests = ["and", "andneg", "or"]
+    tests = ["and", "andneg", "or", "noPosLoop", "posLoop", "negLoop"]
 
     for (index, value) in enumerate(tests)
         a=read(`julia bin/mp-biopath inference --config=./tests/conf/$value.yaml -v`)
-        std_out = String(read(`diff ./tests/files/expected_results/$value.tsv ./tests/files/results/testset/pathways/$value/results.tsv`))
+        std_out = String(read(`diff ./tests/files/expected_results/$value.tsv ./tests/files/outputs/testset/pathways/$value/results.tsv`))
         @test std_out == ""
     end
 end;

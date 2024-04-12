@@ -44,7 +44,7 @@ id-map: tests/files/db_id_to_name_mapping_tests.txt
 
 
 pathways:
-    - tests/files/pathways/or.tsv
+    - tests/files/pathways/negLoop.tsv
 
 # #############################################################################
 #
@@ -60,7 +60,7 @@ pathways:
 #
 # #############################################################################
 
-evidence: tests/files/evidence/or.tsv
+evidence: tests/files/evidence/negLoop.tsv
 
 # #############################################################################
 #

@@ -1,8 +1,0 @@
-Database_Identifier	Node_Name	Node_Type	Display_Name	Reference_Entity_Name	Reference_Entity_Identifier	Instance_Class
-1	Input1	protein	N/A	Input1	N/A	ReferenceGeneProduct
-2	Input2	protein	N/A	Input2	N/A	ReferenceGeneProduct
-3	Complex1	complex	Complex1	N/A	N/A	Complex
-4	Input3	protein	N/A	Input3	N/A	ReferenceGeneProduct
-5	Input4	protein	N/A	Input4	N/A	ReferenceGeneProduct
-6	Input5	protein	N/A	Input5	N/A	ReferenceGeneProduct
-7	Set1	set	N/A	Set1	N/A	DefinedSet

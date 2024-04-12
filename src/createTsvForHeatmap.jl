@@ -8,6 +8,7 @@ include("keyoutputs.jl")
 include("pathwayList.jl")
 
 function run(resultsFolder, pathwayListFile, keyOutputsFile, verbose)
+    println(keyOutputsFile)
     keyoutputs = KeyOutputs.getKeyoutputs(keyOutputsFile)
     pathwayList = PathwayList.getPathwayList(pathwayListFile)
 
@@ -38,16 +39,17 @@ function run(resultsFolder, pathwayListFile, keyOutputsFile, verbose)
                println("Processing: $path")
            end 
            if isdir(path)
-               pathwayId = get(pathwayList[pathwayName][:pathway_id])
-               colour = get(pathwayList[pathwayName][:colour])
-               shortName = get(pathwayList[pathwayName][:short_name])
+               pathwayId = pathwayList[pathwayName][:pathway_id]
+               colour = pathwayList[pathwayName][:colour]
+               shortName = pathwayList[pathwayName][:short_name]
                resultsFile = joinpath(path, "results.tsv")
                df = CSV.read(resultsFile,
                              delim="\t",
                              datarow=2,
 			     types=Dict(1=>String),
-                             quotechar="\\",
-                             nullable=false)
+                            # quotechar="\\",
+                            # nullable=false
+			    )
 
                if printHeader == false
                   printHeader = true

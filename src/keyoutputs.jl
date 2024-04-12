@@ -4,11 +4,9 @@ using CSV
 using DataFrames
 
 function getKeyoutputs(file)
-    df = CSV.read(file,
-                  delim="\t",
-                  datarow=1,
-                  quotechar="\\",
-                  nullable=false,
+    df = CSV.read(file;
+                  delim='\t',
+                  quotechar='\\',
                   header=["pathway_id",
                           "pathway_name",
                           "node_id",
@@ -17,7 +15,6 @@ function getKeyoutputs(file)
                          String,
                          String,
                          String])
-
     keyoutputList = Dict()
     for row in eachrow(df)
         if !isnothing(row[:pathway_name])

@@ -1,4 +1,3 @@
-
 ![logo](/mp-biopath-logo.png?raw=true)
 
 # Description

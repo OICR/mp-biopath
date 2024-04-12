@@ -6,7 +6,7 @@ include("evidence.jl")
 include("results.jl")
 include("idMap.jl")
 
-function analyzeResults(resultsfile, expectedfile, downregulatedcutoff, upregulatedcutoff, verbose)
+function analyzeResults(resultsfile, expectedfile, downregulatedcutoff, upregulatedcutoff, full, verbose)
     expected_data = Results.getExpected(expectedfile)
     expected = expected_data["samplenodestate"]
 
@@ -23,6 +23,9 @@ function analyzeResults(resultsfile, expectedfile, downregulatedcutoff, upregula
     results = Results.getResults(resultsfile)
     probability = 1;
     errors = Dict()
+    if full == true
+        println("scenario\tkeyoutput\tpredictiveValue")
+    end
     for patientname in keys(expected)
         expected_patient_nodes = expected[patientname]
         results_patient_nodes = results[patientname]
@@ -39,25 +42,65 @@ function analyzeResults(resultsfile, expectedfile, downregulatedcutoff, upregula
             end
 
             if expectedState == "0" && resultState == "0"
-                expected_zero_got_zero += 1
+                if full == true
+                    println("$patientname\t$nodename\tTP")
+                else
+                    expected_zero_got_zero += 1
+                end
             elseif expectedState == "1" && resultState == "1"
-                expected_one_got_one += 1
+                if full == true
+                    println("$patientname\t$nodename\tTN")
+                else
+                    expected_one_got_one += 1
+                end
             elseif expectedState == "2" && resultState == "2"
-                expected_two_got_two += 1
+                if full == true
+                    println("$patientname\t$nodename\tTP")
+                else
+                    expected_two_got_two += 1
+                end
             elseif expectedState == "0" && resultState == "1"
-                expected_zero_got_one += 1
+                if full == true
+                    println("$patientname\t$nodename\tFN")
+                else
+                    expected_zero_got_one += 1
+                end
             elseif expectedState == "0" && resultState == "2"
-                expected_zero_got_two += 1
+                if full == true
+                    println("$patientname\t$nodename\tFP")
+                else
+                    expected_zero_got_two += 1
+                end
             elseif expectedState == "1" && resultState == "0"
-                expected_one_got_zero += 1
+                if full == true
+                    println("$patientname\t$nodename\tFP")
+                else
+                    expected_one_got_zero += 1
+                end
             elseif expectedState == "1" && resultState == "2"
-                expected_one_got_two += 1
+                if full == true
+                    println("$patientname\t$nodename\tFP")
+                else
+                    expected_one_got_two += 1
+                end
             elseif expectedState == "2" && resultState == "1"
-                expected_two_got_one += 1
+                if full == true
+                    println("$patientname\t$nodename\tFN")
+                else
+                    expected_two_got_one += 1
+                end
             elseif expectedState == "2" && resultState == "0"
-                expected_two_got_zero += 1
+                if full == true
+                    println("$patientname\t$nodename\tFP")
+                else
+                     expected_two_got_zero += 1
+                end
             end
         end
+    end
+
+    if full == true
+        return
     end
 
     TN = expected_one_got_one

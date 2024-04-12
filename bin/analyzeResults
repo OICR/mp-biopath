@@ -18,6 +18,9 @@ function parse_commandline()
             help = "This determines at which level the node is determined to be upregulated."
             arg_type = Float64
             default = 1.0
+        "--full"
+            help = "If this flag is chosen it the script will output the predictive values for each test instead of the summary"
+            action = :store_true
         "--verbose", "-v"
             help = "This will cause output to be printed to standard out."
             action = :store_true
@@ -46,6 +49,7 @@ function main()
                              parsed_args["expected-file"],
                              parsed_args["downregulated-cutoff"],
                              parsed_args["upregulated-cutoff"],
+                             parsed_args["full"],
                              parsed_args["verbose"])
 end
 

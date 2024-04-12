@@ -82,8 +82,6 @@ function getResults(resultfilename)
         end
     end
 
-    counts = Dict("0" => 0, "1" => 0, "2" => 0)
-
     node = ""
     for line in result_data
         lineparts = split(chomp(line), "\t")

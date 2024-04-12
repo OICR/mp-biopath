@@ -1,13 +1,12 @@
 module IdMap
 
 function getIDmap(IDfile)
-    columns = [:Database_Identifier,
-               :Node_Name,
-               :Node_Type,
-               :Display_Name,
-               :Reference_Entity_Name,
-               :Reference_Entity_Identifier,
-               :Instance_Class]
+    columns = [:database_identifier,
+               :node_type,
+               :display_name,
+               :reference_entity_name,
+               :reference_entity_identifier,
+               :instance_class]
 
     idMap = Dict()
     open(IDfile, "r") do file
@@ -15,19 +14,13 @@ function getIDmap(IDfile)
         for line in eachline(file)
             lineParts = split(chomp(line), "\t")
             row = Dict(zip(columns, lineParts))
-            dbID = row[:Database_Identifier]
+            dbID = row[:database_identifier]
             if haskey(idMap, dbID) == false
                 idMap[dbID] = []
             end
             push!(idMap[dbID], row)
 
-            nodeName = row[:Node_Name]
-            if haskey(idMap, nodeName) == false
-                idMap[nodeName] = []
-            end
-            push!(idMap[nodeName], row)
-
-            refName = row[:Reference_Entity_Name]
+            refName = row[:reference_entity_name]
             if refName != "N/A"
                 if haskey(idMap, refName) == false
                     idMap[refName] = []
@@ -35,7 +28,7 @@ function getIDmap(IDfile)
                 push!(idMap[refName], row)
             end
 
-            refID = row[:Reference_Entity_Identifier]
+            refID = row[:reference_entity_identifier]
             if refID != "N/A"
                 if haskey(idMap, refID) == false
                     idMap[refID] = []
