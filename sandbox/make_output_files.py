@@ -81,7 +81,7 @@ else:
 	output_string = output_string[:-2]
 	colour_string = colour_string[:-2]
 
-if args.heatmap is "F":
+if args.heatmap == "F":
 	print("heatmap script is not executed")
 
 command = "Rscript" # --vanilla --slave < "
