@@ -1,0 +1,9 @@
+2026-03-26 02:58:55.197801 - Need pathway list file for heatmap
+2026-03-26 03:00:19.381438 - Need pathway list file for heatmap
+2026-03-26 03:06:26.609750 - Parameters: {'data': 'dummy.txt', 'heatmap': 'T', 'tsne': False, 'kaplan': False, 'pathway_list': None, 'output': 'output', 'compound': None}
+2026-03-26 03:06:26.611719 - MP-BioPath execution started
+2026-03-26 03:06:26.612742 - Need pathway list file for heatmap
+2026-03-26 03:14:03.942724 - MP-BioPath execution started
+2026-03-26 03:14:03.943771 - Parameters: {'data': 'dummy.txt', 'heatmap': 'T', 'tsne': False, 'kaplan': False, 'pathway_list': None, 'output': 'output', 'compound': None}
+2026-03-26 03:14:03.944770 - Need pathway list file for heatmap
+2026-03-26 03:14:03.946767 - Execution stopped: pathway list missing

@@ -31,7 +31,17 @@
 #################################################################################
 
 import sys, argparse, subprocess
+import os
+from datetime import datetime
 
+def log_message(message):
+    if not os.path.exists("outputs"):
+        os.makedirs("outputs")
+    
+    with open("outputs/run_log.txt", "a") as f:
+        f.write(f"{datetime.now()} - {message}\n")
+
+		
 parser = argparse.ArgumentParser(description='Creates output visuals from MP-BioPath output data file')
 parser.add_argument("data", help="output file from MP-BioPath")
 parser.add_argument("-m", "--heatmap", help="default is 'T' to make heatmap, else specify 'F' for no heatmap",
@@ -45,9 +55,24 @@ parser.add_argument("-o", "--output", help="specify output file name", default="
 parser.add_argument("-c", "--compound", help="specify compound name")
 
 args = parser.parse_args()
+log_message("MP-BioPath execution started")
 
+params = {
+    "data": args.data,
+    "heatmap": args.heatmap,
+    "tsne": args.tsne,
+    "kaplan": args.kaplan,
+    "pathway_list": args.pathway_list,
+    "output": args.output,
+    "compound": args.compound
+}
+
+log_message(f"Parameters: {params}")
 if args.pathway_list is None:
-	print("Need pathway list file for heatmap")
+    log_message("Need pathway list file for heatmap")
+    log_message("Execution stopped: pathway list missing")
+    print("Need pathway list file for heatmap")
+    sys.exit()
 else:
 	pathway_color_map = {}
 	with open(args.pathway_list, 'r') as p:
@@ -81,8 +106,9 @@ else:
 	output_string = output_string[:-2]
 	colour_string = colour_string[:-2]
 
-if args.heatmap is "F":
-	print("heatmap script is not executed")
+if args.heatmap == "F":
+    log_message("Heatmap script is not executed")
+    print("Heatmap script is not executed")
 
 command = "Rscript" # --vanilla --slave < "
 path2script = "sandbox/create_visuals.R"
@@ -101,5 +127,7 @@ else:
 	
 #calls and executes Rscript (create_visuals.R) by passing in arguments
 cmd = [command, path2script, args.data, colour_column_string, args.output, output_string, colour_string, switch]#, args.compound]
+log_message(f"Running command: {cmd}")
 print(cmd)
 subprocess.call(cmd, universal_newlines = True)
+log_message("MP-BioPath execution completed")
